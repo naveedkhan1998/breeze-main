@@ -1,0 +1,13 @@
+# Use the official Node.js image as the base image
+FROM node:latest
+
+WORKDIR /usr/app/
+
+COPY ./package*.json ./
+RUN yarn install --frozen-lockfile
+COPY . .
+
+ENV NODE_ENV=development
+
+EXPOSE 3000
+ENTRYPOINT ["yarn", "dev","--host"]

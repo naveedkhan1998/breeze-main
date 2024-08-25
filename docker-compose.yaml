@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: breeze-postgres
+    env_file:
+      - ./.envs/env.dev
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    build:
+      context: nginx
+      dockerfile: Dockerfile.dev
+    restart: always
+    container_name: breeze-nginx
+    ports:
+      - "8000:80"
+    depends_on:
+      - backend
+      - postgres
+      - frontend
+
+  backend:
+    build:
+      context: backend/
+      dockerfile: Dockerfile.dev
+    container_name: breeze-backend
+    env_file:
+      - ./.envs/env.dev
+    volumes:
+      - ./backend/:/usr/app/
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # entrypoint: |
+    #   bash -c "
+    #   python3 manage.py wait_for_db &&
+    #   python3 manage.py migrate --no-input &&
+    #   python3 manage.py initadmin &&
+    #   python3 manage.py runserver 0.0.0.0:8000"
+
+  frontend:
+    build:
+      context: frontend/
+      dockerfile: Dockerfile.dev
+    container_name: breeze-frontend
+    environment:
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend/src/:/usr/app/src/
+      - ./frontend/public/:/usr/app/public/
+      - ./frontend/package.json:/usr/app/package.json
+      - ./frontend/package-lock.json:/usr/app/package-lock.json
