@@ -4,9 +4,14 @@
 
 **Breeze API Wrapper** is a comprehensive Django-based application that serves as a wrapper around the ICICI Breeze API. It allows users to seamlessly integrate their Breeze API credentials to perform various financial data operations, including session generation, instrument data loading, OHLC (Open, High, Low, Close) graph visualization with analysis, and real-time data subscription with tick updates.
 
+## Live Demo
+
+Experience the Breeze API Wrapper in action! Visit our live demo at: [https://breeze.mnaveedk.com/](https://breeze.mnaveedk.com/)
+
 ## Table of Contents
 
 - [Breeze API Wrapper](#breeze-api-wrapper)
+  - [Live Demo](#live-demo)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Technology Stack](#technology-stack)
@@ -39,12 +44,12 @@
 ## Technology Stack
 
 - **Backend:** Django, Django REST Framework
-- **Frontend:** React.js
-- **Database:** PostgreSQL, Reds Cache
+- **Frontend:** React.js 
+- **Database:** PostgreSQL
 - **Task Queue:** Celery with Redis
 - **Real-Time Communication:** WebSockets via Django Channels
 - **Containerization:** Docker, Docker Compose
-- **Others:** Nginx for reverse proxy, Daphne ASGI server
+- **Others:** Nginx for reverse proxy, Gunicorn as ASGI server
 
 ## Prerequisites
 
