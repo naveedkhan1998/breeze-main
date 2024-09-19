@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 
@@ -129,6 +128,16 @@ const HomePage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<"percentage" | "name">("percentage");
 
+  // Helper function to check if running on localhost
+  const isLocalhost = () => {
+    return (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "[::1]" || // IPv6 localhost
+      /^localhost:\d+$/.test(window.location.hostname) // localhost with port number
+    );
+  };
+
   const sortedAndFilteredInstruments = useMemo(() => {
     if (!data?.data) return [];
     const filtered = data.data.filter(
@@ -138,7 +147,7 @@ const HomePage: React.FC = () => {
       if (sortOption === "percentage") {
         return getAveragePercentage(b) - getAveragePercentage(a);
       } else {
-        //@ts-expect-error dde
+        // @ts-expect-error dde
         return a.exchange_code.localeCompare(b.exchange_code);
       }
     });
@@ -210,9 +219,11 @@ const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    performHealthCheck();
-    const interval = setInterval(performHealthCheck, 120000); // 2 minutes
-    return () => clearInterval(interval);
+    if (!isLocalhost()) {
+      performHealthCheck();
+      const interval = setInterval(performHealthCheck, 120000); // 2 minutes
+      return () => clearInterval(interval);
+    }
   }, []);
 
   useEffect(() => {
@@ -236,11 +247,14 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col items-center justify-between p-6 md:flex-row">
             <h1 className="mb-4 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 md:mb-0">Subscribed Instruments</h1>
             <div className="flex flex-col w-full space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:w-auto">
-              <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
-                <HiRefresh className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`} />
-                {isHealthChecking ? "Checking..." : "Check Worker Health"}
-              </Button>
+              {!isLocalhost() && (
+                <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
+                  <HiRefresh className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`} />
+                  {isHealthChecking ? "Checking..." : "Check Worker Health"}
+                </Button>
+              )}
               <Button onClick={() => refetch()} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
+                <HiRefresh className="w-4 h-4 mr-2" />
                 Refresh Data
               </Button>
             </div>

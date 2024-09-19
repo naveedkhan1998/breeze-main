@@ -4,6 +4,7 @@ media
 venv
 celerybeat-schedule
 .env*
+static
 .flaskenv*
 !.env.project
 !.env.vault
