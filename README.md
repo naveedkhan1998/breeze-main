@@ -49,7 +49,7 @@ Experience the Breeze API Wrapper in action! Visit our live demo at: [https://br
 - **Task Queue:** Celery with Redis
 - **Real-Time Communication:** WebSockets via Django Channels
 - **Containerization:** Docker, Docker Compose
-- **Others:** Nginx for reverse proxy, Gunicorn as ASGI server
+- **Others:** Nginx for reverse proxy, ASGI server for asynchronous capabilities
 
 ## Prerequisites
 
@@ -96,10 +96,6 @@ REDIS_URL=redis://redis:6379/0
 CELERY_BROKER_URL=redis://redis:6379/0
 CELERY_RESULT_BACKEND=redis://redis:6379/0
 
-# Breeze API Credentials
-BREEZE_API_KEY=your_breeze_api_key
-BREEZE_API_SECRET=your_breeze_api_secret
-
 # Django Configuration
 DJANGO_SECRET_KEY=your_django_secret_key
 DEBUG=True
@@ -107,7 +103,6 @@ ALLOWED_HOSTS=*
 ```
 
 **Note:**
-- Replace `your_breeze_api_key` and `your_breeze_api_secret` with your actual Breeze API credentials.
 - Replace `your_django_secret_key` with a securely generated Django secret key. You can generate one using Django's `get_random_secret_key` utility:
 
   ```python
