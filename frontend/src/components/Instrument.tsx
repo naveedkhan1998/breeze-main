@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button, Spinner } from "flowbite-react";
 import { useGetInstrumentsQuery, useGetSubscribedInstrumentsQuery, useSubscribeInstrumentMutation } from "../services/instrumentService";
 import { Instrument as InstrumentType } from "../common-types";
-import { HiPlus, HiChevronDown } from "react-icons/hi";
+import { HiPlus, HiChevronDown, HiOutlineExclamationCircle } from "react-icons/hi";
 import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   exchange: string;
@@ -20,10 +21,16 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({ instrument, onSubscribe
   const [duration, setDuration] = useState(4);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleToggle = () => setIsOpen(!isOpen);
+  const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
   return (
-    <div className="flex flex-col items-start justify-between p-4 transition-colors duration-150 ease-in-out border-b border-gray-200 sm:flex-row sm:items-center hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="flex flex-col items-start justify-between p-4 transition-colors duration-150 ease-in-out border-b border-gray-200 sm:flex-row sm:items-center hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+    >
       <div className="flex-grow mb-3 sm:mb-0">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{instrument.exchange_code}</h3>
         <div className="mt-1 space-y-1 text-sm text-gray-600 dark:text-gray-400">
@@ -38,7 +45,9 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({ instrument, onSubscribe
               <span className="font-semibold">Strike:</span> {instrument.strike_price} |<span className="ml-2 font-semibold">Type:</span> {instrument.option_type}
             </p>
           )}
-          <span className="font-semibold">Company Name:</span> <span>{instrument.company_name}</span>
+          <p>
+            <span className="font-semibold">Company Name:</span> <span>{instrument.company_name}</span>
+          </p>
         </div>
       </div>
       <div className="flex items-center space-x-2">
@@ -50,25 +59,33 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({ instrument, onSubscribe
             <span>{duration} weeks</span>
             <HiChevronDown className="w-5 h-5 ml-2 -mr-1" aria-hidden="true" />
           </button>
-          {isOpen && (
-            <div className="absolute right-0 z-10 w-40 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-700">
-              <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                {[4, 5, 6, 7, 8].map((weeks) => (
-                  <button
-                    key={weeks}
-                    onClick={() => {
-                      setDuration(weeks);
-                      setIsOpen(false);
-                    }}
-                    className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                    role="menuitem"
-                  >
-                    {weeks} weeks
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.1 }}
+                className="absolute right-0 z-10 w-40 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-700"
+              >
+                <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                  {[4, 5, 6, 7, 8].map((weeks) => (
+                    <button
+                      key={weeks}
+                      onClick={() => {
+                        setDuration(weeks);
+                        setIsOpen(false);
+                      }}
+                      className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                      role="menuitem"
+                    >
+                      {weeks} weeks
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <Button size="sm" outline gradientDuoTone="cyanToBlue" onClick={() => onSubscribe(instrument.id, duration)} disabled={isSubscribing}>
           {isSubscribing ? (
@@ -81,7 +98,7 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({ instrument, onSubscribe
           )}
         </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -123,22 +140,37 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
   };
 
   if (isLoading) {
-    return <Spinner size="xl" className="m-auto" />;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner size="xl" />
+      </div>
+    );
   }
 
   if (isError) {
-    return <div className="text-red-500">Error loading instruments</div>;
+    return (
+      <div className="flex items-center justify-center h-64 text-red-500">
+        <HiOutlineExclamationCircle className="w-8 h-8 mr-2" />
+        Error loading instruments
+      </div>
+    );
   }
 
   return (
     <div className="container px-4 mx-auto">
       <div className="overflow-hidden bg-white rounded-lg shadow-md dark:bg-gray-800">
-        {data &&
-          data.data?.map((instrument: InstrumentType) => (
-            <InstrumentItem key={instrument.id} instrument={instrument} onSubscribe={handleSubscribe} isSubscribing={subscribingIds.includes(instrument.id)} />
-          ))}
+        <AnimatePresence>
+          {data &&
+            data.data?.map((instrument: InstrumentType) => (
+              <InstrumentItem key={instrument.id} instrument={instrument} onSubscribe={handleSubscribe} isSubscribing={subscribingIds.includes(instrument.id)} />
+            ))}
+        </AnimatePresence>
       </div>
-      {!data && <p className="mt-4 text-center text-gray-500 dark:text-gray-400">No instruments found. Try adjusting your search.</p>}
+      {(!data || data.data?.length === 0) && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mt-4 text-center text-gray-500 dark:text-gray-400">
+          No instruments found. Try adjusting your search.
+        </motion.p>
+      )}
     </div>
   );
 };

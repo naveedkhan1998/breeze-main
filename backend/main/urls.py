@@ -21,10 +21,10 @@ from django.urls import path,include
 from main import settings
 
 urlpatterns = [
-    path('',TemplateView.as_view(template_name = 'index.html')),
+    path('api/',TemplateView.as_view(template_name = 'index.html')),
     path('admin/', admin.site.urls),
-    path('account/', include('account.urls')),
-    path('core/', include('core.urls')),
+    path('api/account/', include('account.urls')),
+    path('api/core/', include('core.urls')),
 ]\
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
               + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \

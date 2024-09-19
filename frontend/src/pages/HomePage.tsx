@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Button, Spinner, Card } from "flowbite-react";
+
 import { useDeleteInstrumentMutation, useGetSubscribedInstrumentsQuery } from "../services/instrumentService";
 import { toast } from "react-toastify";
 import { Instrument } from "../common-types";
-import { HiChartBar, HiRefresh, HiTrash, HiClock, HiCurrencyDollar, HiOfficeBuilding } from "react-icons/hi";
+import { HiChartBar, HiRefresh, HiTrash, HiClock, HiCurrencyDollar, HiOfficeBuilding, HiSearch } from "react-icons/hi";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge, Button, Card, Spinner } from "flowbite-react";
 
 interface InstrumentCardProps {
   instrument: Instrument;
@@ -66,42 +69,49 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDelete, i
   };
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
-      <div className="p-5">
-        <h3 className="mb-3 text-2xl font-bold text-gray-800 dark:text-white">{instrument.exchange_code}</h3>
-        <div className="mb-4">{renderInstrumentDetails()}</div>
-        <div className="mb-4">
-          {instrument.percentage.length > 0 ? (
-            instrument.percentage.map((p, index) => (
-              <div key={index} className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{p.percentage.toFixed(2)}%</span>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+      <Card className="overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+        <div className="p-5">
+          <h3 className="mb-3 text-2xl font-bold text-gray-800 dark:text-white">{instrument.exchange_code}</h3>
+          <div className="mb-4">{renderInstrumentDetails()}</div>
+          <div className="mb-4">
+            {instrument.percentage.length > 0 ? (
+              instrument.percentage.map((p, index) => (
+                <div key={index} className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{p.percentage.toFixed(2)}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                    <motion.div
+                      className="h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${p.percentage}%` }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
+                  </div>
+                  {!p.is_loading && <Spinner size="sm" className="mt-1" />}
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                  <div className="h-2 transition-all duration-500 ease-out rounded-full bg-gradient-to-r from-blue-400 to-blue-600" style={{ width: `${p.percentage}%` }}></div>
-                </div>
-                {!p.is_loading && <Spinner size="sm" className="mt-1" />}
-              </div>
-            ))
-          ) : (
-            <span className="text-sm text-gray-500 dark:text-gray-400">No data available</span>
-          )}
+              ))
+            ) : (
+              <span className="text-sm text-gray-500 dark:text-gray-400">No data available</span>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="flex justify-between gap-2 p-4 bg-gray-50 dark:bg-gray-800">
-        <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }} className="w-full">
-          <Button disabled={isLoading} size="sm" gradientDuoTone="cyanToBlue" className="w-full transition-all duration-300 hover:shadow-lg">
-            <HiChartBar className="w-4 h-4 mr-2" />
-            View Graph
+        <div className="flex justify-between gap-2 p-4 bg-gray-50 dark:bg-gray-800">
+          <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }} className="w-full">
+            <Button disabled={isLoading} size="sm" gradientDuoTone="cyanToBlue" className="w-full transition-all duration-300 hover:shadow-lg">
+              <HiChartBar className="w-4 h-4 mr-2" />
+              View Graph
+            </Button>
+          </Link>
+          <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id)} className="w-full transition-all duration-300 hover:shadow-lg" disabled={isDeleting}>
+            <HiTrash className="w-4 h-4 mr-2" />
+            Delete
           </Button>
-        </Link>
-        <Button size="sm" gradientDuoTone="pinkToOrange" onClick={() => onDelete(instrument.id)} className="w-full transition-all duration-300 hover:shadow-lg" disabled={isDeleting}>
-          <HiTrash className="w-4 h-4 mr-2" />
-          Delete
-        </Button>
-      </div>
-    </Card>
+        </div>
+      </Card>
+    </motion.div>
   );
 };
 
@@ -116,11 +126,23 @@ const HomePage: React.FC = () => {
   const [deleteInstrument] = useDeleteInstrumentMutation();
   const [deletingRowIds, setDeletingRowIds] = useState<number[]>([]);
   const [isHealthChecking, setIsHealthChecking] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState<"percentage" | "name">("percentage");
 
-  const sortedInstruments = React.useMemo(() => {
+  const sortedAndFilteredInstruments = useMemo(() => {
     if (!data?.data) return [];
-    return [...data.data].sort((a, b) => getAveragePercentage(b) - getAveragePercentage(a));
-  }, [data]);
+    const filtered = data.data.filter(
+      (instrument: Instrument) => instrument?.exchange_code?.toLowerCase().includes(searchTerm.toLowerCase()) || instrument?.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return filtered.sort((a: Instrument, b: Instrument) => {
+      if (sortOption === "percentage") {
+        return getAveragePercentage(b) - getAveragePercentage(a);
+      } else {
+        //@ts-expect-error dde
+        return a.exchange_code.localeCompare(b.exchange_code);
+      }
+    });
+  }, [data, searchTerm, sortOption]);
 
   const handleDelete = async (id: number) => {
     setDeletingRowIds((prevIds) => [...prevIds, id]);
@@ -161,14 +183,14 @@ const HomePage: React.FC = () => {
             render: `${worker.name}: Healthy`,
             type: "success",
             isLoading: false,
-            autoClose: 3000,
+            autoClose: 1000,
           });
         } else {
           toast.update(toastIds[index], {
             render: `${worker.name}: Unhealthy`,
             type: "error",
             isLoading: false,
-            autoClose: 3000,
+            autoClose: 1000,
           });
         }
       });
@@ -179,7 +201,7 @@ const HomePage: React.FC = () => {
           render: `${worker.name}: Check failed`,
           type: "error",
           isLoading: false,
-          autoClose: 3000,
+          autoClose: 1000,
         });
       });
     } finally {
@@ -225,17 +247,56 @@ const HomePage: React.FC = () => {
           </div>
         </Card>
 
-        {data ? (
-          <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-3">
-            {sortedInstruments.map((instrument: Instrument) => (
-              <InstrumentCard key={instrument.id} instrument={instrument} onDelete={handleDelete} isDeleting={deletingRowIds.includes(instrument.id)} />
-            ))}
+        <div className="flex flex-col items-center justify-between mb-6 space-y-4 md:flex-row md:space-y-0">
+          <div className="relative w-full md:w-64">
+            <input
+              type="text"
+              placeholder="Search instruments..."
+              className="w-full px-4 py-2 pl-10 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <HiSearch className="absolute w-5 h-5 text-gray-400 left-3 top-2.5" />
           </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</span>
+            <select
+              className="px-2 py-1 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as "percentage" | "name")}
+            >
+              <option value="percentage">Percentage</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+        </div>
+
+        {data ? (
+          <AnimatePresence>
+            <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-3">
+              {sortedAndFilteredInstruments.map((instrument: Instrument) => (
+                <InstrumentCard key={instrument.id} instrument={instrument} onDelete={handleDelete} isDeleting={deletingRowIds.includes(instrument.id)} />
+              ))}
+            </div>
+          </AnimatePresence>
         ) : (
           <div className="flex items-center justify-center h-64">
             <Spinner size="xl" />
           </div>
         )}
+
+        {sortedAndFilteredInstruments.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-64">
+            <HiSearch className="w-16 h-16 mb-4 text-gray-400" />
+            <p className="text-xl font-medium text-gray-600 dark:text-gray-400">No instruments found</p>
+          </div>
+        )}
+
+        <div className="mt-8 text-center">
+          <Badge color="info" size="xl">
+            Total Instruments: {sortedAndFilteredInstruments.length}
+          </Badge>
+        </div>
       </div>
     </div>
   );

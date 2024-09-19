@@ -1,38 +1,64 @@
-# Use an official Python image from Docker Hub with a specific version tag
-FROM python:3.9
+# Use Ubuntu 20.04 as the base image
+FROM ubuntu:20.04
 
-# Set environment variable to ensure Python output is unbuffered
+# Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Install necessary packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    python3-dev \
-    libffi-dev \
-    libssl-dev \
-    netcat-openbsd \
-    chromium-driver \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create the working directory
-WORKDIR /app
+# Install system packages, Python 3.9, and curl
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        software-properties-common \
+        curl && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        python3.9 \
+        python3.9-dev \
+        python3.9-distutils \
+        python3.9-venv \
+        libffi-dev \
+        libssl-dev \
+        netcat-openbsd \
+        chromium-driver && \
+    ln -sf /usr/bin/python3.9 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3.9 /usr/local/bin/python && \
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python3 get-pip.py && \
+    rm get-pip.py && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and setuptools
-RUN pip install --upgrade pip setuptools
+RUN pip install --no-cache-dir --upgrade pip setuptools
 
-# Copy and install Python package requirements
+# Set the working directory
+WORKDIR /app
+
+# Copy the requirements file
 COPY requirements.txt /app/requirements.txt
-RUN pip install -r requirements.txt
 
-# Copy the rest of the application
+# Install Python dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Remove build dependencies to reduce image size
+RUN apt-get purge -y --auto-remove \
+        build-essential \
+        libffi-dev \
+        libssl-dev && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the rest of the application code
 COPY . /app
-
-# Expose the port
-EXPOSE 8000
 
 # Make the start script executable
 RUN chmod +x /app/start.sh
+
+# Expose the port
+EXPOSE 8000
 
 # Set the entrypoint
 ENTRYPOINT ["./start.sh"]

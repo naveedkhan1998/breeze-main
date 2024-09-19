@@ -4,7 +4,7 @@ import { getToken } from "./auth";
 const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 //https://dtemplarsarsh.pythonanywhere.com
-const baseUrl = isLocalhost ? "http://localhost:8000" : "https://breeze-backend.mnaveedk.com";
+const baseUrl = isLocalhost ? "http://localhost:8000/api" : "https://breeze-backend.mnaveedk.com";
 
 const baseQuery = fetchBaseQuery({
   baseUrl,

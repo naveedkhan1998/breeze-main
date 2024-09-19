@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Toast: React.FC = () => {
   const toastOptions:ToastOptions = {
-    autoClose: 1500,
+    autoClose: 1000,
     theme: "colored",
     position: "bottom-right",
   };

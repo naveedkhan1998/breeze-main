@@ -1,13 +1,26 @@
-# Use the official Node.js image as the base image
-FROM node:latest
+# Use a lightweight Node.js image
+FROM node:20-alpine
 
-WORKDIR /usr/app/
+# Set the working directory inside the container
+WORKDIR /usr/app
 
-COPY ./package*.json ./
+# Copy package.json and yarn.lock to leverage Docker layer caching
+COPY package.json ./
+
+# Install dependencies
 RUN yarn install --frozen-lockfile
+
+# Copy the rest of the application code
 COPY . .
 
+# Set environment variables for development
 ENV NODE_ENV=development
 
-EXPOSE 3000
-ENTRYPOINT ["yarn", "dev","--host"]
+# Expose the port Vite uses
+EXPOSE 5173
+
+# Enable polling for file changes (useful in Docker)
+ENV CHOKIDAR_USEPOLLING=true
+
+# Start the Vite development server
+CMD ["yarn", "dev", "--host", "0.0.0.0"]

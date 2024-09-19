@@ -1,3 +1,5 @@
+version: "3.8" # Specify the version if not already present
+
 services:
   postgres:
     image: postgres:latest
@@ -14,6 +16,15 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:latest
+    container_name: breeze-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   nginx:
     build:
       context: nginx
@@ -23,9 +34,10 @@ services:
     ports:
       - "8000:80"
     depends_on:
-      - backend
-      - postgres
-      - frontend
+      postgres:
+        condition: service_healthy
+      frontend:
+        condition: service_started
 
   backend:
     build:
@@ -39,12 +51,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    # entrypoint: |
-    #   bash -c "
-    #   python3 manage.py wait_for_db &&
-    #   python3 manage.py migrate --no-input &&
-    #   python3 manage.py initadmin &&
-    #   python3 manage.py runserver 0.0.0.0:8000"
+      redis:
+        condition: service_healthy
 
   frontend:
     build:
@@ -58,3 +66,23 @@ services:
       - ./frontend/public/:/usr/app/public/
       - ./frontend/package.json:/usr/app/package.json
       - ./frontend/package-lock.json:/usr/app/package-lock.json
+
+  # celery:
+  #   build:
+  #     context: backend/
+  #     dockerfile: Dockerfile.dev
+  #   container_name: breeze-celery
+  #   env_file:
+  #     - ./.envs/env.dev
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./backend/:/usr/app/
+  #   entrypoint: celery -A main worker --loglevel=INFO --autoscale=10,3
+  #   restart: always
+
+volumes:
+  redis-data:
