@@ -39,12 +39,12 @@
 ## Technology Stack
 
 - **Backend:** Django, Django REST Framework
-- **Frontend:** React.js *(Assuming React; adjust if different)*
-- **Database:** PostgreSQL
+- **Frontend:** React.js
+- **Database:** PostgreSQL, Reds Cache
 - **Task Queue:** Celery with Redis
 - **Real-Time Communication:** WebSockets via Django Channels
 - **Containerization:** Docker, Docker Compose
-- **Others:** Nginx for reverse proxy, Gunicorn as WSGI server
+- **Others:** Nginx for reverse proxy, Daphne ASGI server
 
 ## Prerequisites
 
