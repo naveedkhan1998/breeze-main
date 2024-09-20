@@ -1,27 +1,21 @@
-import datetime
 from django.db.models import Q
 from rest_framework import status
 from django.shortcuts import render
-from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from functools import lru_cache
 from core.tasks import (
-    load_data,
-    get_master_data,
     resample_candles,
     load_instrument_candles,
 )
 from core.models import (
     BreezeAccount,
     Exchanges,
-    Tick,
     Instrument,
     SubscribedInstruments,
     Candle,
-    Percentage,
     PercentageInstrument,
 )
 from core.serializers import (
@@ -33,26 +27,6 @@ from core.serializers import (
     PercentageInstrumentSerializer,
 )
 import urllib
-
-# Create your views here.
-
-
-def item_list(request):
-    items = Candle.objects.all().order_by("-date")
-    context = {"items": items[:50]}
-    return render(request, "test.html", context)
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def get_access_code(request):
-    acc = BreezeAccount.objects.filter(user=request.user)
-    if acc.exists():
-        return Response(
-            "https://api.icicidirect.com/apiuser/login?api_key="
-            + urllib.parse.quote_plus(acc.api_key)
-        )
-    return Response({"msg": "Error"}, status=400)
 
 
 @api_view(["GET", "POST", "PUT"])
@@ -67,7 +41,6 @@ def get_breeze_accounts(request):
 
     elif request.method == "POST":
         serializer = BreezeAccountSerialzer(data=request.data)
-        #print(request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
             return Response(
@@ -95,21 +68,6 @@ def get_breeze_accounts(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def setup(request):
-    get_master_data()
-    for exc in Exchanges.objects.all():
-        # if exc.title == "FON":
-        #    continue
-        per, created = Percentage.objects.get_or_create(source=exc.title)
-        if not created:
-            per.value = 0
-            per.save()
-        load_data.delay(exc.id, exc.title)
-    return Response({"working": "fine"})
-
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def subscribe_instrument(request, pk):
@@ -129,7 +87,7 @@ def subscribe_instrument(request, pk):
 
     sub_ins = SubscribedInstruments(exchange_id=ex_id, **data)
     sub_ins.save()
-    load_instrument_candles.delay(sub_ins.id, request.user.id,duration=duration)
+    load_instrument_candles.delay(sub_ins.id, request.user.id, duration=duration)
 
     return Response({"msg": "success", "data": InstrumentSerializer(sub_ins).data})
 
@@ -151,7 +109,6 @@ def get_instrument_candles(request, pk):
     qs = SubscribedInstruments.objects.filter(id=pk)
 
     if qs.exists():
-        cache.clear()
         load_instrument_candles.delay(qs[0].id, request.user.id)
         return Response({"msg": "success"})
     return Response({"msg": "error"})
@@ -189,15 +146,8 @@ def get_cached_candles(instrument_id):
 def get_candles(request):
     instrument_id = request.GET.get("id")
     tf = request.GET.get("tf")
-    # cache.clear()
     if not instrument_id:
         return Response({"msg": "Missing instrument ID"}, status=400)
-
-    cache_key = f"candles_{instrument_id}_{tf}"
-    cached_data = cache.get(cache_key)
-
-    if cached_data:
-        return Response({"msg": "Loaded From Cache", "data": cached_data}, status=200)
 
     candles = get_cached_candles(instrument_id)
 
@@ -210,7 +160,6 @@ def get_candles(request):
     else:
         new_candles = candles
 
-    cache.set(cache_key, new_candles, timeout=60 * 10)
     return Response({"msg": "done", "data": new_candles}, status=200)
 
 

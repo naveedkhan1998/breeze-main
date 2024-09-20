@@ -1,10 +1,10 @@
 import { ChangeEvent, useEffect, useState, useCallback } from "react";
-import { useGetBreezeQuery, useLazySetupQuery, useUpdateBreezeMutation } from "../services/breezeServices";
+import { useGetBreezeQuery, useUpdateBreezeMutation } from "../services/breezeServices";
 import { BreezeAccount } from "../common-types";
 import { Button, Card, Modal, Spinner, TextInput, Alert } from "flowbite-react";
 import { toast } from "react-toastify";
 import CreateBreezeForm from "../components/CreateBreeze";
-import { RefreshCw, ExternalLink, Plus } from "lucide-react";
+import { RefreshCw, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AccountsPage = () => {
@@ -15,7 +15,6 @@ const AccountsPage = () => {
   const [sessionToken, setSessionToken] = useState("");
 
   const [updateBreeze, { isLoading: isUpdating }] = useUpdateBreezeMutation();
-  const [triggerSetup, { isLoading: isSetupLoading }] = useLazySetupQuery();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSessionToken(e.target.value);
@@ -39,16 +38,6 @@ const AccountsPage = () => {
       }
     }
   }, [selectedAccount, sessionToken, updateBreeze, refetch]);
-
-  const handleSetup = useCallback(async () => {
-    try {
-      await triggerSetup("").unwrap();
-      toast.success("Setup completed successfully");
-      refetch();
-    } catch (error) {
-      toast.error("Failed to complete setup");
-    }
-  }, [triggerSetup, refetch]);
 
   useEffect(() => {
     if (isSuccess && data.data.length > 0) {
@@ -80,10 +69,6 @@ const AccountsPage = () => {
         </header>
 
         <div className="flex flex-col items-center justify-between mb-6 space-y-4 sm:flex-row sm:space-y-0">
-          <Button onClick={handleSetup} disabled={isSetupLoading} gradientDuoTone="cyanToBlue">
-            {isSetupLoading ? <Spinner size="sm" className="mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-            Initial Server Data Setup
-          </Button>
           <p className="text-sm text-gray-600 dark:text-gray-400">Last updated: {lastUpdatedHours !== null ? `${lastUpdatedHours.toFixed(1)} hours ago` : "N/A"}</p>
         </div>
 

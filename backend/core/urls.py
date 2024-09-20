@@ -2,9 +2,6 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path("setup/", views.setup, name="setup"),
-    path("access/", views.get_access_code, name="access"),
-    path("list/", views.item_list, name="ticks"),
     path("subscribe/<int:pk>", views.subscribe_instrument, name="subscribe"),
     path("breeze/", views.get_breeze_accounts, name="breeze_account"),
     path("candles/<int:pk>", views.get_instrument_candles, name="get_candles"),

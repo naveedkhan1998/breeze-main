@@ -10,6 +10,7 @@ wait
 #python3 manage.py makemigrations
 python3 manage.py migrate --noinput --skip-checks
 python3 manage.py initadmin
+python3 manage.py process_data
 rm /var/run/celery/w1.pid
 rm /var/run/celery/w2.pid
 rm /var/run/celery/w3.pid

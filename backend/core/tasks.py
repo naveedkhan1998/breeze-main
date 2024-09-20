@@ -12,6 +12,7 @@ from core.breeze import BreezeSession
 from celery.utils.log import get_task_logger
 from datetime import datetime, timedelta, time
 from django.utils import timezone as django_timezone
+from account.models import User
 from core.models import (
     Exchanges,
     Instrument,
@@ -26,155 +27,20 @@ from core.models import (
 logger = get_task_logger(__name__)
 
 
-@shared_task(name="get_master_files")
-def get_master_data():
-    url = "https://directlink.icicidirect.com/NewSecurityMaster/SecurityMaster.zip"
-    zip_path = os.path.join(MEDIA_ROOT, "SecurityMaster.zip")
-    extracted_path = os.path.join(MEDIA_ROOT, "extracted/")
-
-    # Remove extracted directory if it exists
-    if os.path.exists(extracted_path):
-        shutil.rmtree(extracted_path)
-
-    # Download the zip file
-    urllib.request.urlretrieve(url, zip_path)
-
-    # Extract the zip file
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        zf.extractall(extracted_path)
-
-        for extracted_file in zf.namelist():
-            exchange_title = extracted_file[:3]
-            exchange_file_path = os.path.join("extracted", extracted_file)
-            exchange_qs = Exchanges.objects.filter(title=exchange_title)
-
-            if exchange_qs.exists():
-                exchange_qs.update(file=exchange_file_path)
-            else:
-                # Create new exchange entry based on the title
-                if exchange_title == "BSE":
-                    new_exchange = Exchanges(
-                        title=exchange_title,
-                        file=exchange_file_path,
-                        code="1",
-                        exchange="BSE",
-                    )
-                elif exchange_title == "FON":
-                    new_exchange = Exchanges(
-                        title=exchange_title,
-                        file=exchange_file_path,
-                        code="4",
-                        exchange="NFO",
-                        is_option=True,
-                    )
-                elif exchange_title == "NSE":
-                    new_exchange = Exchanges(
-                        title=exchange_title,
-                        file=exchange_file_path,
-                        code="4",
-                        exchange="NSE",
-                    )
-                else:
-                    continue  # Skip entries that don't match any known exchange title
-
-                new_exchange.save()
-
-    # Clean up
-    os.remove(zip_path)
-    # Optionally remove the extracted files directory
-    # shutil.rmtree(extracted_path)
-
-
-@shared_task(name="load stocks")
-def load_data(id, exchange_name):
-    ins = Exchanges.objects.get(id=id)
-    ins_list = []
-    per = Percentage.objects.get(source=exchange_name)
-    counter = 0
-    all_instruments = set(
-        Instrument.objects.filter(exchange=ins).values_list("token", "short_name")
-    )
-
-    lines = ins.file.read().decode().splitlines()
-    total_lines = len(lines) - 1  # Subtract 1 to exclude header
-
-    def count_check(count, is_option=False):
-        limit = 1000
-        if is_option:
-            limit = 30000
-        return count < limit
-
-    for index, line in enumerate(lines):
-        if index == 0:  # Skip header
-            continue
-
-        data = [item.replace('"', "") for item in line.split(",")]
-
-        token_shortname_tuple = (data[0], data[1])
-        if token_shortname_tuple in all_instruments:
-            continue
-
-        if ins.is_option:
-            stock = Instrument(
-                exchange=ins,
-                stock_token=f"{ins.code}.1!{data[0]}",
-                token=data[0],
-                instrument=data[1],
-                short_name=data[2],
-                series=data[3],
-                company_name=data[3],
-                expiry=(
-                    datetime.strptime(data[4], "%d-%b-%Y").date() if data[4] else None
-                ),
-                strike_price=float(data[5]),
-                option_type=data[6],
-                exchange_code=data[-1].strip(),
-            )
-        else:
-            stock = Instrument(
-                exchange=ins,
-                stock_token=f"{ins.code}.1!{data[0]}",
-                token=data[0],
-                short_name=data[1],
-                series=data[2],
-                company_name=data[3],
-                exchange_code=data[-1].strip(),
-            )
-
-        ins_list.append(stock)
-        counter += 1
-
-        # Update percentage after processing every 100 lines or when limit is reached
-        if not count_check(counter, ins.is_option):
-            per.value = (index / total_lines) * 100
-            per.save()
-            counter = 0
-
-    # Final update to ensure percentage is correct
-    per.value = 100
-    per.save()
-
-    our_array = np.array(ins_list)
-    chunk_size = 800
-    chunked_arrays = np.array_split(our_array, len(ins_list) // chunk_size + 1)
-    chunked_list = [list(array) for array in chunked_arrays]
-    for ch in chunked_list:
-        Instrument.objects.bulk_create(ch)
-
-
 @shared_task(name="websocket_start")
 def websocket_start():
-    sess = BreezeSession()
+    user: User = User.objects.all().first()
+    sess = BreezeSession(user.pk)
     sess.breeze.ws_connect()
+    sub_ins = SubscribedInstruments.objects.all()
 
     def on_ticks(ticks):
+        if sub_ins.exists():
+            for ins in sub_ins:
+                sess.breeze.subscribe_feeds(stock_token=ins.stock_token)
         tick_handler.delay(ticks)
 
     sess.breeze.on_ticks = on_ticks
-    sub_ins = SubscribedInstruments.objects.all()
-    if sub_ins.exists():
-        for ins in sub_ins:
-            sess.breeze.subscribe_feeds(stock_token=ins.stock_token)
 
     # sess.breeze.subscribe_feeds(stock_token="4.1!NIFTY 50")
     # sess.breeze.subscribe_feeds(stock_token="4.1!42697")

@@ -33,16 +33,8 @@ export const breezeApi = baseApi.injectEndpoints({
         },
       }),
     }),
-    setup: builder.query({
-      query: () => ({
-        url: "core/setup/",
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-        },
-      }),
-    }),
+    
   }),
 });
 
-export const { useGetBreezeQuery, useUpdateBreezeMutation, useCreateBreezeMutation, useLazySetupQuery } = breezeApi;
+export const { useGetBreezeQuery, useUpdateBreezeMutation, useCreateBreezeMutation} = breezeApi;
