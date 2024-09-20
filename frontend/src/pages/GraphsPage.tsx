@@ -531,8 +531,8 @@ const GraphsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div ref={mainChartContainerRef} className="relative w-full mb-6 overflow-hidden rounded-lg shadow-lg"></div>
-              {showVolume && <div ref={volumeChartContainerRef} className="relative w-full mb-6 overflow-hidden rounded-lg shadow-lg"></div>}
+              <div ref={mainChartContainerRef} className="relative w-full overflow-hidden rounded-lg shadow-lg"></div>
+              {showVolume && <div ref={volumeChartContainerRef} className="relative w-full overflow-hidden rounded-lg shadow-lg"></div>}
               {indicators.some((ind) => ind.active && (ind.name === "RSI" || ind.name === "MACD")) && (
                 <div ref={indicatorChartContainerRef} className="relative w-full overflow-hidden rounded-lg shadow-lg"></div>
               )}
