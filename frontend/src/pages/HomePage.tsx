@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-
 import { useDeleteInstrumentMutation, useGetSubscribedInstrumentsQuery } from "../services/instrumentService";
 import { toast } from "react-toastify";
 import { Instrument } from "../common-types";
 import { HiChartBar, HiRefresh, HiTrash, HiClock, HiCurrencyDollar, HiOfficeBuilding, HiSearch } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge, Button, Card, Spinner } from "flowbite-react";
+import { useCheckBreezeStatusQuery, useStartWebsocketMutation } from "../services/breezeServices";
 
 interface InstrumentCardProps {
   instrument: Instrument;
@@ -15,7 +15,7 @@ interface InstrumentCardProps {
 }
 
 const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDelete, isDeleting }) => {
-  const isLoading = instrument.percentage.some((p) => !p.is_loading);
+  const isLoading = !instrument.percentage.is_loading;
 
   const renderInstrumentDetails = () => {
     const commonDetails = (
@@ -74,24 +74,22 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDelete, i
           <h3 className="mb-3 text-2xl font-bold text-gray-800 dark:text-white">{instrument.exchange_code}</h3>
           <div className="mb-4">{renderInstrumentDetails()}</div>
           <div className="mb-4">
-            {instrument.percentage.length > 0 ? (
-              instrument.percentage.map((p, index) => (
-                <div key={index} className="mb-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
-                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{p.percentage.toFixed(2)}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                    <motion.div
-                      className="h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${p.percentage}%` }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                    />
-                  </div>
-                  {!p.is_loading && <Spinner size="sm" className="mt-1" />}
+            {instrument.percentage ? (
+              <div key={instrument.id} className="mb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{instrument.percentage.percentage.toFixed(2)}%</span>
                 </div>
-              ))
+                <div className="w-full h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                  <motion.div
+                    className="h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${instrument.percentage.percentage}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  />
+                </div>
+                {!instrument.percentage.percentage && <Spinner size="sm" className="mt-1" />}
+              </div>
             ) : (
               <span className="text-sm text-gray-500 dark:text-gray-400">No data available</span>
             )}
@@ -115,27 +113,29 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDelete, i
 };
 
 const getAveragePercentage = (instrument: Instrument): number => {
-  if (instrument.percentage.length === 0) return 0;
-  const sum = instrument.percentage.reduce((acc, curr) => acc + curr.percentage, 0);
-  return sum / instrument.percentage.length;
+  if (!instrument.percentage) return 0;
+  const sum = instrument.percentage.percentage;
+  return sum;
 };
 
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery("");
   const [deleteInstrument] = useDeleteInstrumentMutation();
+  const [startWebsocket] = useStartWebsocketMutation();
   const [deletingRowIds, setDeletingRowIds] = useState<number[]>([]);
   const [isHealthChecking, setIsHealthChecking] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState<"percentage" | "name">("percentage");
+  const {
+    data: breezeStatusData,
+    error,
+    isLoading,
+  } = useCheckBreezeStatusQuery(undefined, {
+    pollingInterval: 5000,
+  });
 
-  // Helper function to check if running on localhost
   const isLocalhost = () => {
-    return (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1" ||
-      window.location.hostname === "[::1]" || // IPv6 localhost
-      /^localhost:\d+$/.test(window.location.hostname) // localhost with port number
-    );
+    return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "[::1]" || /^localhost:\d+$/.test(window.location.hostname);
   };
 
   const sortedAndFilteredInstruments = useMemo(() => {
@@ -147,8 +147,7 @@ const HomePage: React.FC = () => {
       if (sortOption === "percentage") {
         return getAveragePercentage(b) - getAveragePercentage(a);
       } else {
-        // @ts-expect-error dde
-        return a.exchange_code.localeCompare(b.exchange_code);
+        return a.exchange_code?.localeCompare(b.exchange_code ?? "100%");
       }
     });
   }, [data, searchTerm, sortOption]);
@@ -221,21 +220,21 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     if (!isLocalhost()) {
       performHealthCheck();
-      const interval = setInterval(performHealthCheck, 120000); // 2 minutes
+      const interval = setInterval(performHealthCheck, 120000);
       return () => clearInterval(interval);
     }
   }, []);
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const allLoaded = data?.data.every((instrument: Instrument) => instrument.percentage.length > 0 && instrument.percentage.every((p) => p.is_loading));
+      const allLoaded = data?.data.every((instrument: Instrument) => instrument.percentage && instrument.percentage.is_loading);
 
       if (!allLoaded) {
         await refetch();
       } else {
         clearInterval(interval);
       }
-    }, 2000); // 2 seconds
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [data, refetch]);
@@ -244,8 +243,39 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container px-4 py-8 mx-auto">
         <Card className="mb-8 shadow-lg">
+          <div className="p-6">
+            <h2 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white">Breeze Session Status</h2>
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <Spinner size="lg" />
+              </div>
+            ) : error ? (
+              <div className="p-4 text-red-700 bg-red-100 border-l-4 border-red-500 rounded-md">
+                <p className="font-bold">Error:</p>
+                <p>{error.data || "An unexpected error occurred."}</p>
+              </div>
+            ) : breezeStatusData ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+                  <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">Session Status</h3>
+                  <Badge color={breezeStatusData.data.session_status ? "success" : "danger"} size="lg">
+                    {breezeStatusData.data.session_status ? "Connected" : "Disconnected"}
+                  </Badge>
+                </div>
+                <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+                  <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">Live Feed Status</h3>
+                  <Badge color={breezeStatusData.data.websocket_status ? "success" : "danger"} size="lg">
+                    {breezeStatusData.data.websocket_status ? "Connected" : "Disconnected"}
+                  </Badge>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </Card>
+        <Card className="mb-8 shadow-lg">
           <div className="flex flex-col items-center justify-between p-6 md:flex-row">
             <h1 className="mb-4 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 md:mb-0">Subscribed Instruments</h1>
+
             <div className="flex flex-col w-full space-y-2 md:flex-row md:space-y-0 md:space-x-2 md:w-auto">
               {!isLocalhost() && (
                 <Button onClick={performHealthCheck} disabled={isHealthChecking} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
@@ -256,6 +286,10 @@ const HomePage: React.FC = () => {
               <Button onClick={() => refetch()} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
                 <HiRefresh className="w-4 h-4 mr-2" />
                 Refresh Data
+              </Button>
+              <Button onClick={() => startWebsocket({})} color="light" size="sm" className="w-full transition-all duration-300 hover:shadow-lg md:w-auto">
+                <HiRefresh className="w-4 h-4 mr-2" />
+                Start Live Feed
               </Button>
             </div>
           </div>

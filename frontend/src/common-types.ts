@@ -16,7 +16,7 @@ export interface PercentageInstrument {
 }
 export interface Instrument {
   id: number;
-  percentage: PercentageInstrument[];
+  percentage: PercentageInstrument;
   stock_token: string | null;
   token: string | null;
   instrument: string | null;

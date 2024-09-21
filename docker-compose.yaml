@@ -1,4 +1,4 @@
-version: "3.8" # Specify the version if not already present
+version: "3.8"
 
 services:
   postgres:
@@ -67,21 +67,45 @@ services:
       - ./frontend/package.json:/usr/app/package.json
       - ./frontend/package-lock.json:/usr/app/package-lock.json
 
-  # celery:
+  celery-worker:
+    build:
+      context: backend/
+      dockerfile: Dockerfile.dev
+    container_name: breeze-celery-worker
+    env_file:
+      - ./.envs/env.dev
+    depends_on:
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/:/app/
+    entrypoint: |
+      bash -c "
+      celery multi start w1 w2 w3 -A main --logfile=/var/log/celery/%n.log --loglevel=INFO &&
+      tail -f /var/log/celery/w*.log"
+    restart: always
+
+  # celery-beat:
   #   build:
   #     context: backend/
   #     dockerfile: Dockerfile.dev
-  #   container_name: breeze-celery
+  #   container_name: breeze-celery-beat
   #   env_file:
   #     - ./.envs/env.dev
   #   depends_on:
+  #     backend:
+  #       condition: service_started
   #     postgres:
   #       condition: service_healthy
   #     redis:
   #       condition: service_healthy
   #   volumes:
-  #     - ./backend/:/usr/app/
-  #   entrypoint: celery -A main worker --loglevel=INFO --autoscale=10,3
+  #     - ./backend/:/app/
+  #   entrypoint: celery -A main beat --loglevel=INFO
   #   restart: always
 
 volumes:

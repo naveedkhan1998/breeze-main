@@ -51,7 +51,7 @@ const InstrumentsPage = () => {
               )}
             </AnimatePresence>
           </div>
-          <Tabs aria-label="Instrument tabs" style="underline" className="w-full">
+          <Tabs aria-label="Instrument tabs" style="underline" className="w-full h-fit">
             <Tabs.Item title="NSE">
               <Instrument exchange="NSE" searchTerm={searchTerm} />
             </Tabs.Item>

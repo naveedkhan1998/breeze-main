@@ -175,7 +175,7 @@ To monitor the Celery worker logs in real-time, you can use the following method
 If you have multiple Celery workers (e.g., `w1`, `w2`, `w3`) and want to monitor their logs in real-time, use the `tail` command:
 
 ```bash
-docker-compose exec backend tail -f /var/log/celery/w1.log /var/log/celery/w2.log /var/log/celery/w3.log
+docker-compose exec -it breeze-backend sh tail -f /var/log/celery/w1.log /var/log/celery/w2.log /var/log/celery/w3.log
 ```
 
 Or use a wildcard to follow all worker logs:

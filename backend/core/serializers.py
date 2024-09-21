@@ -1,3 +1,5 @@
+# core/serializers.py
+
 from rest_framework import serializers
 from core.models import (
     Instrument,
@@ -11,7 +13,7 @@ from core.models import (
 class PercentageInstrumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PercentageInstrument
-        fields = ['percentage', 'is_loading']
+        fields = ["percentage", "is_loading"]
 
 
 class AllInstrumentSerializer(serializers.ModelSerializer):
@@ -21,7 +23,7 @@ class AllInstrumentSerializer(serializers.ModelSerializer):
 
 
 class SubscribedSerializer(serializers.ModelSerializer):
-    percentage = PercentageInstrumentSerializer(many=True, read_only=True)
+    percentage = PercentageInstrumentSerializer(read_only=True)
 
     class Meta:
         model = SubscribedInstruments
@@ -34,7 +36,7 @@ class InstrumentSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def to_representation(self, instance):
-        if isinstance(instance, SubscribedSerializer):
+        if isinstance(instance, SubscribedInstruments):
             serializer = SubscribedSerializer(instance=instance)
         else:
             serializer = AllInstrumentSerializer(instance=instance)
@@ -44,10 +46,10 @@ class InstrumentSerializer(serializers.ModelSerializer):
 class CandleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candle
-        fields = ["open", "high", "low", "close","volume", "date"]
+        fields = ["open", "high", "low", "close", "volume", "date"]
 
 
-class BreezeAccountSerialzer(serializers.ModelSerializer):
+class BreezeAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = BreezeAccount
         fields = "__all__"

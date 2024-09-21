@@ -16,7 +16,7 @@ export const instrumentApi = baseApi.injectEndpoints({
     getCandles: builder.query({
       query: ({ id, tf }) => {
         return {
-          url: `core/get_candles/?id=${id}&tf=${tf}`,
+          url: `core/candles/get_candles/?id=${id}&tf=${tf}`,
           method: "GET",
           headers: {
             "Content-type": "application/json",
@@ -26,7 +26,7 @@ export const instrumentApi = baseApi.injectEndpoints({
     }),
     subscribeInstrument: builder.mutation({
       query: ({ id, duration }) => ({
-        url: `core/subscribe/${id}`,
+        url: `core/subscribed_instruments/${id}/subscribe/`,
         method: "POST",
         body: {
           duration: duration,
@@ -47,7 +47,7 @@ export const instrumentApi = baseApi.injectEndpoints({
     }),
     deleteInstrument: builder.mutation({
       query: ({ id }) => ({
-        url: `core/delete/${id}`,
+        url: `core/subscribed_instruments/${id}`,
         method: "DELETE",
         headers: {
           "Content-type": "application/json",
@@ -57,7 +57,7 @@ export const instrumentApi = baseApi.injectEndpoints({
     getInstruments: builder.query({
       query: ({ exchange, search }) => {
         return {
-          url: `core/get_instruments/?exchange=${exchange}&search=${search}`,
+          url: `core/instruments/?exchange=${exchange}&search=${search}`,
           method: "GET",
           headers: {
             "Content-type": "application/json",

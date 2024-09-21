@@ -15,7 +15,7 @@ app = Celery('main', include=[])
 app.conf.beat_schedule = {
     'candle_making_job':{
         'task':'candle_maker',
-        'schedule':1,
+        'schedule':5,
         'relative':True
     },
     'websocket_connect':{
