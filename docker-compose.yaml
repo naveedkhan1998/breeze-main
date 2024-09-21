@@ -38,6 +38,8 @@ services:
         condition: service_healthy
       frontend:
         condition: service_started
+      backend:
+        condition: service_started
 
   backend:
     build:
