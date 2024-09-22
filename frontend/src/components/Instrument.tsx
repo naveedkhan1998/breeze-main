@@ -69,7 +69,7 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({ instrument, onSubscribe
                 className="absolute right-0 z-10 w-40 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-700"
               >
                 <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                  {[4, 5, 6, 7, 8].map((weeks) => (
+                  {[4, 5, 6, 7, 8, 52, 104].map((weeks) => (
                     <button
                       key={weeks}
                       onClick={() => {

@@ -87,6 +87,10 @@ services:
       - ./backend/:/app/
     entrypoint: |
       bash -c "
+      rm -f /var/run/celery/w1.pid &&
+      rm -f /var/run/celery/w2.pid &&
+      rm -f /var/run/celery/w3.pid &&
+      rm -f /var/run/celery/beat.pid &&
       celery multi start w1 w2 w3 -A main --logfile=/var/log/celery/%n.log --loglevel=INFO &&
       tail -f /var/log/celery/w*.log"
     restart: always

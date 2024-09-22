@@ -91,10 +91,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
             check_breeze_session = breeze_session.get_funds()
 
             # Check if ticks have been received in the last 10 seconds
-            if cache.get("ticks_received"):
-                websocket_status = True
-            else:
-                websocket_status = False
+            websocket_status = bool(cache.get("ticks_received", False))
 
             # Determine session status message
             if check_breeze_session.get("Status") == 200:
@@ -102,7 +99,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
                 status_code = status.HTTP_200_OK
             else:
                 session_status = False
-                status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+                status_code = status.HTTP_200_OK
 
             # Construct response data
             response_data = {
@@ -121,8 +118,11 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
                 f"No BreezeAccount found for user ID {self.request.user.id}."
             )
             return Response(
-                {"msg": "error", "data": "No BreezeAccount found."},
-                status=status.HTTP_404_NOT_FOUND,
+                {
+                    "msg": "error",
+                    "data": {"session_status": False, "websocket_status": False},
+                },
+                status=status.HTTP_200_OK
             )
 
         except Exception as e:
@@ -134,17 +134,30 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
 
             # Return a response indicating failure
             return Response(
-                {"msg": "error", "data": "Failed to retrieve Breeze status."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {
+                    "msg": "error",
+                    "data": {"session_status": False, "websocket_status": False},
+                },
+                status=status.HTTP_200_OK,
             )
 
     @action(detail=False, methods=["post"], url_path="websocket_start")
     def start_websocket(self, request):
-        websocket_start.delay()
-        return Response(
-            {"msg": "WebSocket Started successfully", "data": "WebSocket Started"},
-            status=status.HTTP_201_CREATED,
-        )
+        try:
+            websocket_start.delay()
+            return Response(
+                {"msg": "WebSocket Started successfully", "data": "WebSocket Started"},
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            logger.error(f"Error starting WebSocket: {e}", exc_info=True)
+            return Response(
+                {
+                    "msg": "Error starting WebSocket",
+                    "data": "WebSocket could not start",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
