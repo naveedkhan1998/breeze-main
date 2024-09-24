@@ -122,7 +122,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
                     "msg": "error",
                     "data": {"session_status": False, "websocket_status": False},
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         except Exception as e:
@@ -144,7 +144,8 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"], url_path="websocket_start")
     def start_websocket(self, request):
         try:
-            websocket_start.delay()
+            user = self.request.user
+            websocket_start.delay(user.id)
             return Response(
                 {"msg": "WebSocket Started successfully", "data": "WebSocket Started"},
                 status=status.HTTP_201_CREATED,
@@ -285,8 +286,12 @@ class CandleViewSet(viewsets.ViewSet):
             return Response(
                 {"msg": "Missing instrument ID"}, status=status.HTTP_400_BAD_REQUEST
             )
+        
+        instrument = get_object_or_404(SubscribedInstruments, id=instrument_id)
+        qs = Candle.objects.filter(instrument=instrument).order_by("date")
+        CandleSerializer(qs, many=True).data
 
-        candles = self.get_cached_candles(instrument_id)
+        candles = CandleSerializer(qs, many=True).data
 
         if tf:
             try:

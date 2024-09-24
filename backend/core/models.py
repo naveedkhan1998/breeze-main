@@ -107,6 +107,7 @@ class Tick(models.Model):
         SubscribedInstruments, on_delete=models.CASCADE, null=True, blank=True
     )
     ltp = models.FloatField(blank=True, null=True)
+    ltq = models.FloatField(blank=True, null=True)
     date = models.DateTimeField(blank=True, null=True)
     used = models.BooleanField(default=False)
 

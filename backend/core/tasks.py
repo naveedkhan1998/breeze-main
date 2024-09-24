@@ -16,13 +16,15 @@ logger = get_task_logger(__name__)
 
 
 @shared_task(name="websocket_start")
-def websocket_start():
+def websocket_start(user_id: int):
     """
     Initializes the WebSocket connection for the first user and subscribes to feeds
     for instruments that are currently loading.
     """
+    # websocket_status = bool(cache.get("ticks_received", False))
+    # if not websocket_status:
     try:
-        user: User = User.objects.first()
+        user: User = User.objects.get(pk=user_id)
         if not user:
             logger.warning("No users found to initialize WebSocket.")
             return
@@ -31,14 +33,21 @@ def websocket_start():
         sess.breeze.ws_connect()
         sub_ins = SubscribedInstruments.objects.all()
 
-        load_candles(user.pk)
+        load_candles.delay(user.pk)
+
         def on_ticks(ticks):
-            cache.set('ticks_received', True, timeout=10)
-            if sub_ins.exists():
-                for ins in sub_ins:
-                    if ins.percentage.is_loading:
-                        sess.breeze.subscribe_feeds(stock_token=ins.stock_token)
+            cache.set("ticks_received", True, timeout=10)
+            logger.info(ticks)
+
             tick_handler.delay(ticks)
+
+        if sub_ins.exists():
+            for ins in sub_ins:
+                if ins.percentage.is_loading:
+                    ins.percentage.percentage = 0
+                    ins.percentage.is_loading = False
+                    ins.percentage.save()
+                    sess.breeze.subscribe_feeds(stock_token=ins.stock_token)
 
         sess.breeze.on_ticks = on_ticks
         logger.info("WebSocket connection established and subscriptions set.")
@@ -72,7 +81,12 @@ def tick_handler(ticks):
                 stock_token=ticks["symbol"]
             ).first()
             if sub_ins:
-                Tick.objects.create(instrument=sub_ins, ltp=ticks["last"], date=date)
+                volume = 0
+                if ticks["ltq"]:
+                    volume = ticks["ltq"]
+                Tick.objects.create(
+                    instrument=sub_ins, ltp=ticks["last"], ltq=volume, date=date
+                )
                 logger.info(
                     f"Tick saved for instrument {sub_ins.stock_token} at {date}."
                 )
@@ -120,6 +134,9 @@ def sub_candle_maker(ins_id: int):
             return
 
         for tick in ticks:
+            # buy_volume = tick.get("totalBuyQt", 0)
+            # sell_volume = tick.get("totalSellQ", 0)
+            volume = 0
             candle_time = tick.date.replace(second=0, microsecond=0)
             candle, created = Candle.objects.get_or_create(
                 instrument_id=ins_id,
@@ -129,6 +146,7 @@ def sub_candle_maker(ins_id: int):
                     "high": tick.ltp,
                     "low": tick.ltp,
                     "close": tick.ltp,
+                    "volume": tick.ltq,
                 },
             )
 
@@ -144,6 +162,7 @@ def sub_candle_maker(ins_id: int):
                     candle.close = tick.ltp
                     updated = True
                 if updated:
+                    candle.volume += tick.ltq
                     candle.save()
                     logger.info(
                         f"Candle updated for instrument ID {ins_id} at {candle_time}."
@@ -153,10 +172,11 @@ def sub_candle_maker(ins_id: int):
                         f"No update required for candle at {candle_time} for instrument ID {ins_id}."
                     )
 
-        # Mark ticks as used after processing
-        ticks.update(used=True)
+        # Delete ticks after use
+        count = ticks.count()
+        ticks.delete()
         logger.info(
-            f"Processed and marked {ticks.count()} ticks as used for instrument ID {ins_id}."
+            f"Processed and marked {count} ticks as used for instrument ID {ins_id}."
         )
     except Exception as e:
         logger.error(
@@ -259,7 +279,6 @@ def load_candles(user_id: int):
         user_id (int): The ID of the user initiating the request.
     """
     try:
-        sess = BreezeSession(user_id)
         sub_ins_queryset = SubscribedInstruments.objects.all()
 
         if not sub_ins_queryset.exists():
@@ -267,11 +286,8 @@ def load_candles(user_id: int):
             return
 
         for ins in sub_ins_queryset:
-            ins.percentage.percentage = 0
-            ins.percentage.is_loading = False
-            ins.percentage.save()
-            candle_maker_task = load_instrument_candles.s(ins.id, user_id, duration=4)
-            candle_maker_task.apply_async()
+            load_instrument_candles.delay(ins.id, user_id, duration=4)
+
         logger.info(
             f"Initiated loading candles for {sub_ins_queryset.count()} instruments."
         )
