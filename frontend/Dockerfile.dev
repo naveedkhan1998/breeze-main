@@ -8,7 +8,7 @@ WORKDIR /usr/app
 COPY package.json ./
 
 # Install dependencies
-RUN yarn install --frozen-lockfile
+RUN npm i
 
 # Copy the rest of the application code
 COPY . .
@@ -23,4 +23,4 @@ EXPOSE 5173
 ENV CHOKIDAR_USEPOLLING=true
 
 # Start the Vite development server
-CMD ["yarn", "dev", "--host", "0.0.0.0"]
+CMD ["npm","run", "dev", "--host"]

@@ -1,8 +1,8 @@
-import {  createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../app/store";
 
 interface ModeState {
-  mode?: boolean;
+  mode: boolean;
 }
 
 const initialState: ModeState = {
