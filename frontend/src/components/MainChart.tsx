@@ -7,13 +7,15 @@ interface MainChartProps {
   seriesData: any[];
   chartType: SeriesType;
   indicators: Indicator[];
+  width: number;
+  height: number;
   mode: boolean;
   obj: Instrument;
   timeframe: number;
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
 }
 
-const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators, mode, obj, timeframe, setTimeScale }) => {
+const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators, width, height, mode, obj, timeframe, setTimeScale }) => {
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);
@@ -29,8 +31,8 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
           width: mainChartContainerRef.current.clientWidth,
           height,
           layout: {
-            textColor: mode ? "#FFFFFF" : "#191919",
-            background: { color: mode ? "#1F2937" : "#F3F4F6" },
+            textColor: mode ? "#E5E7EB" : "#1F2937",
+            background: { color: mode ? "#111827" : "#FFFFFF" },
             fontSize: 12,
           },
           timeScale: {
@@ -38,13 +40,13 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
             secondsVisible: false,
           },
           rightPriceScale: {
-            borderColor: mode ? "#374151" : "#D1D5DB",
+            borderColor: mode ? "#4B5563" : "#D1D5DB",
           },
           crosshair: {
             mode: 1,
             vertLine: {
               width: 1,
-              color: mode ? "#4B5563" : "#9CA3AF",
+              color: mode ? "#6B7280" : "#9CA3AF",
               style: 1,
             },
             horzLine: {
@@ -65,14 +67,14 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         const mainSeries =
           chartType === "Candlestick"
             ? chart.addCandlestickSeries({
-                upColor: "#10B981",
-                downColor: "#EF4444",
+                upColor: mode ? "#34D399" : "#10B981",
+                downColor: mode ? "#F87171" : "#EF4444",
                 borderVisible: false,
-                wickUpColor: "#10B981",
-                wickDownColor: "#EF4444",
+                wickUpColor: mode ? "#34D399" : "#10B981",
+                wickDownColor: mode ? "#F87171" : "#EF4444",
               })
             : chart.addLineSeries({
-                color: "#3B82F6",
+                color: mode ? "#60A5FA" : "#3B82F6",
                 lineWidth: 2,
               });
 
@@ -81,7 +83,7 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         prevChartTypeRef.current = chartType;
 
         const legendContainer = document.createElement("div");
-        legendContainer.className = `absolute top-4 left-4 bg-white dark:bg-gray-800 dark:text-white p-2 rounded shadow-md text-sm z-[10]`;
+        legendContainer.className = `absolute top-4 left-4 ${mode ? "bg-gray-800 text-white" : "bg-white text-gray-800"} p-2 rounded shadow-md text-sm z-[10]`;
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
@@ -123,14 +125,14 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
           const mainSeries =
             chartType === "Candlestick"
               ? mainChartRef.current.addCandlestickSeries({
-                  upColor: "#10B981",
-                  downColor: "#EF4444",
+                  upColor: mode ? "#34D399" : "#10B981",
+                  downColor: mode ? "#F87171" : "#EF4444",
                   borderVisible: false,
-                  wickUpColor: "#10B981",
-                  wickDownColor: "#EF4444",
+                  wickUpColor: mode ? "#34D399" : "#10B981",
+                  wickDownColor: mode ? "#F87171" : "#EF4444",
                 })
               : mainChartRef.current.addLineSeries({
-                  color: "#3B82F6",
+                  color: mode ? "#60A5FA" : "#3B82F6",
                   lineWidth: 2,
                 });
 
@@ -140,6 +142,30 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         } else {
           seriesRef.current!.setData(seriesData);
         }
+
+        // Update chart colors based on mode
+        mainChartRef.current.applyOptions({
+          layout: {
+            textColor: mode ? "#E5E7EB" : "#1F2937",
+            background: { color: mode ? "#111827" : "#FFFFFF" },
+          },
+          rightPriceScale: {
+            borderColor: mode ? "#4B5563" : "#D1D5DB",
+          },
+          crosshair: {
+            vertLine: {
+              color: mode ? "#6B7280" : "#9CA3AF",
+            },
+          },
+          grid: {
+            vertLines: {
+              color: mode ? "#374151" : "#E5E7EB",
+            },
+            horzLines: {
+              color: mode ? "#374151" : "#E5E7EB",
+            },
+          },
+        });
       }
 
       // Update indicators
@@ -149,7 +175,7 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
             switch (indicator.name) {
               case "MA": {
                 const maSeries = mainChartRef.current!.addLineSeries({
-                  color: "#F59E0B",
+                  color: mode ? "#FBBF24" : "#F59E0B",
                   lineWidth: 2,
                 });
                 maSeries.setData(indicator.data);
@@ -158,11 +184,11 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
               }
               case "Bollinger Bands": {
                 const upperBandSeries = mainChartRef.current!.addLineSeries({
-                  color: "#10B981",
+                  color: mode ? "#34D399" : "#10B981",
                   lineWidth: 1,
                 });
                 const lowerBandSeries = mainChartRef.current!.addLineSeries({
-                  color: "#EF4444",
+                  color: mode ? "#F87171" : "#EF4444",
                   lineWidth: 1,
                 });
                 upperBandSeries.setData(indicator.data.map((d: any) => ({ time: d.time, value: d.upper })));
@@ -175,9 +201,12 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
           } else {
             switch (indicator.name) {
               case "MA":
+                indicatorSeriesRef.current[indicator.name].applyOptions({ color: mode ? "#FBBF24" : "#F59E0B" });
                 indicatorSeriesRef.current[indicator.name].setData(indicator.data);
                 break;
-              case "Bollinger Bands": 
+              case "Bollinger Bands":
+                indicatorSeriesRef.current[`${indicator.name}_upper`].applyOptions({ color: mode ? "#34D399" : "#10B981" });
+                indicatorSeriesRef.current[`${indicator.name}_lower`].applyOptions({ color: mode ? "#F87171" : "#EF4444" });
                 indicatorSeriesRef.current[`${indicator.name}_upper`].setData(indicator.data.map((d: any) => ({ time: d.time, value: d.upper })));
                 indicatorSeriesRef.current[`${indicator.name}_lower`].setData(indicator.data.map((d: any) => ({ time: d.time, value: d.lower })));
                 break;
@@ -202,6 +231,14 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
       });
     }
   }, [seriesData, mode, obj?.company_name, obj?.exchange_code, timeframe, chartType, indicators, setTimeScale]);
+
+  // Update chart size when width or height changes
+  useEffect(() => {
+    if (mainChartRef.current) {
+      mainChartRef.current.applyOptions({ width, height });
+      mainChartRef.current.timeScale().fitContent();
+    }
+  }, [width, height]);
 
   useEffect(() => {
     renderMainChart();

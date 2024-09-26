@@ -7,12 +7,15 @@ import { formatDate, calculateMA, calculateBollingerBands, calculateRSI, calcula
 import { Candle, Indicator, Instrument } from "../common-types";
 import { useAppSelector } from "../app/hooks";
 import { getMode } from "../features/darkModeSlice";
-import { HiArrowLeft, HiRefresh, HiDownload, HiInformationCircle } from "react-icons/hi";
-import { ITimeScaleApi, SeriesType, Time } from "lightweight-charts";
+import { HiArrowLeft, HiInformationCircle, HiXMark } from "react-icons/hi2";
+import { HiArrowsExpand, HiDownload, HiRefresh } from "react-icons/hi";
+import { SeriesType, Time } from "lightweight-charts";
 import ChartControls from "../components/ChartControls";
 import MainChart from "../components/MainChart";
 import VolumeChart from "../components/VolumeChart";
 import IndicatorChart from "../components/IndicatorChart";
+import ResponsiveSidebar from "../components/ResponsiveSidebar";
+import useResizeObserver from "../hooks/useResizeObserver";
 
 interface LocationState {
   obj: Instrument;
@@ -34,14 +37,53 @@ const GraphsPage: React.FC = () => {
     { name: "MACD", active: true, data: [] },
   ]);
 
-  const { data, refetch } = useGetCandlesQuery({
+  const { data, refetch, isLoading, isError } = useGetCandlesQuery({
     id: obj?.id,
     tf: timeframe,
   });
 
-  const mainChartRef = useRef<ITimeScaleApi<Time> | null>(null);
-  const volumeChartRef = useRef<ITimeScaleApi<Time> | null>(null);
-  const indicatorChartRef = useRef<ITimeScaleApi<Time> | null>(null);
+  // Refs for charts
+  const mainChartRef = useRef<any>(null);
+  const volumeChartRef = useRef<any>(null);
+  const indicatorChartRef = useRef<any>(null);
+
+  // Ref for the chart section
+  const chartSectionRef = useRef<HTMLDivElement>(null);
+  const size = useResizeObserver(chartSectionRef);
+
+  // State for fullscreen mode
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  // Handle fullscreen toggle
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      chartSectionRef.current
+        ?.requestFullscreen()
+        .then(() => {
+          setIsFullscreen(true);
+        })
+        .catch((err) => {
+          console.error(`Error attempting to enable fullscreen mode: ${err.message}`);
+        });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      });
+    }
+  };
+
+  // Listen for fullscreen changes to update state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   const seriesData = useMemo(() => {
     if (!data) return [];
@@ -68,6 +110,7 @@ const GraphsPage: React.FC = () => {
     });
   }, [data]);
 
+  // Update indicators based on seriesData
   useEffect(() => {
     if (seriesData.length > 0) {
       const updatedIndicators = indicators.map((indicator) => {
@@ -85,13 +128,16 @@ const GraphsPage: React.FC = () => {
           case "MACD":
             data = calculateMACD(seriesData);
             break;
+          default:
+            break;
         }
         return { ...indicator, data };
       });
       setIndicators(updatedIndicators);
     }
-  }, [seriesData]);
+  }, [seriesData, indicators]);
 
+  // Handle auto-refresh
   useEffect(() => {
     let intervalId: number | null = null;
     if (autoRefresh) {
@@ -106,6 +152,7 @@ const GraphsPage: React.FC = () => {
     };
   }, [autoRefresh, refetch]);
 
+  // Synchronize charts
   const syncCharts = useCallback(() => {
     if (!mainChartRef.current) return;
 
@@ -161,16 +208,14 @@ const GraphsPage: React.FC = () => {
     }
   };
 
-  function convertUnixToLocalTime(unixTimestamp:number) {
-    // Convert Unix timestamp (in seconds) to milliseconds by multiplying by 1000
+  // Convert Unix timestamp to local time
+  function convertUnixToLocalTime(unixTimestamp: number) {
     const date = new Date(unixTimestamp * 1000);
-
-    // Use toLocaleString() to convert the date to the local time string
     const localTime = date.toLocaleString();
-
     return localTime;
-}
+  }
 
+  // Handle CSV download
   const handleDownload = () => {
     const headers = "Date,Open,High,Low,Close,Volume";
     const csvData = seriesData.map((row: any) => `${convertUnixToLocalTime(row.time)},${row.open},${row.high},${row.low},${row.close},${row.value}`);
@@ -184,40 +229,63 @@ const GraphsPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // Toggle indicator activation
   const toggleIndicator = (name: string) => {
     setIndicators((prevIndicators) => prevIndicators.map((ind) => (ind.name === name ? { ...ind, active: !ind.active } : ind)));
   };
 
-  if (!obj) {
-    return <div>No instrument data available.</div>;
+  // Loading state
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen text-gray-700 dark:text-gray-300">Loading chart data...</div>;
   }
 
+  // Error state
+  if (isError) {
+    return <div className="flex items-center justify-center h-screen text-red-500">Failed to load chart data. Please try again later.</div>;
+  }
+
+  // No data state
+  if (!obj) {
+    return <div className="flex items-center justify-center h-screen text-gray-700 dark:text-gray-300">No instrument data available.</div>;
+  }
+
+  // Ensure that the chart section has minimum dimensions
+  const isValidSize = size.width < 300 && size.height < 200;
+
   return (
-    <div className="flex flex-col items-stretch justify-start min-h-screen bg-gray-100 dark:bg-gray-900">
-      <header className="p-4 bg-white shadow-md dark:bg-gray-800">
-        <div className="flex items-center justify-between mx-auto max-w-7xl">
-          <Button color="light" onClick={() => navigate(-1)}>
-            <HiArrowLeft className="w-5 h-5 mr-2" /> Back
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-white shadow-md dark:bg-gray-800">
+        <div className="flex items-center justify-between max-w-full p-4 mx-auto">
+          <Button color="light" onClick={() => navigate(-1)} className="md:hidden" aria-label="Go Back">
+            <HiArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">{obj?.exchange_code} Chart</h1>
+          <h1 className="text-xl font-bold text-gray-800 truncate dark:text-white">{obj?.exchange_code} Chart</h1>
           <div className="flex space-x-2">
-            <Tooltip content="Refresh data">
-              <Button color="light" onClick={() => refetch()}>
+            <Tooltip placement="bottom-start" content="Refresh data">
+              <Button color="light" onClick={() => refetch()} aria-label="Refresh Data">
                 <HiRefresh className="w-5 h-5" />
               </Button>
             </Tooltip>
-            <Tooltip content="Download CSV">
-              <Button color="light" onClick={handleDownload}>
+            <Tooltip placement="bottom-start" content="Download CSV">
+              <Button color="light" onClick={handleDownload} aria-label="Download CSV">
                 <HiDownload className="w-5 h-5" />
+              </Button>
+            </Tooltip>
+            <Tooltip placement="bottom-start" content={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+              <Button color="light" onClick={toggleFullscreen} aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
+                {isFullscreen ? <HiXMark className="w-5 h-5" /> : <HiArrowsExpand className="w-5 h-5" />}
               </Button>
             </Tooltip>
           </div>
         </div>
       </header>
 
-      <main className="flex-grow p-4">
-        <div className="mx-auto max-w-7xl">
-          <Card className="mb-4">
+      {/* Main Content */}
+      <main className="flex flex-grow overflow-hidden">
+        <div ref={chartSectionRef} className="flex flex-grow">
+          {/* Sidebar Section */}
+          <ResponsiveSidebar isFullscreen={isFullscreen}>
             <ChartControls
               timeframe={timeframe}
               chartType={chartType}
@@ -230,35 +298,60 @@ const GraphsPage: React.FC = () => {
               onAutoRefreshChange={setAutoRefresh}
               onToggleIndicator={toggleIndicator}
             />
-          </Card>
+          </ResponsiveSidebar>
 
-          <div className="grid grid-cols-1 gap-4">
-            <Card className="col-span-1">
-              <MainChart
-                seriesData={seriesData}
-                chartType={chartType}
-                indicators={indicators}
-                mode={mode}
-                obj={obj}
-                timeframe={timeframe}
-                setTimeScale={(timeScale) => (mainChartRef.current = timeScale)}
-              />
-            </Card>
+          {/* Charts Section */}
+          <div className="flex flex-col flex-grow p-2 overflow-hidden">
+            {/* Ensure valid sizes before rendering charts */}
+            {isValidSize ? (
+              <>
+                <Card className="flex-grow mb-2">
+                  <MainChart
+                    seriesData={seriesData}
+                    chartType={chartType}
+                    indicators={indicators}
+                    mode={mode}
+                    obj={obj}
+                    timeframe={timeframe}
+                    width={size.width}
+                    height={isFullscreen ? size.height * 0.7 : size.height * 0.6}
+                    setTimeScale={(timeScale: any) => (mainChartRef.current = timeScale)}
+                  />
+                </Card>
 
-            {showVolume && (
-              <Card className="col-span-1">
-                <VolumeChart volumeData={volumeData} mode={mode} setTimeScale={(timeScale) => (volumeChartRef.current = timeScale)} />
-              </Card>
+                <div className="flex flex-grow space-x-2">
+                  {showVolume && (
+                    <Card className="flex-1">
+                      <VolumeChart
+                        volumeData={volumeData}
+                        mode={mode}
+                        width={size.width / 2}
+                        height={isFullscreen ? size.height * 0.25 : size.height * 0.3}
+                        setTimeScale={(timeScale: any) => (volumeChartRef.current = timeScale)}
+                      />
+                    </Card>
+                  )}
+
+                  <Card className="flex-1">
+                    <IndicatorChart
+                      indicators={indicators}
+                      mode={mode}
+                      width={size.width / 2}
+                      height={isFullscreen ? size.height * 0.25 : size.height * 0.3}
+                      setTimeScale={(timeScale: any) => (indicatorChartRef.current = timeScale)}
+                    />
+                  </Card>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center w-full h-full text-gray-700 dark:text-gray-300">Resizing...</div>
             )}
-
-            <Card className="col-span-1">
-              <IndicatorChart indicators={indicators} mode={mode} setTimeScale={(timeScale) => (indicatorChartRef.current = timeScale)} />
-            </Card>
           </div>
         </div>
       </main>
 
-      <footer className="p-4 mt-4 bg-white shadow-md dark:bg-gray-800">
+      {/* Footer */}
+      <footer className="p-4 bg-white shadow-md dark:bg-gray-800">
         <div className="flex items-center justify-center mx-auto text-sm text-gray-600 max-w-7xl dark:text-gray-400">
           <HiInformationCircle className="w-4 h-4 mr-1" />
           <span>Chart data is for educational purposes only. Not financial advice.</span>
