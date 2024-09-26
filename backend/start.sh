@@ -1,19 +1,16 @@
 #!/bin/sh
-set -e # Exit immediately if a command exits with a non-zero status
+bash -c
 
 # Run collectstatic and wait_for_db in the background
-python3 manage.py collectstatic --noinput &
-python3 manage.py wait_for_db &
-
-# Wait for background jobs to finish
-wait
+# python3 manage.py collectstatic --noinput &
+# python3 manage.py wait_for_db
 
 # Run migrations and create an admin user
 # Uncomment if migrations are necessary
 # python3 manage.py makemigrations
-python3 manage.py migrate --noinput --skip-checks
-python3 manage.py initadmin
-python3 manage.py process_data
+# python3 manage.py migrate --noinput --skip-checks
+# python3 manage.py initadmin
+# python3 manage.py process_data
 
 # Remove existing Celery PID files to prevent conflicts
 # rm -f /var/run/celery/w1.pid
@@ -23,7 +20,7 @@ python3 manage.py process_data
 
 # Purge all existing tasks from the Celery queues
 # The --force flag bypasses the confirmation prompt
-celery -A main purge --force || true # || true ensures the script continues even if the purge fails
+# celery -A main purge --force || true # || true ensures the script continues even if the purge fails
 
 # Restart Celery workers using celery multi
 # celery multi restart w1 w2 w3 -A main \
@@ -33,7 +30,7 @@ celery -A main purge --force || true # || true ensures the script continues even
 #     --time-limit=300
 
 # Start Celery Beat in detached mode
-celery -A main beat --detach
+# celery -A main beat --detach
 
 # Launch the Django development server, since there is only 1 instance the lru cache will work just fine
 python3 manage.py runserver 0.0.0.0:8000

@@ -10,7 +10,7 @@ interface MainChartProps {
   mode: boolean;
   obj: Instrument;
   timeframe: number;
-  setTimeScale: (timeScale: ITimeScaleApi<Time> ) => void;
+  setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
 }
 
 const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators, mode, obj, timeframe, setTimeScale }) => {
@@ -177,7 +177,7 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
               case "MA":
                 indicatorSeriesRef.current[indicator.name].setData(indicator.data);
                 break;
-              case "Bollinger Bands":
+              case "Bollinger Bands": 
                 indicatorSeriesRef.current[`${indicator.name}_upper`].setData(indicator.data.map((d: any) => ({ time: d.time, value: d.upper })));
                 indicatorSeriesRef.current[`${indicator.name}_lower`].setData(indicator.data.map((d: any) => ({ time: d.time, value: d.lower })));
                 break;

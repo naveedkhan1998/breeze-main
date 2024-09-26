@@ -1,3 +1,5 @@
+import json
+import time as PythonTime
 from pytz import timezone
 from celery import shared_task
 from core.helper import date_parser
@@ -18,27 +20,37 @@ logger = get_task_logger(__name__)
 @shared_task(name="websocket_start")
 def websocket_start(user_id: int):
     """
-    Initializes the WebSocket connection for the first user and subscribes to feeds
-    for instruments that are currently loading.
+    Initializes the WebSocket connection for the user and subscribes to feeds
+    for instruments. Listens for new subscription requests and subscribes dynamically.
     """
-    # websocket_status = bool(cache.get("ticks_received", False))
-    # if not websocket_status:
+    # Define a unique lock key for the user to prevent multiple task instances
+    lock_key = f"websocket_start_lock_{user_id}"
+    lock = cache.add(lock_key, "true", timeout=3600)  # 1-hour lock
+
+    if not lock:
+        # Task is already running for this user
+        logger.error(f"WebSocket task already running for user {user_id}.")
+        return
+
     try:
-        user: User = User.objects.get(pk=user_id)
-        if not user:
-            logger.warning("No users found to initialize WebSocket.")
+        # Retrieve the user
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            logger.warning(f"No user found with id {user_id}.")
             return
 
+        # Initialize WebSocket session
         sess = BreezeSession(user.pk)
         sess.breeze.ws_connect()
-        sub_ins = SubscribedInstruments.objects.all()
 
-        load_candles.delay(user.pk)
+        # Subscribe to initial instruments
+        sub_ins = SubscribedInstruments.objects.all()
+        load_candles.delay(user.pk)  # Asynchronously load candle data
 
         def on_ticks(ticks):
             cache.set("ticks_received", True, timeout=10)
-            logger.info(ticks)
-
+            # logger.info(f"Received ticks: {ticks}")
             tick_handler.delay(ticks)
 
         if sub_ins.exists():
@@ -50,9 +62,43 @@ def websocket_start(user_id: int):
                     sess.breeze.subscribe_feeds(stock_token=ins.stock_token)
 
         sess.breeze.on_ticks = on_ticks
-        logger.info("WebSocket connection established and subscriptions set.")
+        logger.info("WebSocket connection established and initial subscriptions set.")
+
+        # Access Redis via Django's cache
+        redis_client = cache.client.get_client("default")
+        subscription_queue = f"user:{user_id}:subscriptions"
+
+        while True:
+            try:
+                # Attempt to pop a new subscription from the queue with a timeout
+                subscription = redis_client.blpop(subscription_queue, timeout=5)
+                if subscription:
+                    _, data = subscription
+                    subscription_data = json.loads(data)
+                    stock_token = subscription_data.get("stock_token")
+
+                    if stock_token:
+                        # Subscribe to the new instrument
+                        sess.breeze.subscribe_feeds(stock_token=stock_token)
+                        logger.info(f"Subscribed to new instrument: {stock_token}")
+
+            except Exception as e:
+                logger.error(f"Error while processing subscription: {e}", exc_info=True)
+
+            # Implement a short sleep to prevent tight looping
+            PythonTime.sleep(1)
+
     except Exception as e:
         logger.error(f"Error in websocket_start: {e}", exc_info=True)
+    finally:
+        # Clean up: Disconnect WebSocket and release the lock
+        try:
+            sess.breeze.ws_disconnect()
+            logger.info("WebSocket connection closed.")
+        except Exception as e:
+            logger.error(f"Error while disconnecting WebSocket: {e}", exc_info=True)
+
+        cache.delete(lock_key)
 
 
 @shared_task(name="tick_handler")
@@ -261,6 +307,11 @@ def load_instrument_candles(ins_id: int, user_id: int, duration: int = 4):
         percentage.percentage = 100
         percentage.is_loading = True
         percentage.save()
+        # Enqueue the subscription request in Redis cache
+        redis_client = cache.client.get_client()
+        subscription = {"stock_token": sub_ins.stock_token}
+        subscription_queue = f"user:{user_id}:subscriptions"
+        redis_client.rpush(subscription_queue, json.dumps(subscription))
         logger.info(f"Completed loading candles for instrument ID {ins_id}.")
 
     except Exception as e:

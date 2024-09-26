@@ -1,13 +1,12 @@
-import React, { useState } from "react";
-import { Dropdown, Button, Modal, ToggleSwitch } from "flowbite-react";
-import {  HiAdjustments } from "react-icons/hi";
-import { toast } from "react-toastify";
-import { Indicator } from "../common-types";
+import { useState } from "react";
+import { Button, Dropdown, Modal, ToggleSwitch } from "flowbite-react";
+import { HiAdjustments } from "react-icons/hi";
 import { SeriesType } from "lightweight-charts";
+import { Indicator } from "../common-types";
 
 interface ChartControlsProps {
   timeframe: number;
-  chartType: string;
+  chartType: SeriesType;
   showVolume: boolean;
   autoRefresh: boolean;
   indicators: Indicator[];
@@ -18,7 +17,7 @@ interface ChartControlsProps {
   onToggleIndicator: (name: string) => void;
 }
 
-const ChartControls: React.FC<ChartControlsProps> = ({
+export default function ChartControls({
   timeframe,
   chartType,
   showVolume,
@@ -29,105 +28,75 @@ const ChartControls: React.FC<ChartControlsProps> = ({
   onShowVolumeChange,
   onAutoRefreshChange,
   onToggleIndicator,
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+}: ChartControlsProps) {
+  const [isCustomTfModalOpen, setIsCustomTfModalOpen] = useState(false);
   const [isIndicatorsModalOpen, setIsIndicatorsModalOpen] = useState(false);
   const [customTimeframeInput, setCustomTimeframeInput] = useState("");
 
-  const openCustomTimeframeModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeCustomTimeframeModal = () => {
-    setIsModalOpen(false);
-    setCustomTimeframeInput("");
-  };
-
   const handleCustomTimeframeSubmit = () => {
-    const parsedTimeFrame = parseInt(customTimeframeInput, 10);
-    if (!isNaN(parsedTimeFrame) && parsedTimeFrame > 0) {
-      onTfChange(parsedTimeFrame);
-      closeCustomTimeframeModal();
-    } else {
-      toast.error("Invalid input. Please enter a positive number.");
+    const parsedTimeframe = parseInt(customTimeframeInput, 10);
+    if (!isNaN(parsedTimeframe) && parsedTimeframe > 0) {
+      onTfChange(parsedTimeframe);
+      setIsCustomTfModalOpen(false);
+      setCustomTimeframeInput("");
     }
   };
 
-  const openIndicatorsModal = () => {
-    setIsIndicatorsModalOpen(true);
-  };
-
-  const closeIndicatorsModal = () => {
-    setIsIndicatorsModalOpen(false);
-  };
-
   return (
-    <div className="z-20 flex flex-wrap items-center justify-between p-4 mb-6 bg-white rounded-md shadow-md">
-      {/* Timeframe and Chart Type Section */}
-      <div className="flex items-center space-x-4">
-        <Dropdown label={`Timeframe: ${timeframe}m`} size="sm">
-          {[5, 10, 15, 30, 60, 240, 1440].map((tf) => (
-            <Dropdown.Item key={tf} onClick={() => onTfChange(tf)}>
-              {tf} minutes
-            </Dropdown.Item>
-          ))}
-          <Dropdown.Divider />
-          <Dropdown.Item onClick={openCustomTimeframeModal}>Custom...</Dropdown.Item>
-        </Dropdown>
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <Dropdown label={`Timeframe: ${timeframe}m`}>
+        {[5, 15, 30, 60, 240, 1440].map((tf) => (
+          <Dropdown.Item key={tf} onClick={() => onTfChange(tf)}>
+            {tf} minutes
+          </Dropdown.Item>
+        ))}
+        <Dropdown.Divider />
+        <Dropdown.Item onClick={() => setIsCustomTfModalOpen(true)}>Custom...</Dropdown.Item>
+      </Dropdown>
 
-        <Dropdown label={`Chart: ${chartType}`} size="sm">
-          {["Candlestick", "Line"].map((type) => (
-            <Dropdown.Item key={type} onClick={() => onChartTypeChange(type as SeriesType)}>
-              {type}
-            </Dropdown.Item>
-          ))}
-        </Dropdown>
-      </div>
+      <Dropdown label={`Chart: ${chartType}`}>
+        {["Candlestick", "Line"].map((type) => (
+          <Dropdown.Item key={type} onClick={() => onChartTypeChange(type as SeriesType)}>
+            {type}
+          </Dropdown.Item>
+        ))}
+      </Dropdown>
 
-      {/* Indicators Section */}
-      <div className="flex items-center space-x-4">
-        <Button size="sm" onClick={openIndicatorsModal}>
-          <HiAdjustments className="w-5 h-5 mr-2"/>
-          Indicators
-        </Button>
-      </div>
+      <Button onClick={() => setIsIndicatorsModalOpen(true)}>
+        <HiAdjustments className="w-5 h-5 mr-2" />
+        Indicators
+      </Button>
 
-      {/* Settings Section */}
-      <div className="flex items-center space-x-4">
-        <ToggleSwitch checked={showVolume} onChange={onShowVolumeChange} label="Show Volume" />
-        <ToggleSwitch checked={autoRefresh} onChange={onAutoRefreshChange} label="Auto-Refresh" />
-        
-      </div>
+      <ToggleSwitch checked={showVolume} onChange={onShowVolumeChange} label="Show Volume" />
+      <ToggleSwitch checked={autoRefresh} onChange={onAutoRefreshChange} label="Auto-Refresh" />
 
-      {/* Custom Timeframe Modal */}
-      <Modal show={isModalOpen} onClose={closeCustomTimeframeModal}>
-        <Modal.Header>Enter Custom Timeframe</Modal.Header>
+      <Modal show={isCustomTfModalOpen} onClose={() => setIsCustomTfModalOpen(false)}>
+        <Modal.Header>Custom Timeframe</Modal.Header>
         <Modal.Body>
-          <div className="space-y-4">
-            <label className="block">
-              <span className="text-gray-700">Timeframe (minutes):</span>
-              <input
-                type="number"
-                className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-                placeholder="e.g., 45"
-                value={customTimeframeInput}
-                onChange={(e) => setCustomTimeframeInput(e.target.value)}
-                min="1"
-              />
+          <div className="space-y-6">
+            <label htmlFor="custom-timeframe" className="block text-sm font-medium text-gray-700">
+              Enter custom timeframe (minutes):
             </label>
+            <input
+              type="number"
+              id="custom-timeframe"
+              value={customTimeframeInput}
+              onChange={(e) => setCustomTimeframeInput(e.target.value)}
+              className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              min="1"
+            />
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={handleCustomTimeframeSubmit}>Submit</Button>
-          <Button color="gray" onClick={closeCustomTimeframeModal}>
+          <Button onClick={handleCustomTimeframeSubmit}>Apply</Button>
+          <Button color="gray" onClick={() => setIsCustomTfModalOpen(false)}>
             Cancel
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Indicators Modal */}
-      <Modal show={isIndicatorsModalOpen} onClose={closeIndicatorsModal}>
-        <Modal.Header>Toggle Indicators</Modal.Header>
+      <Modal show={isIndicatorsModalOpen} onClose={() => setIsIndicatorsModalOpen(false)}>
+        <Modal.Header>Indicators</Modal.Header>
         <Modal.Body>
           <div className="space-y-4">
             {indicators.map((indicator) => (
@@ -139,13 +108,11 @@ const ChartControls: React.FC<ChartControlsProps> = ({
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button color="gray" onClick={closeIndicatorsModal}>
+          <Button color="gray" onClick={() => setIsIndicatorsModalOpen(false)}>
             Close
           </Button>
         </Modal.Footer>
       </Modal>
     </div>
   );
-};
-
-export default ChartControls;
+}

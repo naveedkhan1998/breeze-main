@@ -1,5 +1,3 @@
-# core/utils.py
-
 import threading
 import logging
 from breeze_connect import BreezeConnect
