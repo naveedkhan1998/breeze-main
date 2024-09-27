@@ -42,14 +42,14 @@ export default function ChartControls({
   };
 
   const timeframeOptions = [5, 15, 30, 60, 240, 1440];
-  const chartTypes: SeriesType[] = ["Candlestick", "Line"];
+  const chartTypes: SeriesType[] = ["Candlestick"];
 
   return (
-    <div className="flex flex-col p-4 space-y-6">
+    <div className="flex flex-col p-4 space-y-6 dark:text-white">
       {/* Timeframe Section */}
       <Card>
         <div className="flex items-center mb-4">
-          <HiClock className="mr-2 text-xl text-gray-700" />
+          <HiClock className="mr-2 text-xl text-gray-700 dark:text-white" />
           <h3 className="text-lg font-semibold">Timeframe</h3>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -67,7 +67,7 @@ export default function ChartControls({
       {/* Chart Type Section */}
       <Card>
         <div className="flex items-center mb-4">
-          <HiChartBar className="mr-2 text-xl text-gray-700" />
+          <HiChartBar className="mr-2 text-xl text-gray-700 dark:text-white" />
           <h3 className="text-lg font-semibold">Chart Type</h3>
         </div>
         <div className="flex space-x-2">
@@ -82,7 +82,7 @@ export default function ChartControls({
       {/* Indicators Section */}
       <Card>
         <div className="flex items-center mb-4">
-          <HiAdjustments className="mr-2 text-xl text-gray-700" />
+          <HiAdjustments className="mr-2 text-xl text-gray-700 dark:text-white" />
           <h3 className="text-lg font-semibold">Indicators</h3>
         </div>
         <div className="space-y-2">
@@ -113,7 +113,7 @@ export default function ChartControls({
       {/* Auto-Refresh Section */}
       <Card>
         <div className="flex items-center mb-4">
-          <HiRefresh className="mr-2 text-xl text-gray-700" />
+          <HiRefresh className="mr-2 text-xl text-gray-700 dark:text-white" />
           <h3 className="text-lg font-semibold">Auto-Refresh</h3>
         </div>
         <div className="flex items-center justify-between">

@@ -87,15 +87,26 @@ const GraphsPage: React.FC = () => {
 
   const seriesData = useMemo(() => {
     if (!data) return [];
-    return data.data.map(({ date, open, high, low, close, volume = 0 }: Candle) => ({
-      time: formatDate(date) as Time,
-      open,
-      high,
-      low,
-      close,
-      value: volume,
-    }));
-  }, [data]);
+    if (chartType == "Candlestick") {
+      return data.data.map(({ date, open, high, low, close, volume = 0 }: Candle) => ({
+        time: formatDate(date) as Time,
+        open,
+        high,
+        low,
+        close,
+        value: volume,
+      }));
+    } else {
+      return data.data.map(({ date, open, high, low, close, volume = 0 }: Candle) => ({
+        time: formatDate(date) as Time,
+        open,
+        high,
+        low,
+        close,
+        value: volume,
+      }));
+    }
+  }, [data, chartType]);
 
   const volumeData = useMemo(() => {
     if (!data) return [];
@@ -217,7 +228,7 @@ const GraphsPage: React.FC = () => {
 
   // Handle CSV download
   const handleDownload = () => {
-    const headers = "Date,Open,High,Low,Close,Volume";
+    const headers = "Date,Time,Open,High,Low,Close,Volume";
     const csvData = seriesData.map((row: any) => `${convertUnixToLocalTime(row.time)},${row.open},${row.high},${row.low},${row.close},${row.value}`);
     const csvContent = `data:text/csv;charset=utf-8,${headers}\n${csvData.join("\n")}`;
     const encodedUri = encodeURI(csvContent);
@@ -253,10 +264,10 @@ const GraphsPage: React.FC = () => {
   const isValidSize = size.width < 300 && size.height < 200;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col h-screen transition-all ease-in-out delay-100 bg-gray-100 dark:bg-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white shadow-md dark:bg-gray-800">
-        <div className="flex items-center justify-between max-w-full p-4 mx-auto">
+      <header className="sticky z-10 w-full m-auto bg-white shadow-md top-16 dark:bg-gray-800">
+        <div className="flex items-center justify-between max-w-full p-2 mx-auto">
           <Button color="light" onClick={() => navigate(-1)} className="md:hidden" aria-label="Go Back">
             <HiArrowLeft className="w-5 h-5" />
           </Button>
@@ -301,11 +312,11 @@ const GraphsPage: React.FC = () => {
           </ResponsiveSidebar>
 
           {/* Charts Section */}
-          <div className="flex flex-col flex-grow p-2 overflow-hidden">
+          <div className="flex flex-col flex-grow overflow-hidden">
             {/* Ensure valid sizes before rendering charts */}
             {isValidSize ? (
               <>
-                <Card className="flex-grow mb-2">
+                <Card className="flex-grow mb-1 ">
                   <MainChart
                     seriesData={seriesData}
                     chartType={chartType}
@@ -314,30 +325,30 @@ const GraphsPage: React.FC = () => {
                     obj={obj}
                     timeframe={timeframe}
                     width={size.width}
-                    height={isFullscreen ? size.height * 0.7 : size.height * 0.6}
+                    height={isFullscreen ? size.height * 0.8 : size.height * 0.7}
                     setTimeScale={(timeScale: any) => (mainChartRef.current = timeScale)}
                   />
                 </Card>
 
-                <div className="flex flex-grow space-x-2">
+                <div className="flex flex-grow space-x-1 ">
                   {showVolume && (
                     <Card className="flex-1">
                       <VolumeChart
                         volumeData={volumeData}
                         mode={mode}
                         width={size.width / 2}
-                        height={isFullscreen ? size.height * 0.25 : size.height * 0.3}
+                        height={isFullscreen ? size.height * 0.2 : size.height * 0.2}
                         setTimeScale={(timeScale: any) => (volumeChartRef.current = timeScale)}
                       />
                     </Card>
                   )}
 
-                  <Card className="flex-1">
+                  <Card className="flex-1 ">
                     <IndicatorChart
                       indicators={indicators}
                       mode={mode}
                       width={size.width / 2}
-                      height={isFullscreen ? size.height * 0.25 : size.height * 0.3}
+                      height={isFullscreen ? size.height * 0.2 : size.height * 0.2}
                       setTimeScale={(timeScale: any) => (indicatorChartRef.current = timeScale)}
                     />
                   </Card>

@@ -83,7 +83,7 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         prevChartTypeRef.current = chartType;
 
         const legendContainer = document.createElement("div");
-        legendContainer.className = `absolute top-4 left-4 ${mode ? "bg-gray-800 text-white" : "bg-white text-gray-800"} p-2 rounded shadow-md text-sm z-[10]`;
+        legendContainer.className = `absolute top-4 left-4 p-2 rounded bg-white text-slate-800 dark:bg-slate-800 dark:text-white shadow-md text-sm z-[10]`;
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
@@ -106,7 +106,8 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                 const { open, high, low, close } = data;
                 ohlcValues = `<strong>O:</strong> ${open.toFixed(2)} | <strong>H:</strong> ${high.toFixed(2)} | <strong>L:</strong> ${low.toFixed(2)} | <strong>C:</strong> ${close.toFixed(2)}`;
               } else {
-                ohlcValues = `<strong>Price:</strong> ${data.value.toFixed(2)}`;
+                const { close } = data;
+                ohlcValues = `<strong>Price:</strong> ${close.toFixed(2)}`;
               }
             }
           }
@@ -244,7 +245,7 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
     renderMainChart();
   }, [renderMainChart]);
 
-  return <div ref={mainChartContainerRef} className="relative w-full overflow-hidden rounded-lg shadow-lg"></div>;
+  return <div ref={mainChartContainerRef} className="relative w-full overflow-hidden rounded-lg shadow-lg "></div>;
 };
 
 export default MainChart;
