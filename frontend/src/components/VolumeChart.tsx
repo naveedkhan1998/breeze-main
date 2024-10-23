@@ -1,81 +1,91 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import { createChart, IChartApi, ISeriesApi, Time, HistogramData, ITimeScaleApi } from "lightweight-charts";
 
 interface VolumeChartProps {
-  volumeData: any[];
+  volumeData: HistogramData<Time>[];
   mode: boolean;
-  width: number;
-  height: number;
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
 }
 
-const VolumeChart: React.FC<VolumeChartProps> = ({ volumeData, mode,width,height, setTimeScale }) => {
+const VolumeChart: React.FC<VolumeChartProps> = ({ volumeData, mode, setTimeScale }) => {
   const volumeChartContainerRef = useRef<HTMLDivElement | null>(null);
   const volumeChartRef = useRef<IChartApi | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
 
-  const renderVolumeChart = useCallback(() => {
-    if (!volumeChartContainerRef.current || !volumeData.length) return;
+  // Create chart on mount
+  useEffect(() => {
+    if (!volumeChartContainerRef.current) return;
 
-    if (!volumeChartRef.current) {
-      volumeChartContainerRef.current.innerHTML = "";
-
-      const chartHeight = window.innerHeight * 0.2;
-      const chartOptions = {
-        width: volumeChartContainerRef.current.clientWidth,
-        height: chartHeight,
-        layout: {
-          textColor: mode ? "#E5E7EB" : "#1F2937",
-          background: { color: mode ? "#111827" : "#FFFFFF" },
-          fontSize: 12,
+    const chart = createChart(volumeChartContainerRef.current, {
+      layout: {
+        textColor: mode ? "#E5E7EB" : "#1F2937",
+        background: { color: mode ? "#111827" : "#FFFFFF" },
+        fontSize: 12,
+      },
+      timeScale: {
+        visible: true,
+        timeVisible: true,
+        secondsVisible: false,
+      },
+      rightPriceScale: {
+        borderColor: mode ? "#4B5563" : "#D1D5DB",
+      },
+      grid: {
+        vertLines: {
+          visible: false,
         },
-        timeScale: {
+        horzLines: {
+          color: mode ? "#374151" : "#E5E7EB",
+        },
+      },
+      crosshair: {
+        mode: 1,
+        vertLine: {
+          width: 1,
+          color: mode ? "#6B7280" : "#9CA3AF",
+          style: 1,
+        },
+        horzLine: {
           visible: true,
-          timeVisible: true,
-          secondsVisible: false,
+          labelVisible: true,
         },
-        rightPriceScale: {
-          borderColor: mode ? "#4B5563" : "#D1D5DB",
-        },
-        grid: {
-          vertLines: {
-            visible: false,
-          },
-          horzLines: {
-            color: mode ? "#374151" : "#E5E7EB",
-          },
-        },
-        crosshair: {
-          mode: 1,
-          vertLine: {
-            width: 1,
-            color: mode ? "#6B7280" : "#9CA3AF",
-            style: 1,
-          },
-          horzLine: {
-            visible: true,
-            labelVisible: true,
-          },
-        },
-      };
-      //@ts-expect-error check later
-      const chart = createChart(volumeChartContainerRef.current, chartOptions);
+      },
+    });
 
-      const volumeSeries = chart.addHistogramSeries({
-        priceFormat: {
-          type: "volume",
-        },
-        priceScaleId: "right",
-        color: mode ? "#60A5FA" : "#3B82F6",
-      });
+    const volumeSeries = chart.addHistogramSeries({
+      priceFormat: {
+        type: "volume",
+      },
+      priceScaleId: "right",
+      color: mode ? "#60A5FA" : "#3B82F6",
+    });
 
-      volumeSeries.setData(volumeData as HistogramData<Time>[]);
-      volumeSeriesRef.current = volumeSeries;
-      volumeChartRef.current = chart;
-      setTimeScale(chart.timeScale());
-    } else {
-      // Update chart colors based on mode
+    volumeSeries.setData(volumeData);
+    volumeSeriesRef.current = volumeSeries;
+    volumeChartRef.current = chart;
+    setTimeScale(chart.timeScale());
+
+    // Handle Resize
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (volumeChartContainerRef.current && volumeChartRef.current) {
+        const { width, height } = entries[0].contentRect;
+        volumeChartRef.current.applyOptions({ width, height });
+      }
+    });
+
+    resizeObserver.observe(volumeChartContainerRef.current);
+
+    // Clean up on unmount
+    return () => {
+      resizeObserver.disconnect();
+      chart.remove();
+      volumeChartRef.current = null;
+    };
+  }, [mode, setTimeScale, volumeData]);
+
+  // Update chart options when mode changes
+  useEffect(() => {
+    if (volumeChartRef.current) {
       volumeChartRef.current.applyOptions({
         layout: {
           textColor: mode ? "#E5E7EB" : "#1F2937",
@@ -95,27 +105,23 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ volumeData, mode,width,height
           },
         },
       });
-
-      if (volumeSeriesRef.current) {
-        volumeSeriesRef.current.applyOptions({
-          color: mode ? "#60A5FA" : "#3B82F6",
-        });
-        volumeSeriesRef.current.setData(volumeData as HistogramData<Time>[]);
-      }
     }
-  }, [volumeData, mode, setTimeScale]);
 
-  // Update chart size when width or height changes
+    if (volumeSeriesRef.current) {
+      volumeSeriesRef.current.applyOptions({
+        color: mode ? "#60A5FA" : "#3B82F6",
+      });
+    }
+  }, [mode]);
+
+  // Update data when volumeData changes
   useEffect(() => {
-    volumeChartRef.current?.applyOptions({ width, height });
-    volumeChartRef.current?.timeScale().fitContent();
-  }, [width, height]);
+    if (volumeSeriesRef.current) {
+      volumeSeriesRef.current.setData(volumeData);
+    }
+  }, [volumeData]);
 
-  useEffect(() => {
-    renderVolumeChart();
-  }, [renderVolumeChart]);
-
-  return <div ref={volumeChartContainerRef} className="relative w-full overflow-hidden rounded-lg shadow-lg"></div>;
+  return <div ref={volumeChartContainerRef} className="relative w-full h-full overflow-hidden rounded-lg shadow-lg"></div>;
 };
 
 export default VolumeChart;

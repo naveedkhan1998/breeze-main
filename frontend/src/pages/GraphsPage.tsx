@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Card, Button, Tooltip } from "flowbite-react";
+import { Button, Tooltip } from "flowbite-react";
 import { useGetCandlesQuery } from "../services/instrumentService";
 import { formatDate, calculateMA, calculateBollingerBands, calculateRSI, calculateMACD } from "../common-functions";
 import { Candle, Instrument } from "../common-types";
@@ -18,25 +18,6 @@ import ResponsiveSidebar from "../components/ResponsiveSidebar";
 
 interface LocationState {
   obj: Instrument;
-}
-
-// Custom hook to get window size
-function useWindowSize() {
-  const [windowSize, setWindowSize] = useState<{ width: number; height: number }>({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-
-  useEffect(() => {
-    function handleResize() {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    }
-    window.addEventListener("resize", handleResize);
-    // Cleanup
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return windowSize;
 }
 
 const GraphsPage: React.FC = () => {
@@ -67,9 +48,6 @@ const GraphsPage: React.FC = () => {
 
   // State for fullscreen mode
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-
-  // Use custom hook to get window size
-  const windowSize = useWindowSize();
 
   // Handle fullscreen toggle
   const chartSectionRef = useRef<HTMLDivElement>(null);
@@ -153,7 +131,6 @@ const GraphsPage: React.FC = () => {
       });
       setIndicators(updatedIndicators);
     }
-    // We include indicators in dependency array to update when their active state changes
   }, [seriesData]);
 
   // Handle auto-refresh
@@ -269,7 +246,7 @@ const GraphsPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen transition-all ease-in-out delay-100 bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
       <header className="sticky z-10 w-full m-auto bg-white shadow-md top-16 dark:bg-gray-800">
         <div className="flex items-center justify-between max-w-full p-2 mx-auto">
@@ -317,8 +294,8 @@ const GraphsPage: React.FC = () => {
           </ResponsiveSidebar>
 
           {/* Charts Section */}
-          <div className="flex flex-col flex-grow overflow-auto">
-            <Card className="flex-grow">
+          <div className="flex flex-col flex-grow overflow-hidden">
+            <div className="flex-grow" style={{ minHeight: 0 }}>
               <MainChart
                 seriesData={seriesData}
                 chartType={chartType}
@@ -326,34 +303,20 @@ const GraphsPage: React.FC = () => {
                 mode={mode}
                 obj={obj}
                 timeframe={timeframe}
-                width={isFullscreen ? windowSize.width * 0.95 : windowSize.width * 0.8}
-                height={windowSize.height * 0.75} // Adjust height as needed
                 setTimeScale={(timeScale: any) => (mainChartRef.current = timeScale)}
               />
-            </Card>
+            </div>
 
-            <div className="flex flex-grow space-x-1">
+            <div className="flex flex-grow" style={{ minHeight: 0 }}>
               {showVolume && (
-                <Card className="flex-1">
-                  <VolumeChart
-                    volumeData={volumeData}
-                    mode={mode}
-                    width={isFullscreen ? windowSize.width * 0.475 : windowSize.width * 0.4}
-                    height={windowSize.height * 0.25} // Adjust height as needed
-                    setTimeScale={(timeScale: any) => (volumeChartRef.current = timeScale)}
-                  />
-                </Card>
+                <div className="flex-1" style={{ minWidth: 0 }}>
+                  <VolumeChart volumeData={volumeData} mode={mode} setTimeScale={(timeScale: any) => (volumeChartRef.current = timeScale)} />
+                </div>
               )}
 
-              <Card className="flex-1">
-                <IndicatorChart
-                  indicators={indicators}
-                  mode={mode}
-                  width={isFullscreen ? windowSize.width * 0.475 : windowSize.width * 0.4}
-                  height={windowSize.height * 0.25} // Adjust height as needed
-                  setTimeScale={(timeScale: any) => (indicatorChartRef.current = timeScale)}
-                />
-              </Card>
+              <div className="flex-1" style={{ minWidth: 0 }}>
+                <IndicatorChart indicators={indicators} mode={mode} setTimeScale={(timeScale: any) => (indicatorChartRef.current = timeScale)} />
+              </div>
             </div>
           </div>
         </div>

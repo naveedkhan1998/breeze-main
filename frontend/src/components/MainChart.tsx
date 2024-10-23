@@ -26,15 +26,13 @@ interface MainChartProps {
   seriesData: BarData[] | LineData[];
   chartType: "Candlestick" | "Line";
   indicators: Indicator[];
-  width: number;
-  height: number;
   mode: boolean;
   obj: Instrument;
   timeframe: number;
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
 }
 
-const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators, width, height, mode, obj, timeframe, setTimeScale }) => {
+const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators, mode, obj, timeframe, setTimeScale }) => {
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick" | "Line"> | null>(null);
@@ -45,10 +43,8 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
     if (mainChartContainerRef.current && seriesData.length) {
       if (!mainChartRef.current) {
         mainChartContainerRef.current.innerHTML = "";
-        const chartHeight = window.innerHeight * 0.5;
+
         const chart = createChart(mainChartContainerRef.current, {
-          width: mainChartContainerRef.current.clientWidth,
-          height: chartHeight,
           layout: {
             textColor: mode ? "#E5E7EB" : "#1F2937",
             background: { color: mode ? "#111827" : "#FFFFFF" },
@@ -137,6 +133,23 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
 
         mainChartRef.current = chart;
         setTimeScale(chart.timeScale());
+
+        // Handle Resize
+        const resizeObserver = new ResizeObserver((entries) => {
+          if (mainChartContainerRef.current && mainChartRef.current) {
+            const { width, height } = entries[0].contentRect;
+            mainChartRef.current.applyOptions({ width, height });
+          }
+        });
+
+        resizeObserver.observe(mainChartContainerRef.current);
+
+        // Clean up on unmount
+        return () => {
+          resizeObserver.disconnect();
+          chart.remove();
+          mainChartRef.current = null;
+        };
       } else {
         if (prevChartTypeRef.current !== chartType) {
           if (seriesRef.current && mainChartRef.current) {
@@ -145,14 +158,14 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
 
           const mainSeries =
             chartType === "Candlestick"
-              ? mainChartRef.current!.addCandlestickSeries({
+              ? mainChartRef.current.addCandlestickSeries({
                   upColor: mode ? "#34D399" : "#10B981",
                   downColor: mode ? "#F87171" : "#EF4444",
                   borderVisible: false,
                   wickUpColor: mode ? "#34D399" : "#10B981",
                   wickDownColor: mode ? "#F87171" : "#EF4444",
                 })
-              : mainChartRef.current!.addLineSeries({
+              : mainChartRef.current.addLineSeries({
                   color: mode ? "#60A5FA" : "#3B82F6",
                   lineWidth: 2,
                 });
@@ -269,19 +282,11 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
     }
   }, [seriesData, mode, obj?.company_name, obj?.exchange_code, timeframe, chartType, indicators, setTimeScale]);
 
-  // Update chart size when width or height changes
-  useEffect(() => {
-    if (mainChartRef.current) {
-      mainChartRef.current.applyOptions({ width, height });
-      mainChartRef.current.timeScale().fitContent();
-    }
-  }, [width, height]);
-
   useEffect(() => {
     renderMainChart();
   }, [renderMainChart]);
 
-  return <div ref={mainChartContainerRef} className="relative w-full overflow-hidden rounded-lg shadow-lg "></div>;
+  return <div ref={mainChartContainerRef} className="relative w-full h-full overflow-hidden rounded-lg shadow-lg"></div>;
 };
 
 export default MainChart;
