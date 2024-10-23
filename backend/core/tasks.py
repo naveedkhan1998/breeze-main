@@ -264,7 +264,7 @@ def load_instrument_candles(ins_id: int, user_id: int, duration: int = 4):
 
         expiry = None
         if sub_ins.expiry:
-            expiry = sub_ins.expiry.replace(hour=7, minute=0, second=0, microsecond=0)
+            expiry = sub_ins.expiry
 
         data = fetch_historical_data(
             sess, start, end, sub_ins.short_name, expiry, sub_ins.stock_token, sub_ins

@@ -57,7 +57,7 @@ const Navbar: React.FC = () => {
       </FlowbiteNavbar.Brand>
       <div className="flex items-center space-x-3 md:order-2">
         <DarkThemeToggle onClickCapture={handleThemeToggle} className="focus:ring-2 focus:ring-blue-300" />
-        <motion.div >
+        <motion.div>
           <Dropdown
             arrowIcon={false}
             inline
@@ -82,7 +82,7 @@ const Navbar: React.FC = () => {
             <Dropdown.Item icon={FaCog}>Manage notifications</Dropdown.Item>
           </Dropdown>
         </motion.div>
-        <motion.div >
+        <motion.div>
           <Dropdown
             arrowIcon={false}
             inline
@@ -100,8 +100,12 @@ const Navbar: React.FC = () => {
               <span className="block text-sm font-medium">Naveed Khan</span>
               <span className="block text-sm font-light truncate">admin@gmail.com</span>
             </Dropdown.Header>
-            <Dropdown.Item icon={FaHome}>Dashboard</Dropdown.Item>
-            <Dropdown.Item icon={FaUserCircle}>Profile</Dropdown.Item>
+            <Dropdown.Item icon={FaHome}>
+              <Link to={"/dashboard"}>Dashboard</Link>
+            </Dropdown.Item>
+            <Dropdown.Item icon={FaUserCircle}>
+              <Link to={"/profile"}>Profile</Link>
+            </Dropdown.Item>
             <Dropdown.Item icon={FaChartLine}>Analytics</Dropdown.Item>
             <Dropdown.Divider />
             <Dropdown.Item icon={FaSignOutAlt} onClick={signOut} className="text-red-600 hover:bg-red-100 dark:hover:bg-red-900">

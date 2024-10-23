@@ -62,8 +62,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "name",
             "avatar",
             "is_admin",
-            "is_teacher",
-            "is_in_session",
         ]
 
 

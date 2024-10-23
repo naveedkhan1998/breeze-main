@@ -19,6 +19,8 @@ import ContactPage from "./pages/ContactPage";
 import LoginRegPage from "./pages/LoginRegPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import AnnouncementBanner from "./components/AnnouncementBanner";
+import ProfilePage from "./pages/ProfilePage";
+import DashBoardPage from "./pages/DashBoardPage";
 
 interface PrivateRouteProps {
   element: React.ReactElement;
@@ -65,6 +67,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<PrivateRoute element={<HomePage />} />} />
           <Route path="/about" element={<PrivateRoute element={<AboutPage />} />} />
+          <Route path="/profile" element={<PrivateRoute element={<ProfilePage />} />} />
+          <Route path="/dashboard" element={<PrivateRoute element={<DashBoardPage />} />} />
           <Route path="/instruments" element={<PrivateRoute element={<InstrumentsPage />} />} />
           <Route path="/graphs/:id" element={<PrivateRoute element={<GraphsPage />} />} />
           <Route path="/accounts" element={<PrivateRoute element={<AccountsPage />} />} />
