@@ -4,21 +4,39 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Card, Button, Tooltip } from "flowbite-react";
 import { useGetCandlesQuery } from "../services/instrumentService";
 import { formatDate, calculateMA, calculateBollingerBands, calculateRSI, calculateMACD } from "../common-functions";
-import { Candle, Indicator, Instrument } from "../common-types";
+import { Candle, Instrument } from "../common-types";
 import { useAppSelector } from "../app/hooks";
 import { getMode } from "../features/darkModeSlice";
 import { HiArrowLeft, HiInformationCircle, HiXMark } from "react-icons/hi2";
 import { HiArrowsExpand, HiDownload, HiRefresh } from "react-icons/hi";
-import { SeriesType, Time } from "lightweight-charts";
+import { SeriesOptionsMap, Time } from "lightweight-charts";
 import ChartControls from "../components/ChartControls";
 import MainChart from "../components/MainChart";
 import VolumeChart from "../components/VolumeChart";
 import IndicatorChart from "../components/IndicatorChart";
 import ResponsiveSidebar from "../components/ResponsiveSidebar";
-import useResizeObserver from "../hooks/useResizeObserver";
 
 interface LocationState {
   obj: Instrument;
+}
+
+// Custom hook to get window size
+function useWindowSize() {
+  const [windowSize, setWindowSize] = useState<{ width: number; height: number }>({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+    window.addEventListener("resize", handleResize);
+    // Cleanup
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize;
 }
 
 const GraphsPage: React.FC = () => {
@@ -27,10 +45,10 @@ const GraphsPage: React.FC = () => {
   const mode = useAppSelector(getMode);
   const { obj } = (location.state as LocationState) || {};
   const [timeframe, setTimeFrame] = useState<number>(15);
-  const [chartType, setChartType] = useState<SeriesType>("Candlestick");
+  const [chartType, setChartType] = useState<"Candlestick" | "Line">("Candlestick");
   const [showVolume, setShowVolume] = useState<boolean>(true);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
-  const [indicators, setIndicators] = useState<Indicator[]>([
+  const [indicators, setIndicators] = useState<any[]>([
     { name: "MA", active: false, data: [] },
     { name: "Bollinger Bands", active: false, data: [] },
     { name: "RSI", active: false, data: [] },
@@ -47,14 +65,14 @@ const GraphsPage: React.FC = () => {
   const volumeChartRef = useRef<any>(null);
   const indicatorChartRef = useRef<any>(null);
 
-  // Ref for the chart section
-  const chartSectionRef = useRef<HTMLDivElement>(null);
-  const size = useResizeObserver(chartSectionRef);
-
   // State for fullscreen mode
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
+  // Use custom hook to get window size
+  const windowSize = useWindowSize();
+
   // Handle fullscreen toggle
+  const chartSectionRef = useRef<HTMLDivElement>(null);
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       chartSectionRef.current
@@ -83,30 +101,19 @@ const GraphsPage: React.FC = () => {
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
-  }, []);
+  }, [isFullscreen]);
 
   const seriesData = useMemo(() => {
     if (!data) return [];
-    if (chartType == "Candlestick") {
-      return data.data.map(({ date, open, high, low, close, volume = 0 }: Candle) => ({
-        time: formatDate(date) as Time,
-        open,
-        high,
-        low,
-        close,
-        value: volume,
-      }));
-    } else {
-      return data.data.map(({ date, open, high, low, close, volume = 0 }: Candle) => ({
-        time: formatDate(date) as Time,
-        open,
-        high,
-        low,
-        close,
-        value: volume,
-      }));
-    }
-  }, [data, chartType]);
+    return data.data.map(({ date, open, high, low, close, volume = 0 }: Candle) => ({
+      time: formatDate(date) as Time,
+      open,
+      high,
+      low,
+      close,
+      value: volume,
+    }));
+  }, [data]);
 
   const volumeData = useMemo(() => {
     if (!data) return [];
@@ -146,7 +153,8 @@ const GraphsPage: React.FC = () => {
       });
       setIndicators(updatedIndicators);
     }
-  }, [seriesData, indicators]);
+    // We include indicators in dependency array to update when their active state changes
+  }, [seriesData]);
 
   // Handle auto-refresh
   useEffect(() => {
@@ -260,9 +268,6 @@ const GraphsPage: React.FC = () => {
     return <div className="flex items-center justify-center h-screen text-gray-700 dark:text-gray-300">No instrument data available.</div>;
   }
 
-  // Ensure that the chart section has minimum dimensions
-  const isValidSize = size.width < 300 && size.height < 200;
-
   return (
     <div className="flex flex-col h-screen transition-all ease-in-out delay-100 bg-gray-100 dark:bg-gray-900">
       {/* Header */}
@@ -304,7 +309,7 @@ const GraphsPage: React.FC = () => {
               autoRefresh={autoRefresh}
               indicators={indicators}
               onTfChange={handleTfChange}
-              onChartTypeChange={setChartType}
+              onChartTypeChange={(type: keyof SeriesOptionsMap) => setChartType(type as "Candlestick" | "Line")}
               onShowVolumeChange={setShowVolume}
               onAutoRefreshChange={setAutoRefresh}
               onToggleIndicator={toggleIndicator}
@@ -312,51 +317,44 @@ const GraphsPage: React.FC = () => {
           </ResponsiveSidebar>
 
           {/* Charts Section */}
-          <div className="flex flex-col flex-grow overflow-hidden">
-            {/* Ensure valid sizes before rendering charts */}
-            {isValidSize ? (
-              <>
-                <Card className="flex-grow mb-1 ">
-                  <MainChart
-                    seriesData={seriesData}
-                    chartType={chartType}
-                    indicators={indicators}
+          <div className="flex flex-col flex-grow overflow-auto">
+            <Card className="flex-grow">
+              <MainChart
+                seriesData={seriesData}
+                chartType={chartType}
+                indicators={indicators}
+                mode={mode}
+                obj={obj}
+                timeframe={timeframe}
+                width={isFullscreen ? windowSize.width * 0.95 : windowSize.width * 0.8}
+                height={windowSize.height * 0.75} // Adjust height as needed
+                setTimeScale={(timeScale: any) => (mainChartRef.current = timeScale)}
+              />
+            </Card>
+
+            <div className="flex flex-grow space-x-1">
+              {showVolume && (
+                <Card className="flex-1">
+                  <VolumeChart
+                    volumeData={volumeData}
                     mode={mode}
-                    obj={obj}
-                    timeframe={timeframe}
-                    width={size.width}
-                    height={isFullscreen ? size.height * 0.8 : size.height * 0.7}
-                    setTimeScale={(timeScale: any) => (mainChartRef.current = timeScale)}
+                    width={isFullscreen ? windowSize.width * 0.475 : windowSize.width * 0.4}
+                    height={windowSize.height * 0.25} // Adjust height as needed
+                    setTimeScale={(timeScale: any) => (volumeChartRef.current = timeScale)}
                   />
                 </Card>
+              )}
 
-                <div className="flex flex-grow space-x-1 ">
-                  {showVolume && (
-                    <Card className="flex-1">
-                      <VolumeChart
-                        volumeData={volumeData}
-                        mode={mode}
-                        width={size.width / 2}
-                        height={isFullscreen ? size.height * 0.2 : size.height * 0.2}
-                        setTimeScale={(timeScale: any) => (volumeChartRef.current = timeScale)}
-                      />
-                    </Card>
-                  )}
-
-                  <Card className="flex-1 ">
-                    <IndicatorChart
-                      indicators={indicators}
-                      mode={mode}
-                      width={size.width / 2}
-                      height={isFullscreen ? size.height * 0.2 : size.height * 0.2}
-                      setTimeScale={(timeScale: any) => (indicatorChartRef.current = timeScale)}
-                    />
-                  </Card>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center justify-center w-full h-full text-gray-700 dark:text-gray-300">Resizing...</div>
-            )}
+              <Card className="flex-1">
+                <IndicatorChart
+                  indicators={indicators}
+                  mode={mode}
+                  width={isFullscreen ? windowSize.width * 0.475 : windowSize.width * 0.4}
+                  height={windowSize.height * 0.25} // Adjust height as needed
+                  setTimeScale={(timeScale: any) => (indicatorChartRef.current = timeScale)}
+                />
+              </Card>
+            </div>
           </div>
         </div>
       </main>

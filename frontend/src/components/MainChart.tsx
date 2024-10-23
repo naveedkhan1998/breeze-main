@@ -1,11 +1,30 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef, useCallback } from "react";
-import { createChart, IChartApi, SeriesType, ISeriesApi, ITimeScaleApi, Time } from "lightweight-charts";
-import { Indicator, Instrument } from "../common-types";
+import { createChart, IChartApi, SeriesType, ISeriesApi, ITimeScaleApi, Time, BarData, LineData, MouseEventParams } from "lightweight-charts";
+import { Instrument } from "../common-types";
+
+interface MAIndicator {
+  name: "MA";
+  active: boolean;
+  data: LineData[];
+}
+
+interface BollingerBandsDataItem {
+  time: Time;
+  upper: number;
+  lower: number;
+}
+
+interface BollingerBandsIndicator {
+  name: "Bollinger Bands";
+  active: boolean;
+  data: BollingerBandsDataItem[];
+}
+
+type Indicator = MAIndicator | BollingerBandsIndicator;
 
 interface MainChartProps {
-  seriesData: any[];
-  chartType: SeriesType;
+  seriesData: BarData[] | LineData[];
+  chartType: "Candlestick" | "Line";
   indicators: Indicator[];
   width: number;
   height: number;
@@ -18,18 +37,18 @@ interface MainChartProps {
 const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators, width, height, mode, obj, timeframe, setTimeScale }) => {
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);
-  const indicatorSeriesRef = useRef<{ [key: string]: ISeriesApi<any> }>({});
+  const seriesRef = useRef<ISeriesApi<"Candlestick" | "Line"> | null>(null);
+  const indicatorSeriesRef = useRef<{ [key: string]: ISeriesApi<"Line"> }>({});
   const prevChartTypeRef = useRef<SeriesType>(chartType);
 
   const renderMainChart = useCallback(() => {
     if (mainChartContainerRef.current && seriesData.length) {
       if (!mainChartRef.current) {
         mainChartContainerRef.current.innerHTML = "";
-        const height = window.innerHeight * 0.5;
+        const chartHeight = window.innerHeight * 0.5;
         const chart = createChart(mainChartContainerRef.current, {
           width: mainChartContainerRef.current.clientWidth,
-          height,
+          height: chartHeight,
           layout: {
             textColor: mode ? "#E5E7EB" : "#1F2937",
             background: { color: mode ? "#111827" : "#FFFFFF" },
@@ -97,17 +116,18 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         legendContainer.appendChild(legendRow);
         legendContainer.appendChild(ohlcRow);
 
-        chart.subscribeCrosshairMove((param) => {
+        chart.subscribeCrosshairMove((param: MouseEventParams<Time>) => {
           let ohlcValues = "";
-          if (param.time) {
-            const data = param.seriesData.get(mainSeries) as any;
+          if (param.time && seriesRef.current) {
+            const data = param.seriesData.get(seriesRef.current);
+
             if (data) {
-              if (chartType === "Candlestick") {
-                const { open, high, low, close } = data;
+              if (chartType === "Candlestick" && "open" in data) {
+                const { open, high, low, close } = data as BarData;
                 ohlcValues = `<strong>O:</strong> ${open.toFixed(2)} | <strong>H:</strong> ${high.toFixed(2)} | <strong>L:</strong> ${low.toFixed(2)} | <strong>C:</strong> ${close.toFixed(2)}`;
-              } else {
-                const { close } = data;
-                ohlcValues = `<strong>Price:</strong> ${close.toFixed(2)}`;
+              } else if (chartType === "Line" && "value" in data) {
+                const { value } = data as LineData;
+                ohlcValues = `<strong>Price:</strong> ${value.toFixed(2)}`;
               }
             }
           }
@@ -119,20 +139,20 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         setTimeScale(chart.timeScale());
       } else {
         if (prevChartTypeRef.current !== chartType) {
-          if (seriesRef.current) {
+          if (seriesRef.current && mainChartRef.current) {
             mainChartRef.current.removeSeries(seriesRef.current);
           }
 
           const mainSeries =
             chartType === "Candlestick"
-              ? mainChartRef.current.addCandlestickSeries({
+              ? mainChartRef.current!.addCandlestickSeries({
                   upColor: mode ? "#34D399" : "#10B981",
                   downColor: mode ? "#F87171" : "#EF4444",
                   borderVisible: false,
                   wickUpColor: mode ? "#34D399" : "#10B981",
                   wickDownColor: mode ? "#F87171" : "#EF4444",
                 })
-              : mainChartRef.current.addLineSeries({
+              : mainChartRef.current!.addLineSeries({
                   color: mode ? "#60A5FA" : "#3B82F6",
                   lineWidth: 2,
                 });
@@ -141,7 +161,7 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
           seriesRef.current = mainSeries;
           prevChartTypeRef.current = chartType;
         } else {
-          seriesRef.current!.setData(seriesData);
+          seriesRef.current?.setData(seriesData);
         }
 
         // Update chart colors based on mode
@@ -175,15 +195,17 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
           if (!indicatorSeriesRef.current[indicator.name]) {
             switch (indicator.name) {
               case "MA": {
+                const maIndicator = indicator as MAIndicator;
                 const maSeries = mainChartRef.current!.addLineSeries({
                   color: mode ? "#FBBF24" : "#F59E0B",
                   lineWidth: 2,
                 });
-                maSeries.setData(indicator.data);
+                maSeries.setData(maIndicator.data);
                 indicatorSeriesRef.current[indicator.name] = maSeries;
                 break;
               }
               case "Bollinger Bands": {
+                const bbIndicator = indicator as BollingerBandsIndicator;
                 const upperBandSeries = mainChartRef.current!.addLineSeries({
                   color: mode ? "#34D399" : "#10B981",
                   lineWidth: 1,
@@ -192,24 +214,38 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                   color: mode ? "#F87171" : "#EF4444",
                   lineWidth: 1,
                 });
-                upperBandSeries.setData(indicator.data.map((d: any) => ({ time: d.time, value: d.upper })));
-                lowerBandSeries.setData(indicator.data.map((d: any) => ({ time: d.time, value: d.lower })));
+                upperBandSeries.setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.upper })));
+                lowerBandSeries.setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.lower })));
                 indicatorSeriesRef.current[`${indicator.name}_upper`] = upperBandSeries;
                 indicatorSeriesRef.current[`${indicator.name}_lower`] = lowerBandSeries;
                 break;
               }
+              default:
+                break;
             }
           } else {
             switch (indicator.name) {
-              case "MA":
-                indicatorSeriesRef.current[indicator.name].applyOptions({ color: mode ? "#FBBF24" : "#F59E0B" });
-                indicatorSeriesRef.current[indicator.name].setData(indicator.data);
+              case "MA": {
+                const maIndicator = indicator as MAIndicator;
+                indicatorSeriesRef.current[indicator.name].applyOptions({
+                  color: mode ? "#FBBF24" : "#F59E0B",
+                });
+                indicatorSeriesRef.current[indicator.name].setData(maIndicator.data);
                 break;
-              case "Bollinger Bands":
-                indicatorSeriesRef.current[`${indicator.name}_upper`].applyOptions({ color: mode ? "#34D399" : "#10B981" });
-                indicatorSeriesRef.current[`${indicator.name}_lower`].applyOptions({ color: mode ? "#F87171" : "#EF4444" });
-                indicatorSeriesRef.current[`${indicator.name}_upper`].setData(indicator.data.map((d: any) => ({ time: d.time, value: d.upper })));
-                indicatorSeriesRef.current[`${indicator.name}_lower`].setData(indicator.data.map((d: any) => ({ time: d.time, value: d.lower })));
+              }
+              case "Bollinger Bands": {
+                const bbIndicator = indicator as BollingerBandsIndicator;
+                indicatorSeriesRef.current[`${indicator.name}_upper`].applyOptions({
+                  color: mode ? "#34D399" : "#10B981",
+                });
+                indicatorSeriesRef.current[`${indicator.name}_lower`].applyOptions({
+                  color: mode ? "#F87171" : "#EF4444",
+                });
+                indicatorSeriesRef.current[`${indicator.name}_upper`].setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.upper })));
+                indicatorSeriesRef.current[`${indicator.name}_lower`].setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.lower })));
+                break;
+              }
+              default:
                 break;
             }
           }
