@@ -24,7 +24,7 @@ from core.serializers import (
     AllInstrumentSerializer,
     BreezeAccountSerializer,
 )
-from core.breeze import BreezeSession
+from core.breeze import breeze_session_manager, BreezeSessionManager
 from core.tasks import resample_candles, load_instrument_candles, websocket_start
 import logging
 
@@ -85,10 +85,10 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
             user_id = self.request.user.id
 
             # Initialize BreezeSession (retrieves cached instance or creates a new one)
-            breeze_session = BreezeSession(user_id).breeze
+            session = breeze_session_manager.initialize_session(user_id)
 
             # Check session status by fetching funds
-            check_breeze_session = breeze_session.get_funds()
+            check_breeze_session = session.get_funds()
 
             # Check if ticks have been received in the last 10 seconds
             websocket_status = bool(cache.get("ticks_received", False))
@@ -286,7 +286,7 @@ class CandleViewSet(viewsets.ViewSet):
             return Response(
                 {"msg": "Missing instrument ID"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         instrument = get_object_or_404(SubscribedInstruments, id=instrument_id)
         qs = Candle.objects.filter(instrument=instrument).order_by("date")
         CandleSerializer(qs, many=True).data

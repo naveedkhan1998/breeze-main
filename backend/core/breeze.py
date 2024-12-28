@@ -1,4 +1,3 @@
-import threading
 import logging
 from breeze_connect import BreezeConnect
 from core.models import BreezeAccount
@@ -7,63 +6,77 @@ from django.shortcuts import get_object_or_404
 logger = logging.getLogger(__name__)
 
 
-class BreezeSession:
+class BreezeSessionManager:
     """
-    Singleton class to manage BreezeConnect sessions per user.
-    Ensures that each user has only one BreezeSession instance.
-    Reinitializes the session if the session_token changes.
+    Class to manage BreezeConnect sessions for multiple users.
+    Sessions are stored in a dictionary keyed by user ID.
     """
 
-    _instances = {}
-    _lock = threading.Lock()
+    def __init__(self):
+        """
+        Initializes the BreezeSessionManager instance.
+        """
+        self.sessions = {}
 
-    def __new__(cls, user_id):
+    def initialize_session(self, user_id):
         """
-        Controls the instantiation of the BreezeSession class.
-        Ensures a single instance per user_id.
-        """
-        with cls._lock:
-            if user_id in cls._instances:
-                instance = cls._instances[user_id]
-                acc = get_object_or_404(BreezeAccount, user__id=user_id)
-                if instance.acc.session_token != acc.session_token:
-                    # Session token has changed; recreate the instance
-                    logger.info(
-                        f"Session token changed for user {user_id}. Reinitializing BreezeSession."
-                    )
-                    instance = super(BreezeSession, cls).__new__(cls)
-                    cls._instances[user_id] = instance
-                    instance.__init__(user_id)
-                return cls._instances[user_id]
-            else:
-                instance = super(BreezeSession, cls).__new__(cls)
-                cls._instances[user_id] = instance
-                instance.__init__(user_id)
-                return instance
+        Initializes or retrieves a session for the specified user.
 
-    def __init__(self, user_id):
+        Args:
+            user_id (int): The ID of the user for whom the session is being initialized.
+
+        Returns:
+            BreezeConnect: The BreezeConnect session for the user.
         """
-        Initializes the BreezeSession instance.
-        Prevents re-initialization if already initialized.
-        """
-        if hasattr(self, "initialized") and self.initialized:
-            return  # Avoid re-initialization
-        self.initialized = True
-        self.user_id = user_id
-        self.acc = get_object_or_404(BreezeAccount, user__id=user_id)
-        self.breeze = BreezeConnect(api_key=self.acc.api_key)
+        if user_id in self.sessions:
+            logger.info(f"Reusing existing BreezeSession for user {user_id}.")
+            return self.sessions[user_id]
+
+        # Initialize a new session for the user
+        acc = get_object_or_404(BreezeAccount, user__id=user_id)
+        breeze = BreezeConnect(api_key=acc.api_key)
+
         try:
-            self.breeze.generate_session(
-                api_secret=self.acc.api_secret, session_token=self.acc.session_token
+            breeze.generate_session(
+                api_secret=acc.api_secret, session_token=acc.session_token
             )
+            self.sessions[user_id] = breeze
             logger.info(f"BreezeSession initialized for user {user_id}.")
+            return breeze
         except Exception as e:
             logger.error(f"Failed to initialize BreezeSession for user {user_id}: {e}")
             raise e
 
-    def get_data(self):
+    def get_session(self, user_id):
         """
-        Placeholder for data retrieval logic.
-        Implement your data fetching methods here.
+        Retrieves the session for a user, if it exists.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            BreezeConnect or None: The existing session, or None if not initialized.
         """
-        pass
+        return self.sessions.get(user_id)
+
+    def clear_session(self, user_id):
+        """
+        Clears the session for a specified user.
+
+        Args:
+            user_id (int): The ID of the user whose session is to be cleared.
+        """
+        if user_id in self.sessions:
+            del self.sessions[user_id]
+            logger.info(f"Session cleared for user {user_id}.")
+
+    def clear_all_sessions(self):
+        """
+        Clears all stored sessions.
+        """
+        self.sessions.clear()
+        logger.info("All sessions cleared.")
+
+
+# Instantiate a global BreezeSessionManager
+breeze_session_manager = BreezeSessionManager()

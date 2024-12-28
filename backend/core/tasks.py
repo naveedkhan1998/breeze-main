@@ -3,7 +3,7 @@ import time as PythonTime
 from pytz import timezone
 from celery import shared_task
 from core.helper import date_parser
-from core.breeze import BreezeSession
+from core.breeze import breeze_session_manager, BreezeConnect
 from celery.utils.log import get_task_logger
 from datetime import datetime, timedelta, time
 from account.models import User
@@ -41,8 +41,8 @@ def websocket_start(user_id: int):
             return
 
         # Initialize WebSocket session
-        sess = BreezeSession(user.pk)
-        sess.breeze.ws_connect()
+        sess = breeze_session_manager.initialize_session(user_id)
+        sess.ws_connect()
 
         # Subscribe to initial instruments
         sub_ins = SubscribedInstruments.objects.all()
@@ -241,7 +241,7 @@ def load_instrument_candles(ins_id: int, user_id: int, duration: int = 4):
         duration (int, optional): Number of weeks of historical data to fetch. Defaults to 4.
     """
     try:
-        sess = BreezeSession(user_id)
+        sess = breeze_session_manager.initialize_session(user_id)
         sub_ins = (
             SubscribedInstruments.objects.filter(id=ins_id)
             .select_related("percentage")
@@ -347,7 +347,7 @@ def load_candles(user_id: int):
 
 
 def fetch_historical_data(
-    session: BreezeSession,
+    breeze_session: BreezeConnect,
     start: datetime,
     end: datetime,
     short_name: str,
@@ -398,7 +398,7 @@ def fetch_historical_data(
                 strike_price = None
                 expiry_parsed = None
 
-            current_data = session.breeze.get_historical_data_v2(
+            current_data = breeze_session.get_historical_data_v2(
                 interval="1minute",
                 from_date=date_parser(current_start),
                 to_date=date_parser(current_end),
