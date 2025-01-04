@@ -1,11 +1,18 @@
 import { ChangeEvent, useEffect, useState, useCallback } from "react";
+import { RefreshCw, ExternalLink, AlertCircle, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useGetBreezeQuery, useUpdateBreezeMutation } from "../services/breezeServices";
 import { BreezeAccount } from "../common-types";
-import { Button, Card, Modal, Spinner, TextInput, Alert } from "flowbite-react";
-import { toast } from "react-toastify";
 import CreateBreezeForm from "../components/CreateBreeze";
-import { RefreshCw, ExternalLink } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import BreezeStatusCard from "@/components/BreezeStatusCard";
+import { Badge } from "@/components/ui/badge";
 
 const AccountsPage = () => {
   const { data, isSuccess, refetch, isLoading } = useGetBreezeQuery("");
@@ -33,7 +40,7 @@ const AccountsPage = () => {
         refetch();
         setOpenModal(false);
         setSessionToken("");
-      } catch (error) {
+      } catch {
         toast.error("Failed to update session token");
       }
     }
@@ -51,7 +58,10 @@ const AccountsPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Spinner size="xl" />
+        <div className="space-y-4 text-center">
+          <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading your account details...</p>
+        </div>
       </div>
     );
   }
@@ -61,84 +71,125 @@ const AccountsPage = () => {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-8 text-center">
-          <h1 className="mb-2 text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Breeze Account</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage your ICICI Direct Breeze account</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen p-4 md:p-8 bg-gradient-to-b from-background to-muted/50">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <header className="space-y-4 text-center">
+          <motion.h1 initial={{ y: -20 }} animate={{ y: 0 }} className="text-4xl font-bold md:text-5xl">
+            <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">Breeze Account</span>
+          </motion.h1>
+          <p className="text-lg text-muted-foreground">Manage your ICICI Direct Breeze account</p>
         </header>
 
-        <div className="flex flex-col items-center justify-between mb-6 space-y-4 sm:flex-row sm:space-y-0">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Last updated: {lastUpdatedHours !== null ? `${lastUpdatedHours.toFixed(1)} hours ago` : "N/A"}</p>
-        </div>
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+          <BreezeStatusCard />
+        </motion.div>
 
-        <AnimatePresence>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
-            <Card className="w-full overflow-hidden transition-shadow duration-300 hover:shadow-lg">
-              <div className="p-6">
-                <h2 className="mb-4 text-2xl font-semibold text-gray-800 dark:text-white">{data.data[0].name}</h2>
-                <div className="space-y-4 text-gray-600 dark:text-gray-400">
-                  <p>
-                    <span className="font-medium">Session Token:</span> {data.data[0].session_token ? "••••••" : "Not set"}
-                  </p>
-                  <p>
-                    <span className="font-medium">Status:</span>{" "}
-                    <span className={`font-semibold ${data.data[0].is_active ? "text-green-600" : "text-red-600"}`}>{data.data[0].is_active ? "Active" : "Inactive"}</span>
-                  </p>
+        <div className="grid gap-8 md:grid-cols-2">
+          <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Account Details</span>
+                  <Badge variant={data.data[0].is_active ? "success" : "destructive"}>{data.data[0].is_active ? "Active" : "Inactive"}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
+                    <span className="font-medium">Account Name</span>
+                    <span>{data.data[0].name}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
+                    <span className="font-medium">Session Token</span>
+                    <span>{data.data[0].session_token ? "••••••" : "Not set"}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
+                    <span className="font-medium">Last Updated</span>
+                    <span>{lastUpdatedHours !== null ? `${lastUpdatedHours.toFixed(1)} hours ago` : "N/A"}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col p-4 space-y-2 border-t border-gray-200 sm:flex-row sm:space-y-0 sm:space-x-2 dark:border-gray-700">
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-3">
                 <Button
+                  className="w-full"
                   onClick={() => {
                     setSelectedAccount(data.data[0]);
                     setOpenModal(true);
                   }}
-                  outline
-                  gradientDuoTone="purpleToBlue"
-                  className="flex-1"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Update Token
+                  Update Session Token
                 </Button>
-                <Button onClick={() => handleOpenLink(data.data[0].api_key)} outline gradientDuoTone="purpleToBlue" className="flex-1">
+                <Button variant="outline" className="w-full" onClick={() => handleOpenLink(data.data[0].api_key)}>
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  ICICI Breeze
+                  Open ICICI Breeze Portal
                 </Button>
-              </div>
+              </CardFooter>
             </Card>
           </motion.div>
-        </AnimatePresence>
+
+          <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="space-y-6">
+            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50">
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert className="bg-white/80 dark:bg-background/80">
+                  <AlertCircle className="w-4 h-4" />
+                  <AlertDescription className="ml-2">Remember to update your session token daily for uninterrupted trading.</AlertDescription>
+                </Alert>
+                {/* Add more quick actions or information cards here */}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
 
-      <Modal show={openModal} onClose={() => setOpenModal(false)}>
-        <Modal.Header>Update Session Token</Modal.Header>
-        <Modal.Body>
-          <div className="space-y-4 text-gray-600 dark:text-gray-400">
-            <Alert color="info">
-              <p className="font-medium">Follow these steps to update your session token:</p>
-              <ol className="ml-4 space-y-2 list-decimal">
-                <li>Click the button below to open the ICICI Breeze login page</li>
-                <li>Log in to your account</li>
-                <li>Copy the session token from the URL</li>
-                <li>Paste the token in the input field below</li>
-              </ol>
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Session Token</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <Alert variant="default" className="bg-blue-50 dark:bg-blue-950/50">
+              <AlertCircle className="w-4 h-4" />
+              <AlertTitle>Update Instructions</AlertTitle>
+              <AlertDescription>
+                <ol className="ml-4 space-y-2 list-decimal">
+                  <li>Click the button below to open the ICICI Breeze login page</li>
+                  <li>Log in to your account</li>
+                  <li>Copy the session token from the URL</li>
+                  <li>Paste the token in the input field below</li>
+                </ol>
+              </AlertDescription>
             </Alert>
-            <Button onClick={() => handleOpenLink(selectedAccount?.api_key || "")} outline gradientDuoTone="purpleToBlue" className="w-full">
+
+            <Button variant="outline" className="w-full" onClick={() => handleOpenLink(selectedAccount?.api_key || "")}>
               <ExternalLink className="w-4 h-4 mr-2" />
               Open ICICI BREEZE
             </Button>
-            <TextInput id="sessionToken" type="text" placeholder="Enter Session Token" value={sessionToken} onChange={handleChange} required />
+
+            <Input placeholder="Enter Session Token" value={sessionToken} onChange={handleChange} className="w-full" />
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={sendToken} disabled={isUpdating} gradientDuoTone="greenToBlue">
-            {isUpdating ? <Spinner size="sm" className="mr-2" /> : "Update Token"}
-          </Button>
-          <Button onClick={() => setOpenModal(false)} className="ml-2" color="gray">
-            Cancel
-          </Button>
-        </Modal.Footer>
-      </Modal>
+
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => setOpenModal(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button onClick={sendToken} disabled={isUpdating} className="w-full sm:w-auto">
+              {isUpdating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update Token"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
