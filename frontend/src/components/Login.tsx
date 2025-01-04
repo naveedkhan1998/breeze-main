@@ -1,5 +1,4 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
-import { Button, TextInput, Label, Spinner, Alert } from "flowbite-react";
 import { useLoginUserMutation } from "../services/userAuthService";
 import { useAppDispatch } from "../app/hooks";
 import { setCredentials } from "../features/authSlice";
@@ -7,7 +6,12 @@ import { storeToken } from "../services/LocalStorageService";
 import { toast } from "react-toastify";
 import { setToken } from "../services/auth";
 import { useNavigate } from "react-router-dom";
-import { HiMail, HiLockClosed, HiExclamationCircle } from "react-icons/hi";
+
+import { Mail, Lock, AlertCircle, Loader } from "lucide-react";
+import { Alert } from "./ui/alert";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 interface FormData {
   email: string;
@@ -48,7 +52,7 @@ const Login: React.FC = () => {
       dispatch(setCredentials({ access: token.access }));
       toast.success("Logged In Successfully");
       navigate("/");
-    } catch (error) {
+    } catch {
       setError("Login failed. Please check your credentials.");
       toast.error("Login failed. Please check your credentials.");
     }
@@ -57,20 +61,27 @@ const Login: React.FC = () => {
   return (
     <form className="flex flex-col w-full gap-4" onSubmit={handleSubmit}>
       {error && (
-        <Alert color="failure" icon={HiExclamationCircle}>
+        <Alert variant="destructive" className="flex items-center gap-2">
+          <AlertCircle className="w-5 h-5" />
           {error}
         </Alert>
       )}
-      <div>
-        <Label htmlFor="email" value="Email" className="block mb-2" />
-        <TextInput id="email" type="email" icon={HiMail} placeholder="name@company.com" value={formData.email} onChange={handleChange} required color={error ? "failure" : undefined} />
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="email">Email</Label>
+        <div className="relative">
+          <Input id="email" type="email" placeholder="name@company.com" value={formData.email} onChange={handleChange} required className={error ? "border-red-500" : ""} />
+          <Mail className="absolute text-gray-400 right-3 top-2" />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="password" value="Password" className="block mb-2" />
-        <TextInput id="password" type="password" icon={HiLockClosed} placeholder="••••••••" value={formData.password} onChange={handleChange} required color={error ? "failure" : undefined} />
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="password">Password</Label>
+        <div className="relative">
+          <Input id="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required className={error ? "border-red-500" : ""} />
+          <Lock className="absolute text-gray-400 right-3 top-2" />
+        </div>
       </div>
-      <Button type="submit" gradientDuoTone="cyanToBlue" className="mt-4" disabled={isLoading}>
-        {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
+      <Button type="submit" disabled={isLoading} className="w-full">
+        {isLoading && <Loader className="w-5 h-5 mr-2 animate-spin" />}
         {isLoading ? "Logging in..." : "Log in"}
       </Button>
       <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">

@@ -1,5 +1,4 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
-import { Button, Checkbox, Label, TextInput, Spinner, Alert } from "flowbite-react";
 import { useAppDispatch } from "../app/hooks";
 import { useRegisterUserMutation } from "../services/userAuthService";
 import { storeToken } from "../services/LocalStorageService";
@@ -7,7 +6,13 @@ import { setCredentials } from "../features/authSlice";
 import { toast } from "react-toastify";
 import { setToken } from "../services/auth";
 import { useNavigate } from "react-router-dom";
-import { HiUser, HiMail, HiLockClosed, HiExclamationCircle } from "react-icons/hi";
+import { Alert } from "./ui/alert";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+
+import { AlertCircle, Lock, Mail, User, Loader } from "lucide-react";
+import { Checkbox } from "./ui/checkbox";
 
 interface FormData {
   name: string;
@@ -36,12 +41,21 @@ const Registration: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: type === "checkbox" ? checked : value,
-    }));
+  const handleChange = (e: ChangeEvent<HTMLInputElement> | boolean, id?: string) => {
+    if (typeof e === "boolean" && id) {
+      // Handle checkbox
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: e,
+      }));
+    } else if (typeof e !== "boolean") {
+      // Handle regular input
+      const { id, value, type, checked } = e.target;
+      setFormData((prevData) => ({
+        ...prevData,
+        [id]: type === "checkbox" ? checked : value,
+      }));
+    }
     setError(null);
   };
 
@@ -62,7 +76,7 @@ const Registration: React.FC = () => {
       dispatch(setCredentials({ access: token.access }));
       toast.success("Registration successful");
       navigate("/");
-    } catch (error) {
+    } catch {
       setError("Registration failed. Please try again.");
       toast.error("Registration failed. Please try again.");
     }
@@ -71,28 +85,41 @@ const Registration: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
       {error && (
-        <Alert color="failure" icon={HiExclamationCircle}>
+        <Alert variant="destructive" className="flex items-center gap-2">
+          <AlertCircle className="w-5 h-5" />
           {error}
         </Alert>
       )}
-      <div>
-        <Label htmlFor="name" value="Full Name" className="block mb-2" />
-        <TextInput id="name" type="text" icon={HiUser} placeholder="John Doe" value={formData.name} onChange={handleChange} required color={error ? "failure" : undefined} />
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="name">Full Name</Label>
+        <div className="relative">
+          <Input id="name" type="text" placeholder="John Doe" value={formData.name} onChange={handleChange} required />
+          <User className="absolute text-gray-400 right-3 top-2" />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="email" value="Email" className="block mb-2" />
-        <TextInput id="email" type="email" icon={HiMail} placeholder="name@company.com" value={formData.email} onChange={handleChange} required color={error ? "failure" : undefined} />
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="email">Email</Label>
+        <div className="relative">
+          <Input id="email" type="email" placeholder="name@company.com" value={formData.email} onChange={handleChange} required />
+          <Mail className="absolute text-gray-400 right-3 top-2" />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="password" value="Password" className="block mb-2" />
-        <TextInput id="password" type="password" icon={HiLockClosed} placeholder="••••••••" value={formData.password} onChange={handleChange} required color={error ? "failure" : undefined} />
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="password">Password</Label>
+        <div className="relative">
+          <Input id="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required />
+          <Lock className="absolute text-gray-400 right-3 top-2" />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="password2" value="Confirm Password" className="block mb-2" />
-        <TextInput id="password2" type="password" icon={HiLockClosed} placeholder="••••••••" value={formData.password2} onChange={handleChange} required color={error ? "failure" : undefined} />
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="password2">Confirm Password</Label>
+        <div className="relative">
+          <Input id="password2" type="password" placeholder="••••••••" value={formData.password2} onChange={handleChange} required />
+          <Lock className="absolute text-gray-400 right-3 top-2" />
+        </div>
       </div>
       <div className="flex items-center gap-2">
-        <Checkbox id="tc" checked={formData.tc} onChange={handleChange} required color={error ? "failure" : undefined} />
+        <Checkbox id="tc" checked={formData.tc} onCheckedChange={(checked: boolean) => handleChange(checked, "tc")} />
         <Label htmlFor="tc" className="flex">
           I agree with the&nbsp;
           <a href="#" className="text-cyan-600 hover:underline dark:text-cyan-500">
@@ -100,8 +127,8 @@ const Registration: React.FC = () => {
           </a>
         </Label>
       </div>
-      <Button type="submit" gradientDuoTone="cyanToBlue" className="mt-4" disabled={isLoading}>
-        {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
+      <Button type="submit" disabled={isLoading} className="w-full">
+        {isLoading && <Loader className="w-5 h-5 mr-2 animate-spin" />}
         {isLoading ? "Registering..." : "Register new account"}
       </Button>
     </form>
