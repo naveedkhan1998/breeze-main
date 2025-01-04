@@ -22,42 +22,49 @@ import AnnouncementBanner from "./components/AnnouncementBanner";
 import ProfilePage from "./pages/ProfilePage";
 import DashBoardPage from "./pages/DashBoardPage";
 
-interface PrivateRouteProps {
-  element: React.ReactElement;
-}
+import { checkEnvironment } from "./utils/environment.ts";
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
+const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
+
+// PrivateRoute Component
+const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
   const accessToken = useAppSelector(getCurrentToken);
   return accessToken ? element : <Navigate to="/login" />;
 };
 
-const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes in milliseconds
-
 export default function App() {
-  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
+  const [isLoadingComplete, setIsLoadingComplete] = useState(false);
   const { isLoading, refetch } = useHealthCheckQuery("");
 
   useEffect(() => {
-    const checkEnvironment = () => {
-      const isLocalhost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-      localStorage.setItem("isLocalhost", JSON.stringify(isLocalhost));
-    };
-
     checkEnvironment();
 
-    if (!isLoading && !initialCheckComplete) {
-      setInitialCheckComplete(true);
+    if (!isLoading && !isLoadingComplete) {
+      setIsLoadingComplete(true);
     }
-  }, [isLoading, initialCheckComplete]);
+  }, [isLoading, isLoadingComplete]);
 
   useEffect(() => {
     const intervalId = setInterval(refetch, HEALTH_CHECK_INTERVAL);
     return () => clearInterval(intervalId);
   }, [refetch]);
 
-  if (isLoading && !initialCheckComplete) {
+  if (isLoading && !isLoadingComplete) {
     return <LoadingScreen />;
   }
+
+  const routes = [
+    { path: "/", element: <HomePage />, private: true },
+    { path: "/about", element: <AboutPage />, private: true },
+    { path: "/profile", element: <ProfilePage />, private: true },
+    { path: "/dashboard", element: <DashBoardPage />, private: true },
+    { path: "/instruments", element: <InstrumentsPage />, private: true },
+    { path: "/graphs/:id", element: <GraphsPage />, private: true },
+    { path: "/accounts", element: <AccountsPage />, private: true },
+    { path: "/contact", element: <ContactPage />, private: true },
+    { path: "/login", element: <LoginRegPage />, private: false },
+    { path: "*", element: <NotFoundPage />, private: false },
+  ];
 
   return (
     <BrowserRouter>
@@ -65,16 +72,9 @@ export default function App() {
         <Navbar />
         <AnnouncementBanner />
         <Routes>
-          <Route path="/" element={<PrivateRoute element={<HomePage />} />} />
-          <Route path="/about" element={<PrivateRoute element={<AboutPage />} />} />
-          <Route path="/profile" element={<PrivateRoute element={<ProfilePage />} />} />
-          <Route path="/dashboard" element={<PrivateRoute element={<DashBoardPage />} />} />
-          <Route path="/instruments" element={<PrivateRoute element={<InstrumentsPage />} />} />
-          <Route path="/graphs/:id" element={<PrivateRoute element={<GraphsPage />} />} />
-          <Route path="/accounts" element={<PrivateRoute element={<AccountsPage />} />} />
-          <Route path="/contact" element={<PrivateRoute element={<ContactPage />} />} />
-          <Route path="/login" element={<LoginRegPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+          {routes.map(({ path, element, private: isPrivate }) => (
+            <Route key={path} path={path} element={isPrivate ? <PrivateRoute element={element} /> : element} />
+          ))}
         </Routes>
         <Toast />
       </Flowbite>
