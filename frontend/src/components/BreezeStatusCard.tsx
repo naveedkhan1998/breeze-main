@@ -1,6 +1,9 @@
 import React from "react";
-import { Spinner, Badge, Card } from "flowbite-react";
 import { useCheckBreezeStatusQuery } from "../services/breezeServices";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 type BreezeStatusData = {
   data: {
@@ -23,37 +26,40 @@ const BreezeStatusCard: React.FC = () => {
   };
 
   return (
-    <Card className="mb-8 shadow-lg">
-      <div className="p-6">
-        <h2 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white">Breeze Session Status</h2>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Breeze Session Status</CardTitle>
+      </CardHeader>
+      <CardContent>
         {isLoading ? (
           <div className="flex items-center justify-center">
-            <Spinner size="lg" />
+            <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : error ? (
-          <div className="p-4 text-red-700 bg-red-100 border-l-4 border-red-500 rounded-md">
-            <p className="font-bold">Error:</p>
-            <p>{"data" in error ? error.data?.data : "An unexpected error occurred."}</p>
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{"data" in error ? error.data?.data : "An unexpected error occurred."}</AlertDescription>
+          </Alert>
         ) : breezeStatusData ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
-              <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">Session Status</h3>
-              <Badge color={breezeStatusData.data.session_status ? "success" : "danger"} size="lg">
-                {breezeStatusData.data.session_status ? "Connected" : "Disconnected"}
-              </Badge>
-            </div>
-            <div className="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
-              <h3 className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300">Live Feed Status</h3>
-              <Badge color={breezeStatusData.data.websocket_status ? "success" : "danger"} size="lg">
-                {breezeStatusData.data.websocket_status ? "Connected" : "Disconnected"}
-              </Badge>
-            </div>
+            <StatusItem title="Session Status" status={breezeStatusData.data.session_status} />
+            <StatusItem title="Live Feed Status" status={breezeStatusData.data.websocket_status} />
           </div>
         ) : null}
-      </div>
+      </CardContent>
     </Card>
   );
 };
+
+interface StatusItemProps {
+  title: string;
+  status: boolean;
+}
+
+const StatusItem: React.FC<StatusItemProps> = ({ title, status }) => (
+  <div className="p-4 border rounded-lg">
+    <h3 className="mb-2 text-sm font-semibold">{title}</h3>
+    <Badge variant={status ? "success" : "destructive"}>{status ? "Connected" : "Disconnected"}</Badge>
+  </div>
+);
 
 export default BreezeStatusCard;
