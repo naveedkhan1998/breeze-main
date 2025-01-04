@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { Button, Card, TextInput, Textarea, Alert } from "flowbite-react";
-import { motion } from "framer-motion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -10,12 +15,25 @@ const ContactPage = () => {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<null | "success" | "error">(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  interface FormData {
+    name: string;
+    email: string;
+    message: string;
+  }
+
+  interface ChangeEvent {
+    target: {
+      name: string;
+      value: string;
+    };
+  }
+
+  const handleChange = (e: ChangeEvent) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev: FormData) => ({
+      ...prev,
       [name]: value,
     }));
   };
@@ -25,95 +43,99 @@ const ContactPage = () => {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    // Simulating an API call
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       setSubmitStatus("success");
       setFormData({ name: "", email: "", message: "" });
-    } catch (error) {
+    } catch {
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const ContactItem = ({ icon: Icon, text, href }: { icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; text: string; href?: string }) => (
+    <div className="flex items-center space-x-3 text-sm">
+      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+        <Icon className="w-5 h-5 text-primary" />
+      </div>
+      {href ? (
+        <a href={href} className="text-muted-foreground hover:text-primary">
+          {text}
+        </a>
+      ) : (
+        <span className="text-muted-foreground">{text}</span>
+      )}
+    </div>
+  );
+
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="container max-w-4xl mx-auto">
-        <Card className="overflow-hidden">
-          <div className="p-8 space-y-8">
-            <h1 className="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Get in Touch</h1>
-            <p className="text-center text-gray-600 dark:text-gray-400">
-              We'd love to hear from you! Whether you have a question, feedback, or a project idea, feel free to reach out to us using the contact details below or by filling out the form.
-            </p>
+    <div className="min-h-screen p-4 bg-background md:p-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Get in Touch</h1>
+          <p className="mx-auto max-w-[700px] text-muted-foreground">Have a question or project in mind? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+        </div>
 
-            <div className="grid gap-8 md:grid-cols-2">
-              <Card className="p-6 bg-gray-50 dark:bg-gray-800">
-                <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Contact Information</h2>
-                <ul className="space-y-4">
-                  <li className="flex items-center space-x-3">
-                    <Mail className="w-5 h-5 text-blue-500" />
-                    <span className="text-gray-700 dark:text-gray-300">nkhan364@uwo.ca</span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Phone className="w-5 h-5 text-blue-500" />
-                    <span className="text-gray-700 dark:text-gray-300">+1 (226) 236-7245</span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <MapPin className="w-5 h-5 text-blue-500" />
-                    <span className="text-gray-700 dark:text-gray-300">London, Ontario, Canada</span>
-                  </li>
-                </ul>
-              </Card>
+        <div className="grid gap-8 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+              <CardDescription>Reach out to us through any of these channels</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <ContactItem icon={Mail} text="nkhan364@uwo.ca" href="mailto:nkhan364@uwo.ca" />
+              <ContactItem icon={Phone} text="+1 (226) 236-7245" href="tel:+12262367245" />
+              <ContactItem icon={MapPin} text="London, Ontario, Canada" href={"/"} />
+            </CardContent>
+          </Card>
 
-              <Card className="p-6 bg-gray-50 dark:bg-gray-800">
-                <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Send us a Message</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Your Name
-                    </label>
-                    <TextInput id="name" name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" required />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Your Email
-                    </label>
-                    <TextInput id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="john@example.com" required />
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Your Message
-                    </label>
-                    <Textarea id="message" name="message" value={formData.message} onChange={handleChange} placeholder="Your message here..." required rows={4} />
-                  </div>
-                  <Button type="submit" gradientDuoTone="cyanToBlue" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </Card>
-            </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Send a Message</CardTitle>
+              <CardDescription>Fill out the form below and we'll get back to you</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Enter your name" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Enter your email" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea id="message" name="message" value={formData.message} onChange={handleChange} placeholder="Type your message here..." required className="min-h-[120px]" />
+                </div>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
 
-            {submitStatus && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-                <Alert color={submitStatus === "success" ? "success" : "failure"} onDismiss={() => setSubmitStatus(null)}>
-                  {submitStatus === "success" ? "Message sent successfully!" : "Failed to send message. Please try again."}
-                </Alert>
-              </motion.div>
-            )}
-          </div>
-        </Card>
-      </motion.div>
+        {submitStatus && (
+          <Alert
+            variant={submitStatus === "success" ? "default" : "destructive"}
+            className={cn("animate-in fade-in-0 slide-in-from-bottom-5", submitStatus === "success" ? "bg-green-500/15" : undefined)}
+          >
+            <AlertDescription>{submitStatus === "success" ? "Message sent successfully! We'll get back to you soon." : "Failed to send message. Please try again."}</AlertDescription>
+          </Alert>
+        )}
+      </div>
     </div>
   );
 };
