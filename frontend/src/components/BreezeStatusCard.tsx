@@ -28,7 +28,7 @@ const BreezeStatusCard: React.FC = () => {
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
-        <CardTitle className="text-xl font-semibold">Breeze Status Monitor</CardTitle>
+        <CardTitle className="text-xl font-semibold dark:text-white">Breeze Status Monitor</CardTitle>
         {isLoading && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
