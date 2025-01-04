@@ -2,37 +2,25 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { getCurrentToken, logOut } from "../features/authSlice";
-import { setMode } from "../features/darkModeSlice";
 import { removeToken as removeLocalToken } from "../services/LocalStorageService";
 import { toast } from "react-toastify";
 import { FaBars, FaSignOutAlt, FaUserCircle, FaHome, FaChartLine, FaInfoCircle, FaEnvelope } from "react-icons/fa";
-
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
-import { MoonIcon, SunIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { ModeToggle } from "./mode-toggle";
 
 const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
   const access_token = useAppSelector(getCurrentToken);
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-    dispatch(setMode());
-  };
 
   const signOut = () => {
     removeLocalToken();
@@ -73,10 +61,7 @@ const Navbar: React.FC = () => {
               {item.label}
             </Link>
           ))}
-          <Button variant="ghost" size="icon" onClick={toggleTheme}>
-            <SunIcon className="w-5 h-5 dark:hidden" />
-            <MoonIcon className="hidden w-5 h-5 dark:block" />
-          </Button>
+          <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative w-8 h-8 p-0">
@@ -101,10 +86,7 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu */}
         <div className="flex items-center space-x-2 md:hidden">
-          <Button variant="ghost" size="icon" onClick={toggleTheme}>
-            <SunIcon className="w-5 h-5 dark:hidden" />
-            <MoonIcon className="hidden w-5 h-5 dark:block" />
-          </Button>
+          <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">

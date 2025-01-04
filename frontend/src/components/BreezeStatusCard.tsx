@@ -61,13 +61,13 @@ interface StatusItemProps {
 }
 
 const StatusItem: React.FC<StatusItemProps> = ({ title, status, isLoading, icon: Icon }) => {
-  const bgColor = status ? "bg-green-50" : "bg-red-50";
-  const textColor = status ? "text-green-700" : "text-red-700";
+  const bgColor = status ? "bg-green-50 dark:bg-green-900/20" : "bg-red-50 dark:bg-red-900/20";
+  const textColor = status ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400";
 
   return (
-    <div className={`p-6 rounded-lg border transition-all duration-200 ${bgColor} ${isLoading ? "opacity-50" : ""}`}>
+    <div className={`p-6 rounded-lg border transition-all duration-200 ${bgColor} ${isLoading ? "opacity-50" : ""} dark:border-slate-800`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-medium">{title}</h3>
+        <h3 className="font-medium dark:text-slate-200">{title}</h3>
         <Icon className={`h-5 w-5 ${textColor}`} />
       </div>
       <div className="flex items-center space-x-2">

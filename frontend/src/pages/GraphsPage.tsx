@@ -5,8 +5,6 @@ import { Button, Tooltip } from "flowbite-react";
 import { useGetCandlesQuery } from "../services/instrumentService";
 import { formatDate, calculateMA, calculateBollingerBands, calculateRSI, calculateMACD } from "../common-functions";
 import { Candle, Instrument } from "../common-types";
-import { useAppSelector } from "../app/hooks";
-import { getMode } from "../features/darkModeSlice";
 import { HiArrowLeft, HiInformationCircle, HiXMark } from "react-icons/hi2";
 import { HiArrowsExpand, HiDownload, HiRefresh } from "react-icons/hi";
 import { SeriesOptionsMap, Time } from "lightweight-charts";
@@ -15,6 +13,7 @@ import MainChart from "../components/MainChart";
 import VolumeChart from "../components/VolumeChart";
 import IndicatorChart from "../components/IndicatorChart";
 import ResponsiveSidebar from "../components/ResponsiveSidebar";
+import { useTheme } from "@/components/theme-provider";
 
 interface LocationState {
   obj: Instrument;
@@ -23,7 +22,8 @@ interface LocationState {
 const GraphsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const mode = useAppSelector(getMode);
+  const themeCtx = useTheme();
+  const mode = themeCtx.theme === "dark" ? true : false;
   const { obj } = (location.state as LocationState) || {};
   const [timeframe, setTimeFrame] = useState<number>(15);
   const [chartType, setChartType] = useState<"Candlestick" | "Line">("Candlestick");

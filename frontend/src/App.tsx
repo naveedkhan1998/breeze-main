@@ -23,6 +23,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DashBoardPage from "./pages/DashBoardPage";
 
 import { checkEnvironment } from "./utils/environment.ts";
+import { ThemeProvider } from "./components/theme-provider.tsx";
 
 const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
 
@@ -68,16 +69,18 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Flowbite>
-        <Navbar />
-        <AnnouncementBanner />
-        <Routes>
-          {routes.map(({ path, element, private: isPrivate }) => (
-            <Route key={path} path={path} element={isPrivate ? <PrivateRoute element={element} /> : element} />
-          ))}
-        </Routes>
-        <Toast />
-      </Flowbite>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <Flowbite>
+          <Navbar />
+          <AnnouncementBanner />
+          <Routes>
+            {routes.map(({ path, element, private: isPrivate }) => (
+              <Route key={path} path={path} element={isPrivate ? <PrivateRoute element={element} /> : element} />
+            ))}
+          </Routes>
+          <Toast />
+        </Flowbite>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
