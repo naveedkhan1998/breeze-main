@@ -37,7 +37,7 @@ export type Candle = {
   close: number;
   date: string;
   volume?: number;
-  time?:string
+  time?: string;
 };
 
 export interface BreezeAccount {

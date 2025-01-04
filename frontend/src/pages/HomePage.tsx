@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BreezeStatusCard from "@/components/BreezeStatusCard";
+
 import { InstrumentCard } from "@/components/InstrumentCard";
 import { Instrument } from "../common-types";
+import BreezeStatusCard from "@/components/BreezeStatusCard";
 
 const getAveragePercentage = (instrument: Instrument): number => {
   return instrument.percentage?.percentage || 0;
