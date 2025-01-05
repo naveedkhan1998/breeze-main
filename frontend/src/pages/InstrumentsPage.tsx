@@ -21,7 +21,7 @@ const InstrumentsPage = () => {
             <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text sm:text-3xl">Instruments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="sticky z-10 p-4 mb-4 bg-white rounded-lg shadow-md dark:bg-zinc-800 top-16 ">
+            <div className="sticky z-10 p-4 mb-4 bg-white rounded-lg shadow-md dark:bg-zinc-900 top-16 ">
               <div className="flex items-center gap-2">
                 <div className="relative flex-grow">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { ChevronDown, Plus, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,9 +8,9 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
-import { useGetInstrumentsQuery, useGetSubscribedInstrumentsQuery, useSubscribeInstrumentMutation } from "../services/instrumentService";
-import { Instrument as InstrumentType } from "../common-types";
-import { Spinner } from "flowbite-react";
+import { useGetInstrumentsQuery, useGetSubscribedInstrumentsQuery, useSubscribeInstrumentMutation } from "@/services/instrumentService";
+import { Instrument as InstrumentType } from "@/common-types";
+import { Spinner } from "./ui/spinner";
 
 type Props = {
   exchange: string;
@@ -30,24 +32,24 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({ instrument, onSubscribe
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col items-start justify-between p-4 transition-colors duration-150 ease-in-out border-b border-gray-200 sm:flex-row sm:items-center hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+      className="flex flex-col justify-between p-4 transition-colors duration-150 ease-in-out border-b sm:flex-row sm:items-center border-border hover:bg-accent/5"
     >
       <div className="flex-grow mb-3 sm:mb-0">
         <h3 className="text-lg font-semibold text-foreground">{instrument.exchange_code}</h3>
         <div className="mt-1 space-y-1 text-sm text-muted-foreground">
           <p>
-            <span className="font-semibold">Symbol:</span> {instrument.stock_token || instrument.token} |<span className="ml-2 font-semibold">Series:</span> {instrument.series}
+            <span className="font-medium">Symbol:</span> {instrument.stock_token || instrument.token} |<span className="ml-2 font-medium">Series:</span> {instrument.series}
           </p>
           <p>
-            <span className="font-semibold">Exchange:</span> {instrument.exchange_code} |<span className="ml-2 font-semibold">Expiry:</span> {instrument.expiry || "N/A"}
+            <span className="font-medium">Exchange:</span> {instrument.exchange_code} |<span className="ml-2 font-medium">Expiry:</span> {instrument.expiry || "N/A"}
           </p>
           {instrument.strike_price !== null && instrument.option_type && (
             <p>
-              <span className="font-semibold">Strike:</span> {instrument.strike_price} |<span className="ml-2 font-semibold">Type:</span> {instrument.option_type}
+              <span className="font-medium">Strike:</span> {instrument.strike_price} |<span className="ml-2 font-medium">Type:</span> {instrument.option_type}
             </p>
           )}
           <p>
-            <span className="font-semibold">Company Name:</span> <span>{instrument.company_name}</span>
+            <span className="font-medium">Company Name:</span> <span>{instrument.company_name}</span>
           </p>
         </div>
       </div>
@@ -138,21 +140,19 @@ const Instrument = ({ exchange, searchTerm }: Props) => {
   }
 
   return (
-    <div className="container px-4 mx-auto">
-      <Card className="overflow-hidden">
-        <AnimatePresence>
-          {data &&
-            data.data?.map((instrument: InstrumentType) => (
-              <InstrumentItem key={instrument.id} instrument={instrument} onSubscribe={handleSubscribe} isSubscribing={subscribingIds.includes(instrument.id)} />
-            ))}
-        </AnimatePresence>
-      </Card>
+    <Card className="border-0 rounded-none shadow-none">
+      <AnimatePresence>
+        {data &&
+          data.data?.map((instrument: InstrumentType) => (
+            <InstrumentItem key={instrument.id} instrument={instrument} onSubscribe={handleSubscribe} isSubscribing={subscribingIds.includes(instrument.id)} />
+          ))}
+      </AnimatePresence>
       {(!data || data.data?.length === 0) && (
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mt-4 text-center text-muted-foreground">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-8 text-center text-muted-foreground">
           No instruments found. Try adjusting your search.
         </motion.p>
       )}
-    </div>
+    </Card>
   );
 };
 
