@@ -323,7 +323,7 @@ const GraphsPage: React.FC = () => {
             <ResizablePanel defaultSize={80}>
               <ResizablePanelGroup direction="vertical">
                 {/* Main Chart Panel */}
-                <ResizablePanel defaultSize={60}>
+                <ResizablePanel defaultSize={70}>
                   <MainChart
                     seriesData={seriesData}
                     chartType={chartType}
@@ -338,7 +338,7 @@ const GraphsPage: React.FC = () => {
                 <ResizableHandle withHandle />
 
                 {/* Bottom Charts Panel */}
-                <ResizablePanel defaultSize={40}>
+                <ResizablePanel defaultSize={30}>
                   <ResizablePanelGroup direction="horizontal">
                     {showVolume && (
                       <>
