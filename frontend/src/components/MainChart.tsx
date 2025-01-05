@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { createChart, IChartApi, SeriesType, ISeriesApi, ITimeScaleApi, Time, BarData, LineData, MouseEventParams } from "lightweight-charts";
 import { Instrument } from "../common-types";
+import { Card } from "@/components/ui/card";
 
 interface MAIndicator {
   name: "MA";
@@ -49,13 +50,19 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
             textColor: mode ? "#E5E7EB" : "#1F2937",
             background: { color: mode ? "#111827" : "#FFFFFF" },
             fontSize: 12,
+            fontFamily: "Inter, -apple-system, system-ui, sans-serif",
           },
           timeScale: {
             timeVisible: true,
             secondsVisible: false,
+            borderColor: mode ? "#374151" : "#E5E7EB",
           },
           rightPriceScale: {
             borderColor: mode ? "#4B5563" : "#D1D5DB",
+            scaleMargins: {
+              top: 0.1,
+              bottom: 0.1,
+            },
           },
           crosshair: {
             mode: 1,
@@ -67,16 +74,23 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
             horzLine: {
               visible: true,
               labelVisible: true,
+              color: mode ? "#6B7280" : "#9CA3AF",
+              width: 1,
+              style: 1,
             },
           },
           grid: {
             vertLines: {
               color: mode ? "#374151" : "#E5E7EB",
+              style: 1,
             },
             horzLines: {
               color: mode ? "#374151" : "#E5E7EB",
+              style: 1,
             },
           },
+          handleScroll: true,
+          handleScale: true,
         });
 
         const mainSeries =
@@ -91,6 +105,9 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
             : chart.addLineSeries({
                 color: mode ? "#60A5FA" : "#3B82F6",
                 lineWidth: 2,
+                crosshairMarkerVisible: true,
+                crosshairMarkerRadius: 4,
+                lastValueVisible: true,
               });
 
         mainSeries.setData(seriesData);
@@ -98,43 +115,80 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         prevChartTypeRef.current = chartType;
 
         const legendContainer = document.createElement("div");
-        legendContainer.className = `absolute top-4 left-4 p-2 rounded bg-white text-slate-800 dark:bg-slate-800 dark:text-white shadow-md text-sm z-[10]`;
+        legendContainer.className = "absolute top-4 left-4 p-3 rounded-lg bg-card text-card-foreground shadow-lg border z-[10] min-w-[240px]";
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
-        const legendRow = document.createElement("div");
-        legendRow.className = "mb-1 font-semibold";
-        legendRow.innerHTML = `${obj?.company_name} | ${obj?.exchange_code} | Timeframe: ${timeframe}`;
+        const headerRow = document.createElement("div");
+        headerRow.className = "flex items-center gap-2 mb-2";
 
-        const ohlcRow = document.createElement("div");
-        ohlcRow.innerHTML = "<strong>OHLC:</strong> ";
+        const companyName = document.createElement("span");
+        companyName.className = "text-sm font-semibold";
+        companyName.textContent = obj?.company_name || "";
 
-        legendContainer.appendChild(legendRow);
-        legendContainer.appendChild(ohlcRow);
+        const exchangeBadge = document.createElement("span");
+        exchangeBadge.className = "px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary";
+        exchangeBadge.textContent = obj?.exchange_code || "";
+
+        const timeframeBadge = document.createElement("span");
+        timeframeBadge.className = "px-2 py-0.5 text-xs rounded-full bg-secondary/10 text-secondary ml-auto";
+        timeframeBadge.textContent = `${timeframe}`;
+
+        headerRow.appendChild(companyName);
+        headerRow.appendChild(exchangeBadge);
+        headerRow.appendChild(timeframeBadge);
+
+        const separator = document.createElement("div");
+        separator.className = "h-px my-2 bg-border";
+
+        const priceRow = document.createElement("div");
+        priceRow.className = "grid grid-cols-2 gap-2 text-xs";
+
+        legendContainer.appendChild(headerRow);
+        legendContainer.appendChild(separator);
+        legendContainer.appendChild(priceRow);
 
         chart.subscribeCrosshairMove((param: MouseEventParams<Time>) => {
-          let ohlcValues = "";
           if (param.time && seriesRef.current) {
             const data = param.seriesData.get(seriesRef.current);
 
             if (data) {
+              priceRow.innerHTML = "";
               if (chartType === "Candlestick" && "open" in data) {
                 const { open, high, low, close } = data as BarData;
-                ohlcValues = `<strong>O:</strong> ${open.toFixed(2)} | <strong>H:</strong> ${high.toFixed(2)} | <strong>L:</strong> ${low.toFixed(2)} | <strong>C:</strong> ${close.toFixed(2)}`;
+                const priceItems = [
+                  { label: "Open", value: open.toFixed(2) },
+                  { label: "High", value: high.toFixed(2) },
+                  { label: "Low", value: low.toFixed(2) },
+                  { label: "Close", value: close.toFixed(2) },
+                ];
+
+                priceItems.forEach(({ label, value }) => {
+                  const item = document.createElement("div");
+                  item.className = "flex items-center justify-between";
+                  item.innerHTML = `
+                    <span class="text-muted-foreground">${label}</span>
+                    <span class="font-medium">${value}</span>
+                  `;
+                  priceRow.appendChild(item);
+                });
               } else if (chartType === "Line" && "value" in data) {
                 const { value } = data as LineData;
-                ohlcValues = `<strong>Price:</strong> ${value.toFixed(2)}`;
+                const item = document.createElement("div");
+                item.className = "flex items-center justify-between col-span-2";
+                item.innerHTML = `
+                  <span class="text-muted-foreground">Price</span>
+                  <span class="font-medium">${value.toFixed(2)}</span>
+                `;
+                priceRow.appendChild(item);
               }
             }
           }
-          legendRow.innerHTML = `${obj?.company_name} | ${obj?.exchange_code} | Timeframe: ${timeframe}`;
-          ohlcRow.innerHTML = `<strong>OHLC:</strong> ${ohlcValues}`;
         });
 
         mainChartRef.current = chart;
         setTimeScale(chart.timeScale());
 
-        // Handle Resize
         const resizeObserver = new ResizeObserver((entries) => {
           if (mainChartContainerRef.current && mainChartRef.current) {
             const { width, height } = entries[0].contentRect;
@@ -144,7 +198,6 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
 
         resizeObserver.observe(mainChartContainerRef.current);
 
-        // Clean up on unmount
         return () => {
           resizeObserver.disconnect();
           chart.remove();
@@ -168,6 +221,9 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
               : mainChartRef.current.addLineSeries({
                   color: mode ? "#60A5FA" : "#3B82F6",
                   lineWidth: 2,
+                  crosshairMarkerVisible: true,
+                  crosshairMarkerRadius: 4,
+                  lastValueVisible: true,
                 });
 
           mainSeries.setData(seriesData);
@@ -177,7 +233,6 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
           seriesRef.current?.setData(seriesData);
         }
 
-        // Update chart colors based on mode
         mainChartRef.current.applyOptions({
           layout: {
             textColor: mode ? "#E5E7EB" : "#1F2937",
@@ -188,6 +243,9 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
           },
           crosshair: {
             vertLine: {
+              color: mode ? "#6B7280" : "#9CA3AF",
+            },
+            horzLine: {
               color: mode ? "#6B7280" : "#9CA3AF",
             },
           },
@@ -202,7 +260,6 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         });
       }
 
-      // Update indicators
       indicators.forEach((indicator) => {
         if (indicator.active) {
           if (!indicatorSeriesRef.current[indicator.name]) {
@@ -212,6 +269,7 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                 const maSeries = mainChartRef.current!.addLineSeries({
                   color: mode ? "#FBBF24" : "#F59E0B",
                   lineWidth: 2,
+                  lastValueVisible: true,
                 });
                 maSeries.setData(maIndicator.data);
                 indicatorSeriesRef.current[indicator.name] = maSeries;
@@ -222,10 +280,12 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                 const upperBandSeries = mainChartRef.current!.addLineSeries({
                   color: mode ? "#34D399" : "#10B981",
                   lineWidth: 1,
+                  lastValueVisible: true,
                 });
                 const lowerBandSeries = mainChartRef.current!.addLineSeries({
                   color: mode ? "#F87171" : "#EF4444",
                   lineWidth: 1,
+                  lastValueVisible: true,
                 });
                 upperBandSeries.setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.upper })));
                 lowerBandSeries.setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.lower })));
@@ -233,8 +293,6 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                 indicatorSeriesRef.current[`${indicator.name}_lower`] = lowerBandSeries;
                 break;
               }
-              default:
-                break;
             }
           } else {
             switch (indicator.name) {
@@ -258,8 +316,6 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                 indicatorSeriesRef.current[`${indicator.name}_lower`].setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.lower })));
                 break;
               }
-              default:
-                break;
             }
           }
         } else {
@@ -286,7 +342,13 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
     renderMainChart();
   }, [renderMainChart]);
 
-  return <div ref={mainChartContainerRef} className="relative w-full h-full overflow-hidden rounded-lg shadow-lg"></div>;
+  return (
+    <Card className="w-full h-full">
+      <div ref={mainChartContainerRef} className="relative w-full h-full ">
+        {/* Chart will be rendered here */}
+      </div>
+    </Card>
+  );
 };
 
 export default MainChart;
