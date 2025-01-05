@@ -1,6 +1,7 @@
 // components/ResponsiveSidebar.tsx
 import React, { useState } from "react";
-import { Button, Card } from "flowbite-react";
+import { Button } from "@/components/ui/button"; // Adjust paths as needed for your setup
+import { Card } from "@/components/ui/card";
 import { HiMenu, HiX } from "react-icons/hi";
 
 interface ResponsiveSidebarProps {
@@ -11,19 +12,22 @@ interface ResponsiveSidebarProps {
 const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({ children, isFullscreen }) => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  // Hide sidebar in fullscreen mode
-  if (isFullscreen) return null;
+  console.log(isFullscreen);
 
   return (
     <div className="w-full md:w-96">
       {/* Toggle Button for Mobile */}
       <div className="flex justify-end p-2 md:hidden">
-        <Button color="light" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Sidebar">
+        <Button variant="outline" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Sidebar" size="icon">
           {isOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
         </Button>
       </div>
       {/* Sidebar Content */}
-      {isOpen && <Card className="hidden overflow-y-auto md:block md:h-full">{children}</Card>}
+      {isOpen && (
+        <div className="hidden md:block">
+          <Card className="h-full overflow-y-auto">{children}</Card>
+        </div>
+      )}
       {/* Sidebar for Mobile */}
       {isOpen && (
         <div className="block md:hidden">
