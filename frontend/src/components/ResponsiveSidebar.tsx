@@ -12,7 +12,9 @@ interface ResponsiveSidebarProps {
 const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({ children, isFullscreen }) => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  console.log(isFullscreen);
+  if (isFullscreen) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="w-full md:w-96">
