@@ -1,46 +1,85 @@
-import React from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
-const LoadingScreen: React.FC = () => {
-  const containerVariants = {
-    start: { opacity: 0, scale: 0.8 },
-    end: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
-  };
+const LoadingScreen = () => {
+  const [progress, setProgress] = useState(0);
+  const [dots, setDots] = useState("");
 
-  const circleVariants = {
-    start: { scale: 0 },
-    end: { scale: 1, transition: { duration: 0.5, delay: 0.2 } },
-  };
+  useEffect(() => {
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => (prev >= 100 ? 100 : prev + 1));
+    }, 900);
 
-  const dotVariants = {
-    start: { y: 0 },
-    end: { y: -10, transition: { duration: 0.4, yoyo: Infinity } },
-  };
+    const dotsInterval = setInterval(() => {
+      setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+    }, 500);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(dotsInterval);
+    };
+  }, []);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-900 dark:to-gray-800">
-      <motion.div className="p-8 bg-white rounded-lg shadow-xl dark:bg-gray-800" variants={containerVariants} initial="start" animate="end">
-        <h2 className="mb-6 text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Backend Starting Up</h2>
-        <motion.div className="flex items-center justify-center mb-6" variants={circleVariants}>
-          <svg className="w-24 h-24" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="url(#gradient)" strokeWidth="8" strokeLinecap="round">
-              <animateTransform attributeName="transform" type="rotate" dur="2s" from="0 50 50" to="360 50 50" repeatCount="indefinite" />
-            </circle>
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#3B82F6" />
-                <stop offset="100%" stopColor="#8B5CF6" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </motion.div>
-        <p className="mb-4 text-lg text-center text-gray-600 dark:text-gray-300">Please wait while we set things up for you</p>
-        <div className="flex justify-center space-x-2">
-          {[0, 1, 2].map((index) => (
-            <motion.div key={index} className="w-3 h-3 bg-blue-500 rounded-full dark:bg-purple-400" variants={dotVariants} initial="start" animate="end" transition={{ delay: index * 0.2 }} />
-          ))}
-        </div>
-      </motion.div>
+    <div className="relative min-h-screen overflow-hidden bg-black">
+      {/* Animated background patterns */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-blue-900/20" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent animate-pulse" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" />
+
+        {/* Animated circles */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 animate-pulse"
+            style={{
+              width: Math.random() * 200 + 50 + "px",
+              height: Math.random() * 200 + 50 + "px",
+              top: Math.random() * 100 + "%",
+              left: Math.random() * 100 + "%",
+              animationDelay: Math.random() * 2 + "s",
+              animationDuration: Math.random() * 3 + 2 + "s",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main content */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md mx-4 border border-gray-800 bg-black/40 backdrop-blur-xl">
+          <div className="p-8 space-y-8">
+            {/* Central loading animation */}
+            <div className="relative flex justify-center">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-32 h-32 border-2 rounded-full border-purple-500/20 animate-ping" />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-24 h-24 border-2 rounded-full border-blue-500/20 animate-ping" style={{ animationDelay: "0.5s" }} />
+              </div>
+              <Loader2 className="w-16 h-16 text-purple-500 animate-spin" />
+            </div>
+
+            {/* Text and progress */}
+            <div className="space-y-6 text-center">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Initializing System{dots}</h2>
+
+              <div className="space-y-2">
+                <div className="relative w-full h-1 overflow-hidden bg-gray-800 rounded-full">
+                  <div className="absolute top-0 left-0 h-full transition-all duration-300 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" style={{ width: `${progress}%` }} />
+                </div>
+                <p className="text-sm text-gray-400">{progress}% Complete</p>
+              </div>
+            </div>
+
+            {/* Status messages */}
+            <div className="text-center">
+              <p className="text-sm text-gray-500">Estimated time remaining: {Math.ceil((100 - progress) * 0.9)} seconds</p>
+            </div>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };
