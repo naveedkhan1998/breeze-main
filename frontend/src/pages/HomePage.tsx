@@ -149,7 +149,7 @@ const HomePage: React.FC = () => {
     const interval = setInterval(() => {
       if (
         data?.data?.some(
-          (instrument: Instrument) => instrument.percentage?.is_loading,
+          (instrument: Instrument) => !instrument.percentage?.is_loading,
         )
       ) {
         refetch();
@@ -165,7 +165,7 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted ">
       <div className="container px-4 py-8 mx-auto">
         <div className="mb-8">
-          <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+          <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
             Instrument Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">

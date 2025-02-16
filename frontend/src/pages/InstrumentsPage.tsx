@@ -23,7 +23,7 @@ const InstrumentsPage = () => {
       >
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text sm:text-3xl">
+            <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-primary to-accent bg-clip-text sm:text-3xl">
               Instruments
             </CardTitle>
           </CardHeader>
