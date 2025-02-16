@@ -12,7 +12,18 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Card } from "./ui/card";
-import { AlertCircle, Lock, Mail, User, Loader, Eye, EyeOff, CheckCircle2, XCircle, Info } from "lucide-react";
+import {
+  AlertCircle,
+  Lock,
+  Mail,
+  User,
+  Loader,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  XCircle,
+  Info,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FormData {
@@ -69,7 +80,13 @@ const Registration: React.FC = () => {
   };
 
   const validatePassword = (password: string) => {
-    return password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password);
+    return (
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password)
+    );
   };
 
   const getPasswordStrength = (password: string) => {
@@ -85,7 +102,14 @@ const Registration: React.FC = () => {
     return {
       strength,
       message: messages[strength - 1] || "",
-      color: strength <= 1 ? "red" : strength === 2 ? "yellow" : strength === 3 ? "blue" : "green",
+      color:
+        strength <= 1
+          ? "red"
+          : strength === 2
+            ? "yellow"
+            : strength === 3
+              ? "blue"
+              : "green",
     };
   };
 
@@ -95,13 +119,22 @@ const Registration: React.FC = () => {
       setValidation((prev) => ({ ...prev, name: validateName(formData.name) }));
     }
     if (formData.email) {
-      setValidation((prev) => ({ ...prev, email: validateEmail(formData.email) }));
+      setValidation((prev) => ({
+        ...prev,
+        email: validateEmail(formData.email),
+      }));
     }
     if (formData.password) {
-      setValidation((prev) => ({ ...prev, password: validatePassword(formData.password) }));
+      setValidation((prev) => ({
+        ...prev,
+        password: validatePassword(formData.password),
+      }));
     }
     if (formData.password && formData.password2) {
-      setValidation((prev) => ({ ...prev, passwordMatch: formData.password === formData.password2 }));
+      setValidation((prev) => ({
+        ...prev,
+        passwordMatch: formData.password === formData.password2,
+      }));
     }
   }, [formData]);
 
@@ -190,14 +223,21 @@ const Registration: React.FC = () => {
               required
               className={cn(
                 "pl-10 pr-10 transition-all duration-200",
-                error && validation.name === false && "border-red-500 focus-visible:ring-red-500",
-                validation.name && "border-green-500 focus-visible:ring-green-500"
+                error &&
+                  validation.name === false &&
+                  "border-red-500 focus-visible:ring-red-500",
+                validation.name &&
+                  "border-green-500 focus-visible:ring-green-500",
               )}
             />
             <User className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
             {formData.name && (
               <div className="absolute transform -translate-y-1/2 right-3 top-1/2">
-                {validation.name ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <XCircle className="w-5 h-5 text-red-500" />}
+                {validation.name ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-500" />
+                )}
               </div>
             )}
           </div>
@@ -215,14 +255,21 @@ const Registration: React.FC = () => {
               required
               className={cn(
                 "pl-10 pr-10 transition-all duration-200",
-                error && validation.email === false && "border-red-500 focus-visible:ring-red-500",
-                validation.email && "border-green-500 focus-visible:ring-green-500"
+                error &&
+                  validation.email === false &&
+                  "border-red-500 focus-visible:ring-red-500",
+                validation.email &&
+                  "border-green-500 focus-visible:ring-green-500",
               )}
             />
             <Mail className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
             {formData.email && (
               <div className="absolute transform -translate-y-1/2 right-3 top-1/2">
-                {validation.email ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <XCircle className="w-5 h-5 text-red-500" />}
+                {validation.email ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-500" />
+                )}
               </div>
             )}
           </div>
@@ -240,37 +287,88 @@ const Registration: React.FC = () => {
               required
               className={cn(
                 "pl-10 pr-10 transition-all duration-200",
-                error && validation.password === false && "border-red-500 focus-visible:ring-red-500",
-                validation.password && "border-green-500 focus-visible:ring-green-500"
+                error &&
+                  validation.password === false &&
+                  "border-red-500 focus-visible:ring-red-500",
+                validation.password &&
+                  "border-green-500 focus-visible:ring-green-500",
               )}
             />
             <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-            <Button type="button" variant="ghost" size="sm" className="absolute transform -translate-y-1/2 right-1 top-1/2" onClick={() => togglePasswordVisibility("password")}>
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute transform -translate-y-1/2 right-1 top-1/2"
+              onClick={() => togglePasswordVisibility("password")}
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
             </Button>
           </div>
           {formData.password && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 {[...Array(4)].map((_, index) => (
-                  <div key={index} className={cn("h-1 flex-1 rounded-full transition-all duration-300", index < passwordStrength.strength ? `bg-${passwordStrength.color}-500` : "bg-gray-200")} />
+                  <div
+                    key={index}
+                    className={cn(
+                      "h-1 flex-1 rounded-full transition-all duration-300",
+                      index < passwordStrength.strength
+                        ? `bg-${passwordStrength.color}-500`
+                        : "bg-gray-200",
+                    )}
+                  />
                 ))}
-                <span className="text-xs text-gray-500">{passwordStrength.message}</span>
+                <span className="text-xs text-gray-500">
+                  {passwordStrength.message}
+                </span>
               </div>
               <div className="space-y-1 text-xs text-gray-500">
-                <div className={cn("flex items-center gap-2", formData.password.length >= 8 ? "text-green-500" : "text-gray-500")}>
+                <div
+                  className={cn(
+                    "flex items-center gap-2",
+                    formData.password.length >= 8
+                      ? "text-green-500"
+                      : "text-gray-500",
+                  )}
+                >
                   <CheckCircle2 className="w-3 h-3" />
                   Minimum 8 characters
                 </div>
-                <div className={cn("flex items-center gap-2", /[A-Z]/.test(formData.password) ? "text-green-500" : "text-gray-500")}>
+                <div
+                  className={cn(
+                    "flex items-center gap-2",
+                    /[A-Z]/.test(formData.password)
+                      ? "text-green-500"
+                      : "text-gray-500",
+                  )}
+                >
                   <CheckCircle2 className="w-3 h-3" />
                   One uppercase letter
                 </div>
-                <div className={cn("flex items-center gap-2", /[0-9]/.test(formData.password) ? "text-green-500" : "text-gray-500")}>
+                <div
+                  className={cn(
+                    "flex items-center gap-2",
+                    /[0-9]/.test(formData.password)
+                      ? "text-green-500"
+                      : "text-gray-500",
+                  )}
+                >
                   <CheckCircle2 className="w-3 h-3" />
                   One number
                 </div>
-                <div className={cn("flex items-center gap-2", /[^A-Za-z0-9]/.test(formData.password) ? "text-green-500" : "text-gray-500")}>
+                <div
+                  className={cn(
+                    "flex items-center gap-2",
+                    /[^A-Za-z0-9]/.test(formData.password)
+                      ? "text-green-500"
+                      : "text-gray-500",
+                  )}
+                >
                   <CheckCircle2 className="w-3 h-3" />
                   One special character
                 </div>
@@ -291,23 +389,51 @@ const Registration: React.FC = () => {
               required
               className={cn(
                 "pl-10 pr-10 transition-all duration-200",
-                formData.password2 && !validation.passwordMatch && "border-red-500 focus-visible:ring-red-500",
-                validation.passwordMatch && "border-green-500 focus-visible:ring-green-500"
+                formData.password2 &&
+                  !validation.passwordMatch &&
+                  "border-red-500 focus-visible:ring-red-500",
+                validation.passwordMatch &&
+                  "border-green-500 focus-visible:ring-green-500",
               )}
             />
             <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-            <Button type="button" variant="ghost" size="sm" className="absolute transform -translate-y-1/2 right-1 top-1/2" onClick={() => togglePasswordVisibility("password2")}>
-              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute transform -translate-y-1/2 right-1 top-1/2"
+              onClick={() => togglePasswordVisibility("password2")}
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
             </Button>
           </div>
-          {formData.password2 && !validation.passwordMatch && <p className="text-xs text-red-500">Passwords do not match</p>}
+          {formData.password2 && !validation.passwordMatch && (
+            <p className="text-xs text-red-500">Passwords do not match</p>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
-          <Checkbox id="tc" checked={formData.tc} onCheckedChange={(checked: boolean) => setFormData((prev) => ({ ...prev, tc: checked }))} />
-          <Label htmlFor="tc" className="text-sm text-gray-600 dark:text-gray-400">
+          <Checkbox
+            id="tc"
+            checked={formData.tc}
+            onCheckedChange={(checked: boolean) =>
+              setFormData((prev) => ({ ...prev, tc: checked }))
+            }
+          />
+          <Label
+            htmlFor="tc"
+            className="text-sm text-gray-600 dark:text-gray-400"
+          >
             I agree with the{" "}
-            <Button variant="link" className="h-auto p-0 text-blue-600 dark:text-blue-500" onClick={() => navigate("/terms")}>
+            <Button
+              variant="link"
+              className="h-auto p-0 text-blue-600 dark:text-blue-500"
+              onClick={() => navigate("/terms")}
+            >
               terms and conditions
             </Button>
           </Label>
@@ -315,8 +441,18 @@ const Registration: React.FC = () => {
 
         <Button
           type="submit"
-          disabled={isLoading || !formData.tc || !validation.name || !validation.email || !validation.password || !validation.passwordMatch}
-          className={cn("w-full transition-all duration-300", isLoading && "opacity-80")}
+          disabled={
+            isLoading ||
+            !formData.tc ||
+            !validation.name ||
+            !validation.email ||
+            !validation.password ||
+            !validation.passwordMatch
+          }
+          className={cn(
+            "w-full transition-all duration-300",
+            isLoading && "opacity-80",
+          )}
         >
           {isLoading ? (
             <>
@@ -330,10 +466,30 @@ const Registration: React.FC = () => {
 
         {/* Registration progress indicators */}
         <div className="grid grid-cols-4 gap-2 pt-4">
-          <div className={cn("h-1 rounded-full transition-all duration-300", validation.name ? "bg-green-500" : "bg-gray-200")} />
-          <div className={cn("h-1 rounded-full transition-all duration-300", validation.email ? "bg-green-500" : "bg-gray-200")} />
-          <div className={cn("h-1 rounded-full transition-all duration-300", validation.password ? "bg-green-500" : "bg-gray-200")} />
-          <div className={cn("h-1 rounded-full transition-all duration-300", validation.passwordMatch ? "bg-green-500" : "bg-gray-200")} />
+          <div
+            className={cn(
+              "h-1 rounded-full transition-all duration-300",
+              validation.name ? "bg-green-500" : "bg-gray-200",
+            )}
+          />
+          <div
+            className={cn(
+              "h-1 rounded-full transition-all duration-300",
+              validation.email ? "bg-green-500" : "bg-gray-200",
+            )}
+          />
+          <div
+            className={cn(
+              "h-1 rounded-full transition-all duration-300",
+              validation.password ? "bg-green-500" : "bg-gray-200",
+            )}
+          />
+          <div
+            className={cn(
+              "h-1 rounded-full transition-all duration-300",
+              validation.passwordMatch ? "bg-green-500" : "bg-gray-200",
+            )}
+          />
         </div>
 
         <div className="flex items-center justify-center gap-2 text-sm text-gray-500">

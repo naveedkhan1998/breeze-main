@@ -1,9 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useLocation } from "react-router-dom";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { useGetCandlesQuery } from "../services/instrumentService";
-import { formatDate, calculateMA, calculateBollingerBands, calculateRSI, calculateMACD } from "../common-functions";
+import {
+  formatDate,
+  calculateMA,
+  calculateBollingerBands,
+  calculateRSI,
+  calculateMACD,
+} from "../common-functions";
 import { Candle, Instrument } from "../common-types";
 import { SeriesOptionsMap, Time } from "lightweight-charts";
 import { useTheme } from "@/components/theme-provider";
@@ -25,7 +41,9 @@ const GraphsPage: React.FC = () => {
   const isDarkMode = theme === "dark";
 
   const [timeframe, setTimeFrame] = useState<number>(15);
-  const [chartType, setChartType] = useState<"Candlestick" | "Line">("Candlestick");
+  const [chartType, setChartType] = useState<"Candlestick" | "Line">(
+    "Candlestick",
+  );
   const [showVolume, setShowVolume] = useState<boolean>(true);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -48,27 +66,34 @@ const GraphsPage: React.FC = () => {
 
   const seriesData = useMemo(() => {
     if (!data) return [];
-    return data.data.map(({ date, open, high, low, close, volume = 0 }: Candle) => ({
-      time: formatDate(date) as Time,
-      open,
-      high,
-      low,
-      close,
-      value: volume,
-    }));
+    return data.data.map(
+      ({ date, open, high, low, close, volume = 0 }: Candle) => ({
+        time: formatDate(date) as Time,
+        open,
+        high,
+        low,
+        close,
+        value: volume,
+      }),
+    );
   }, [data]);
 
   const volumeData = useMemo(() => {
     if (!data) return [];
-    return data.data.map(({ date, close, volume = 0 }: Candle, index: number, array: Candle[]) => {
-      const previousClose = index > 0 ? array[index - 1].close : close;
-      const color = close >= previousClose ? "rgba(76, 175, 80, 0.5)" : "rgba(255, 82, 82, 0.5)";
-      return {
-        time: formatDate(date) as Time,
-        value: volume,
-        color,
-      };
-    });
+    return data.data.map(
+      ({ date, close, volume = 0 }: Candle, index: number, array: Candle[]) => {
+        const previousClose = index > 0 ? array[index - 1].close : close;
+        const color =
+          close >= previousClose
+            ? "rgba(76, 175, 80, 0.5)"
+            : "rgba(255, 82, 82, 0.5)";
+        return {
+          time: formatDate(date) as Time,
+          value: volume,
+          color,
+        };
+      },
+    );
   }, [data]);
 
   useEffect(() => {
@@ -116,8 +141,10 @@ const GraphsPage: React.FC = () => {
 
     const getChartsToSync = () => {
       const charts = [];
-      if (showVolume && volumeChartRef.current) charts.push(volumeChartRef.current);
-      if (indicators.some((ind) => ind.active) && indicatorChartRef.current) charts.push(indicatorChartRef.current);
+      if (showVolume && volumeChartRef.current)
+        charts.push(volumeChartRef.current);
+      if (indicators.some((ind) => ind.active) && indicatorChartRef.current)
+        charts.push(indicatorChartRef.current);
       return charts;
     };
 
@@ -137,7 +164,9 @@ const GraphsPage: React.FC = () => {
     };
 
     const subscribeToMainChart = () => {
-      mainChartRef.current?.subscribeVisibleTimeRangeChange(handleVisibleTimeRangeChange);
+      mainChartRef.current?.subscribeVisibleTimeRangeChange(
+        handleVisibleTimeRangeChange,
+      );
     };
 
     handleVisibleTimeRangeChange();
@@ -145,7 +174,9 @@ const GraphsPage: React.FC = () => {
 
     return () => {
       clearTimeout(timeoutId);
-      mainChartRef.current?.unsubscribeVisibleTimeRangeChange(handleVisibleTimeRangeChange);
+      mainChartRef.current?.unsubscribeVisibleTimeRangeChange(
+        handleVisibleTimeRangeChange,
+      );
     };
   }, [showVolume, indicators]);
 
@@ -180,7 +211,11 @@ const GraphsPage: React.FC = () => {
   };
 
   const toggleIndicator = (name: string) => {
-    setIndicators((prevIndicators) => prevIndicators.map((ind) => (ind.name === name ? { ...ind, active: !ind.active } : ind)));
+    setIndicators((prevIndicators) =>
+      prevIndicators.map((ind) =>
+        ind.name === name ? { ...ind, active: !ind.active } : ind,
+      ),
+    );
   };
 
   const toggleFullscreen = () => {
@@ -188,7 +223,11 @@ const GraphsPage: React.FC = () => {
       chartSectionRef.current
         ?.requestFullscreen()
         .then(() => setIsFullscreen(true))
-        .catch((err) => console.error(`Error attempting to enable fullscreen mode: ${err.message}`));
+        .catch((err) =>
+          console.error(
+            `Error attempting to enable fullscreen mode: ${err.message}`,
+          ),
+        );
     } else {
       document.exitFullscreen().then(() => setIsFullscreen(false));
     }
@@ -205,24 +244,47 @@ const GraphsPage: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen text-zinc-700 dark:text-zinc-300">Loading chart data...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-zinc-700 dark:text-zinc-300">
+        Loading chart data...
+      </div>
+    );
   }
 
   if (isError) {
-    return <div className="flex items-center justify-center h-screen text-red-500">Failed to load chart data. Please try again later.</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        Failed to load chart data. Please try again later.
+      </div>
+    );
   }
 
   if (!obj) {
-    return <div className="flex items-center justify-center h-screen text-zinc-700 dark:text-zinc-300">No instrument data available.</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-zinc-700 dark:text-zinc-300">
+        No instrument data available.
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col max-h-screen h-[calc(100vh-4rem)] bg-white dark:bg-zinc-950">
-      <GraphHeader title={`${obj.exchange_code} Chart`} onRefresh={refetch} onDownload={handleDownload} onToggleFullscreen={toggleFullscreen} isFullscreen={isFullscreen} />
+      <GraphHeader
+        title={`${obj.exchange_code} Chart`}
+        onRefresh={refetch}
+        onDownload={handleDownload}
+        onToggleFullscreen={toggleFullscreen}
+        isFullscreen={isFullscreen}
+      />
       <main className="flex flex-grow overflow-hidden">
         <div ref={chartSectionRef} className="flex flex-grow">
           <ResizablePanelGroup direction="horizontal" className="flex-grow">
-            <ResizablePanel defaultSize={15} minSize={15} maxSize={30} className="hidden md:block">
+            <ResizablePanel
+              defaultSize={15}
+              minSize={15}
+              maxSize={30}
+              className="hidden md:block"
+            >
               <ResponsiveSidebar isFullscreen={isFullscreen}>
                 <ChartControls
                   timeframe={timeframe}
@@ -231,7 +293,9 @@ const GraphsPage: React.FC = () => {
                   autoRefresh={autoRefresh}
                   indicators={indicators}
                   onTfChange={handleTfChange}
-                  onChartTypeChange={(type: keyof SeriesOptionsMap) => setChartType(type as "Candlestick" | "Line")}
+                  onChartTypeChange={(type: keyof SeriesOptionsMap) =>
+                    setChartType(type as "Candlestick" | "Line")
+                  }
                   onShowVolumeChange={setShowVolume}
                   onAutoRefreshChange={setAutoRefresh}
                   onToggleIndicator={toggleIndicator}
@@ -249,7 +313,9 @@ const GraphsPage: React.FC = () => {
                     mode={isDarkMode}
                     obj={obj}
                     timeframe={timeframe}
-                    setTimeScale={(timeScale: any) => (mainChartRef.current = timeScale)}
+                    setTimeScale={(timeScale: any) =>
+                      (mainChartRef.current = timeScale)
+                    }
                   />
                 </ResizablePanel>
                 <ResizableHandle withHandle />
@@ -258,13 +324,25 @@ const GraphsPage: React.FC = () => {
                     {showVolume && (
                       <>
                         <ResizablePanel defaultSize={50}>
-                          <VolumeChart volumeData={volumeData} mode={isDarkMode} setTimeScale={(timeScale: any) => (volumeChartRef.current = timeScale)} />
+                          <VolumeChart
+                            volumeData={volumeData}
+                            mode={isDarkMode}
+                            setTimeScale={(timeScale: any) =>
+                              (volumeChartRef.current = timeScale)
+                            }
+                          />
                         </ResizablePanel>
                         <ResizableHandle withHandle />
                       </>
                     )}
                     <ResizablePanel defaultSize={50}>
-                      <IndicatorChart indicators={indicators} mode={isDarkMode} setTimeScale={(timeScale: any) => (indicatorChartRef.current = timeScale)} />
+                      <IndicatorChart
+                        indicators={indicators}
+                        mode={isDarkMode}
+                        setTimeScale={(timeScale: any) =>
+                          (indicatorChartRef.current = timeScale)
+                        }
+                      />
                     </ResizablePanel>
                   </ResizablePanelGroup>
                 </ResizablePanel>

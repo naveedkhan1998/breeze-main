@@ -9,7 +9,10 @@ interface ResponsiveSidebarProps {
   isFullscreen: boolean;
 }
 
-const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({ children, isFullscreen }) => {
+const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({
+  children,
+  isFullscreen,
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
   if (isFullscreen) {
@@ -20,8 +23,17 @@ const ResponsiveSidebar: React.FC<ResponsiveSidebarProps> = ({ children, isFulls
     <div className="w-full md:w-96">
       {/* Toggle Button for Mobile */}
       <div className="flex justify-end p-2 md:hidden">
-        <Button variant="outline" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Sidebar" size="icon">
-          {isOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+        <Button
+          variant="outline"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle Sidebar"
+          size="icon"
+        >
+          {isOpen ? (
+            <HiX className="w-6 h-6" />
+          ) : (
+            <HiMenu className="w-6 h-6" />
+          )}
         </Button>
       </div>
       {/* Sidebar Content */}

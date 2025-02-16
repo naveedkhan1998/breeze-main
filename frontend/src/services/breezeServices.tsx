@@ -56,4 +56,10 @@ export const breezeApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetBreezeQuery, useCheckBreezeStatusQuery, useUpdateBreezeMutation, useCreateBreezeMutation, useStartWebsocketMutation } = breezeApi;
+export const {
+  useGetBreezeQuery,
+  useCheckBreezeStatusQuery,
+  useUpdateBreezeMutation,
+  useCreateBreezeMutation,
+  useStartWebsocketMutation,
+} = breezeApi;

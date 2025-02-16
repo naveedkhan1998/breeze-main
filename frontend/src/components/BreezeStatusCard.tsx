@@ -28,7 +28,9 @@ const BreezeStatusCard: React.FC = () => {
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
-        <CardTitle className="text-xl font-semibold dark:text-white">Breeze Status Monitor</CardTitle>
+        <CardTitle className="text-xl font-semibold dark:text-white">
+          Breeze Status Monitor
+        </CardTitle>
         {isLoading && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -38,14 +40,31 @@ const BreezeStatusCard: React.FC = () => {
       </CardHeader>
       <CardContent>
         {error ? (
-          <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
+          <Alert
+            variant="destructive"
+            className="animate-in fade-in slide-in-from-top-1"
+          >
             <AlertCircle className="w-4 h-4" />
-            <AlertDescription className="ml-2">{"data" in error ? error.data?.data : "Unable to fetch status. Please try again later."}</AlertDescription>
+            <AlertDescription className="ml-2">
+              {"data" in error
+                ? error.data?.data
+                : "Unable to fetch status. Please try again later."}
+            </AlertDescription>
           </Alert>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <StatusItem title="Session Status" status={breezeStatusData?.data.session_status ?? false} isLoading={isLoading} icon={breezeStatusData?.data.session_status ? Wifi : WifiOff} />
-            <StatusItem title="Live Feed Status" status={breezeStatusData?.data.websocket_status ?? false} isLoading={isLoading} icon={breezeStatusData?.data.websocket_status ? Wifi : WifiOff} />
+            <StatusItem
+              title="Session Status"
+              status={breezeStatusData?.data.session_status ?? false}
+              isLoading={isLoading}
+              icon={breezeStatusData?.data.session_status ? Wifi : WifiOff}
+            />
+            <StatusItem
+              title="Live Feed Status"
+              status={breezeStatusData?.data.websocket_status ?? false}
+              isLoading={isLoading}
+              icon={breezeStatusData?.data.websocket_status ? Wifi : WifiOff}
+            />
           </div>
         )}
       </CardContent>
@@ -60,19 +79,35 @@ interface StatusItemProps {
   icon: React.ElementType;
 }
 
-const StatusItem: React.FC<StatusItemProps> = ({ title, status, isLoading, icon: Icon }) => {
-  const bgColor = status ? "bg-green-50 dark:bg-green-900/20" : "bg-red-50 dark:bg-red-900/20";
-  const textColor = status ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400";
+const StatusItem: React.FC<StatusItemProps> = ({
+  title,
+  status,
+  isLoading,
+  icon: Icon,
+}) => {
+  const bgColor = status
+    ? "bg-green-50 dark:bg-green-900/20"
+    : "bg-red-50 dark:bg-red-900/20";
+  const textColor = status
+    ? "text-green-700 dark:text-green-400"
+    : "text-red-700 dark:text-red-400";
 
   return (
-    <div className={`p-6 rounded-lg border transition-all duration-200 ${bgColor} ${isLoading ? "opacity-50" : ""} dark:border-slate-800`}>
+    <div
+      className={`p-6 rounded-lg border transition-all duration-200 ${bgColor} ${isLoading ? "opacity-50" : ""} dark:border-slate-800`}
+    >
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium dark:text-slate-200">{title}</h3>
         <Icon className={`h-5 w-5 ${textColor}`} />
       </div>
       <div className="flex items-center space-x-2">
-        <div className={`h-2 w-2 rounded-full ${status ? "bg-green-500" : "bg-red-500"} ${status ? "animate-pulse" : ""}`} />
-        <Badge variant={status ? "success" : "destructive"} className="text-xs font-medium">
+        <div
+          className={`h-2 w-2 rounded-full ${status ? "bg-green-500" : "bg-red-500"} ${status ? "animate-pulse" : ""}`}
+        />
+        <Badge
+          variant={status ? "success" : "destructive"}
+          className="text-xs font-medium"
+        >
           {status ? "Connected" : "Disconnected"}
         </Badge>
       </div>

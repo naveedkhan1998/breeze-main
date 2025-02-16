@@ -4,9 +4,24 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { getCurrentToken, logOut } from "../features/authSlice";
 import { removeToken as removeLocalToken } from "../services/LocalStorageService";
 import { toast } from "react-toastify";
-import { FaBars, FaSignOutAlt, FaUserCircle, FaHome, FaChartLine, FaInfoCircle, FaEnvelope } from "react-icons/fa";
+import {
+  FaBars,
+  FaSignOutAlt,
+  FaUserCircle,
+  FaHome,
+  FaChartLine,
+  FaInfoCircle,
+  FaEnvelope,
+} from "react-icons/fa";
 import { Button } from "./ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ModeToggle } from "./mode-toggle";
 
@@ -39,12 +54,16 @@ const Navbar: React.FC = () => {
   if (!access_token) return null;
 
   return (
-    <nav className={`sticky top-0 z-30 w-full transition-all duration-300 ${isScrolled ? "bg-background/90 shadow-md backdrop-blur-lg" : "bg-background"}`}>
+    <nav
+      className={`sticky top-0 z-30 w-full transition-all duration-300 ${isScrolled ? "bg-background/90 shadow-md backdrop-blur-lg" : "bg-background"}`}
+    >
       <div className="container flex items-center justify-between h-16 px-4 mx-auto">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
           <img src="/vite.svg" alt="Logo" className="w-8 h-8" />
-          <span className="text-xl font-semibold tracking-tight">ICICI Breeze</span>
+          <span className="text-xl font-semibold tracking-tight">
+            ICICI Breeze
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -54,7 +73,9 @@ const Navbar: React.FC = () => {
               key={item.path}
               to={item.path}
               className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition ${
-                location.pathname === item.path ? "bg-primary text-primary-foreground" : "hover:bg-accent hover:text-accent-foreground"
+                location.pathname === item.path
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
               }`}
             >
               <item.icon className="w-4 h-4 mr-2" />
@@ -66,13 +87,18 @@ const Navbar: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative w-8 h-8 p-0">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src="https://ui-avatars.com/api/?name=Naveed+Khan" alt="Profile" />
+                  <AvatarImage
+                    src="https://ui-avatars.com/api/?name=Naveed+Khan"
+                    alt="Profile"
+                  />
                   <AvatarFallback>NK</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="font-medium">Naveed Khan</DropdownMenuLabel>
+              <DropdownMenuLabel className="font-medium">
+                Naveed Khan
+              </DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link to="/profile">Profile</Link>
               </DropdownMenuItem>

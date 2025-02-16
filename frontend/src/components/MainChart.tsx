@@ -1,5 +1,15 @@
 import React, { useEffect, useRef, useCallback } from "react";
-import { createChart, IChartApi, SeriesType, ISeriesApi, ITimeScaleApi, Time, BarData, LineData, MouseEventParams } from "lightweight-charts";
+import {
+  createChart,
+  IChartApi,
+  SeriesType,
+  ISeriesApi,
+  ITimeScaleApi,
+  Time,
+  BarData,
+  LineData,
+  MouseEventParams,
+} from "lightweight-charts";
 import { Instrument } from "../common-types";
 import { Card } from "@/components/ui/card";
 
@@ -33,7 +43,15 @@ interface MainChartProps {
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
 }
 
-const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators, mode, obj, timeframe, setTimeScale }) => {
+const MainChart: React.FC<MainChartProps> = ({
+  seriesData,
+  chartType,
+  indicators,
+  mode,
+  obj,
+  timeframe,
+  setTimeScale,
+}) => {
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick" | "Line"> | null>(null);
@@ -115,7 +133,8 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         prevChartTypeRef.current = chartType;
 
         const legendContainer = document.createElement("div");
-        legendContainer.className = "absolute top-4 left-4 p-3 rounded-lg bg-card text-card-foreground shadow-lg border z-[10] min-w-[240px]";
+        legendContainer.className =
+          "absolute top-4 left-4 p-3 rounded-lg bg-card text-card-foreground shadow-lg border z-[10] min-w-[240px]";
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
@@ -127,11 +146,13 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
         companyName.textContent = obj?.company_name || "";
 
         const exchangeBadge = document.createElement("span");
-        exchangeBadge.className = "px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary";
+        exchangeBadge.className =
+          "px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary";
         exchangeBadge.textContent = obj?.exchange_code || "";
 
         const timeframeBadge = document.createElement("span");
-        timeframeBadge.className = "px-2 py-0.5 text-xs rounded-full bg-secondary/10 text-secondary ml-auto";
+        timeframeBadge.className =
+          "px-2 py-0.5 text-xs rounded-full bg-secondary/10 text-secondary ml-auto";
         timeframeBadge.textContent = `${timeframe}`;
 
         headerRow.appendChild(companyName);
@@ -287,10 +308,22 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                   lineWidth: 1,
                   lastValueVisible: true,
                 });
-                upperBandSeries.setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.upper })));
-                lowerBandSeries.setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.lower })));
-                indicatorSeriesRef.current[`${indicator.name}_upper`] = upperBandSeries;
-                indicatorSeriesRef.current[`${indicator.name}_lower`] = lowerBandSeries;
+                upperBandSeries.setData(
+                  bbIndicator.data.map((d) => ({
+                    time: d.time,
+                    value: d.upper,
+                  })),
+                );
+                lowerBandSeries.setData(
+                  bbIndicator.data.map((d) => ({
+                    time: d.time,
+                    value: d.lower,
+                  })),
+                );
+                indicatorSeriesRef.current[`${indicator.name}_upper`] =
+                  upperBandSeries;
+                indicatorSeriesRef.current[`${indicator.name}_lower`] =
+                  lowerBandSeries;
                 break;
               }
             }
@@ -301,42 +334,73 @@ const MainChart: React.FC<MainChartProps> = ({ seriesData, chartType, indicators
                 indicatorSeriesRef.current[indicator.name].applyOptions({
                   color: mode ? "#FBBF24" : "#F59E0B",
                 });
-                indicatorSeriesRef.current[indicator.name].setData(maIndicator.data);
+                indicatorSeriesRef.current[indicator.name].setData(
+                  maIndicator.data,
+                );
                 break;
               }
               case "Bollinger Bands": {
                 const bbIndicator = indicator as BollingerBandsIndicator;
-                indicatorSeriesRef.current[`${indicator.name}_upper`].applyOptions({
+                indicatorSeriesRef.current[
+                  `${indicator.name}_upper`
+                ].applyOptions({
                   color: mode ? "#34D399" : "#10B981",
                 });
-                indicatorSeriesRef.current[`${indicator.name}_lower`].applyOptions({
+                indicatorSeriesRef.current[
+                  `${indicator.name}_lower`
+                ].applyOptions({
                   color: mode ? "#F87171" : "#EF4444",
                 });
-                indicatorSeriesRef.current[`${indicator.name}_upper`].setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.upper })));
-                indicatorSeriesRef.current[`${indicator.name}_lower`].setData(bbIndicator.data.map((d) => ({ time: d.time, value: d.lower })));
+                indicatorSeriesRef.current[`${indicator.name}_upper`].setData(
+                  bbIndicator.data.map((d) => ({
+                    time: d.time,
+                    value: d.upper,
+                  })),
+                );
+                indicatorSeriesRef.current[`${indicator.name}_lower`].setData(
+                  bbIndicator.data.map((d) => ({
+                    time: d.time,
+                    value: d.lower,
+                  })),
+                );
                 break;
               }
             }
           }
         } else {
           if (indicatorSeriesRef.current[indicator.name]) {
-            mainChartRef.current!.removeSeries(indicatorSeriesRef.current[indicator.name]);
+            mainChartRef.current!.removeSeries(
+              indicatorSeriesRef.current[indicator.name],
+            );
             delete indicatorSeriesRef.current[indicator.name];
           }
           if (indicator.name === "Bollinger Bands") {
             if (indicatorSeriesRef.current[`${indicator.name}_upper`]) {
-              mainChartRef.current!.removeSeries(indicatorSeriesRef.current[`${indicator.name}_upper`]);
+              mainChartRef.current!.removeSeries(
+                indicatorSeriesRef.current[`${indicator.name}_upper`],
+              );
               delete indicatorSeriesRef.current[`${indicator.name}_upper`];
             }
             if (indicatorSeriesRef.current[`${indicator.name}_lower`]) {
-              mainChartRef.current!.removeSeries(indicatorSeriesRef.current[`${indicator.name}_lower`]);
+              mainChartRef.current!.removeSeries(
+                indicatorSeriesRef.current[`${indicator.name}_lower`],
+              );
               delete indicatorSeriesRef.current[`${indicator.name}_lower`];
             }
           }
         }
       });
     }
-  }, [seriesData, mode, obj?.company_name, obj?.exchange_code, timeframe, chartType, indicators, setTimeScale]);
+  }, [
+    seriesData,
+    mode,
+    obj?.company_name,
+    obj?.exchange_code,
+    timeframe,
+    chartType,
+    indicators,
+    setTimeScale,
+  ]);
 
   useEffect(() => {
     renderMainChart();

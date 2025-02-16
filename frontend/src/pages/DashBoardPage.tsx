@@ -24,7 +24,9 @@ const DashBoardPage = () => {
         <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "overview" ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" : "text-gray-600 dark:text-gray-400"
+              activeTab === "overview"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
             } font-semibold flex items-center justify-center space-x-2`}
             onClick={() => setActiveTab("overview")}
           >
@@ -33,7 +35,9 @@ const DashBoardPage = () => {
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "profile" ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" : "text-gray-600 dark:text-gray-400"
+              activeTab === "profile"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
             } font-semibold flex items-center justify-center space-x-2`}
             onClick={() => setActiveTab("profile")}
           >
@@ -42,7 +46,9 @@ const DashBoardPage = () => {
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "settings" ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" : "text-gray-600 dark:text-gray-400"
+              activeTab === "settings"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
             } font-semibold flex items-center justify-center space-x-2`}
             onClick={() => setActiveTab("settings")}
           >
@@ -51,7 +57,9 @@ const DashBoardPage = () => {
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "notifications" ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" : "text-gray-600 dark:text-gray-400"
+              activeTab === "notifications"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
             } font-semibold flex items-center justify-center space-x-2`}
             onClick={() => setActiveTab("notifications")}
           >
@@ -63,7 +71,9 @@ const DashBoardPage = () => {
         <div className="p-6">
           {activeTab === "overview" && (
             <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">Portfolio Overview</h3>
+              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
+                Portfolio Overview
+              </h3>
               <div className="w-full h-80">
                 <Line data={data} options={{ maintainAspectRatio: false }} />
               </div>
@@ -72,24 +82,36 @@ const DashBoardPage = () => {
 
           {activeTab === "profile" && (
             <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">User Profile</h3>
-              <p className="text-gray-600 dark:text-gray-400">This section will display the user's profile information.</p>
+              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
+                User Profile
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                This section will display the user's profile information.
+              </p>
               {/* Profile information UI elements would go here */}
             </div>
           )}
 
           {activeTab === "settings" && (
             <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">Settings</h3>
-              <p className="text-gray-600 dark:text-gray-400">Here you can adjust your application settings.</p>
+              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
+                Settings
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Here you can adjust your application settings.
+              </p>
               {/* Settings form or other UI elements would go here */}
             </div>
           )}
 
           {activeTab === "notifications" && (
             <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">Notifications</h3>
-              <p className="text-gray-600 dark:text-gray-400">Manage your notification preferences here.</p>
+              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
+                Notifications
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Manage your notification preferences here.
+              </p>
               {/* Notification settings UI elements would go here */}
             </div>
           )}

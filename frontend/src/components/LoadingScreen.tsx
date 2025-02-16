@@ -56,18 +56,26 @@ const LoadingScreen = () => {
                 <div className="w-32 h-32 border-2 rounded-full border-purple-500/20 animate-ping" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-24 h-24 border-2 rounded-full border-blue-500/20 animate-ping" style={{ animationDelay: "0.5s" }} />
+                <div
+                  className="w-24 h-24 border-2 rounded-full border-blue-500/20 animate-ping"
+                  style={{ animationDelay: "0.5s" }}
+                />
               </div>
               <Loader2 className="w-16 h-16 text-purple-500 animate-spin" />
             </div>
 
             {/* Text and progress */}
             <div className="space-y-6 text-center">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Initializing System{dots}</h2>
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                Initializing System{dots}
+              </h2>
 
               <div className="space-y-2">
                 <div className="relative w-full h-1 overflow-hidden bg-gray-800 rounded-full">
-                  <div className="absolute top-0 left-0 h-full transition-all duration-300 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" style={{ width: `${progress}%` }} />
+                  <div
+                    className="absolute top-0 left-0 h-full transition-all duration-300 rounded-full bg-gradient-to-r from-purple-500 to-blue-500"
+                    style={{ width: `${progress}%` }}
+                  />
                 </div>
                 <p className="text-sm text-gray-400">{progress}% Complete</p>
               </div>
@@ -75,7 +83,10 @@ const LoadingScreen = () => {
 
             {/* Status messages */}
             <div className="text-center">
-              <p className="text-sm text-gray-500">Estimated time remaining: {Math.ceil((100 - progress) * 0.9)} seconds</p>
+              <p className="text-sm text-gray-500">
+                Estimated time remaining: {Math.ceil((100 - progress) * 0.9)}{" "}
+                seconds
+              </p>
             </div>
           </div>
         </Card>
