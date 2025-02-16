@@ -1,7 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
-  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}", "./node_modules/flowbite/**/*.js"],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "./node_modules/flowbite/**/*.js",
+  ],
   theme: {
     extend: {
       borderRadius: {

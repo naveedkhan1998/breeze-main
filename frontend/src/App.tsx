@@ -24,12 +24,14 @@ import DashBoardPage from "./pages/DashBoardPage";
 
 import { checkEnvironment } from "./utils/environment.ts";
 import { ThemeProvider } from "./components/theme-provider.tsx";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 
 const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
 
 // PrivateRoute Component
-const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
+const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({
+  element,
+}) => {
   const accessToken = useAppSelector(getCurrentToken);
   return accessToken ? element : <Navigate to="/login" />;
 };
@@ -76,7 +78,13 @@ export default function App() {
           <AnnouncementBanner />
           <Routes>
             {routes.map(({ path, element, private: isPrivate }) => (
-              <Route key={path} path={path} element={isPrivate ? <PrivateRoute element={element} /> : element} />
+              <Route
+                key={path}
+                path={path}
+                element={
+                  isPrivate ? <PrivateRoute element={element} /> : element
+                }
+              />
             ))}
           </Routes>
           <Toast />

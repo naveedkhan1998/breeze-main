@@ -6,7 +6,16 @@ import { storeToken } from "../services/LocalStorageService";
 import { setToken } from "../services/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Mail, Lock, AlertCircle, Loader, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  AlertCircle,
+  Loader,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -51,7 +60,9 @@ const Login: React.FC = () => {
   }, [formData.email]);
 
   // Password strength indicator
-  const getPasswordStrength = (password: string): { strength: number; message: string } => {
+  const getPasswordStrength = (
+    password: string,
+  ): { strength: number; message: string } => {
     if (!password) return { strength: 0, message: "" };
 
     let strength = 0;
@@ -127,12 +138,21 @@ const Login: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className={cn("pl-10 pr-10 transition-all duration-200", error && "border-red-500 focus-visible:ring-red-500", validEmail === true && "border-green-500 focus-visible:ring-green-500")}
+              className={cn(
+                "pl-10 pr-10 transition-all duration-200",
+                error && "border-red-500 focus-visible:ring-red-500",
+                validEmail === true &&
+                  "border-green-500 focus-visible:ring-green-500",
+              )}
             />
             <Mail className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
             {formData.email && (
               <div className="absolute transform -translate-y-1/2 right-3 top-1/2">
-                {validEmail ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <XCircle className="w-5 h-5 text-red-500" />}
+                {validEmail ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-500" />
+                )}
               </div>
             )}
           </div>
@@ -148,12 +168,27 @@ const Login: React.FC = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className={cn("pl-10 pr-10 transition-all duration-200", error && "border-red-500 focus-visible:ring-red-500")}
+              className={cn(
+                "pl-10 pr-10 transition-all duration-200",
+                error && "border-red-500 focus-visible:ring-red-500",
+              )}
             />
             <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-            <Button type="button" variant="ghost" size="sm" className="absolute transform -translate-y-1/2 right-1 top-1/2" onClick={togglePasswordVisibility}>
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute transform -translate-y-1/2 right-1 top-1/2"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+              <span className="sr-only">
+                {showPassword ? "Hide password" : "Show password"}
+              </span>
             </Button>
           </div>
           {formData.password && (
@@ -163,28 +198,54 @@ const Login: React.FC = () => {
                   key={index}
                   className={cn(
                     "h-1 flex-1 rounded-full transition-all duration-300",
-                    index < passwordStrength.strength ? (index < 2 ? "bg-red-500" : index < 3 ? "bg-yellow-500" : "bg-green-500") : "bg-gray-200"
+                    index < passwordStrength.strength
+                      ? index < 2
+                        ? "bg-red-500"
+                        : index < 3
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      : "bg-gray-200",
                   )}
                 />
               ))}
-              <span className="text-xs text-gray-500">{passwordStrength.message}</span>
+              <span className="text-xs text-gray-500">
+                {passwordStrength.message}
+              </span>
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(checked as boolean)} />
-            <Label htmlFor="remember-me" className="text-sm text-gray-600 dark:text-gray-400">
+            <Checkbox
+              id="remember-me"
+              checked={rememberMe}
+              onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+            />
+            <Label
+              htmlFor="remember-me"
+              className="text-sm text-gray-600 dark:text-gray-400"
+            >
               Remember me
             </Label>
           </div>
-          <Button variant="ghost" className="p-0 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-500" onClick={() => navigate("/forgot-password")}>
+          <Button
+            variant="ghost"
+            className="p-0 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-500"
+            onClick={() => navigate("/forgot-password")}
+          >
             Forgot password?
           </Button>
         </div>
 
-        <Button type="submit" disabled={isLoading || !validEmail} className={cn("w-full transition-all duration-300", isLoading && "opacity-80")}>
+        <Button
+          type="submit"
+          disabled={isLoading || !validEmail}
+          className={cn(
+            "w-full transition-all duration-300",
+            isLoading && "opacity-80",
+          )}
+        >
           {isLoading ? (
             <>
               <Loader className="w-5 h-5 mr-2 animate-spin" />

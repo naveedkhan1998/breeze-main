@@ -7,7 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { Switch } from "@/components/ui/switch";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
 import { useCreateBreezeMutation } from "../services/breezeServices";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -49,14 +57,25 @@ const CreateBreezeForm = () => {
 
   return (
     <div className="flex items-start justify-center min-h-screen bg-gradient-to-b from-background to-muted/50">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }} className="w-full max-w-lg p-8 m-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-lg p-8 m-4"
+      >
         <Card className="shadow-xl">
           <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">Create Breeze Account</CardTitle>
+            <CardTitle className="text-3xl font-bold text-center text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+              Create Breeze Account
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
                 <FormField
                   control={form.control}
                   name="name"
@@ -92,7 +111,11 @@ const CreateBreezeForm = () => {
                     <FormItem>
                       <FormLabel>API Secret</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter API secret" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="Enter API secret"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -106,9 +129,14 @@ const CreateBreezeForm = () => {
                     <FormItem>
                       <FormLabel>Session Token</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter session token (optional)" {...field} />
+                        <Input
+                          placeholder="Enter session token (optional)"
+                          {...field}
+                        />
                       </FormControl>
-                      <FormDescription>Optional: Provide a session token if you have one</FormDescription>
+                      <FormDescription>
+                        Optional: Provide a session token if you have one
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -120,11 +148,18 @@ const CreateBreezeForm = () => {
                   render={({ field }) => (
                     <FormItem className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">Active Status</FormLabel>
-                        <FormDescription>Enable this to activate the account immediately</FormDescription>
+                        <FormLabel className="text-base">
+                          Active Status
+                        </FormLabel>
+                        <FormDescription>
+                          Enable this to activate the account immediately
+                        </FormDescription>
                       </div>
                       <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
                     </FormItem>
                   )}

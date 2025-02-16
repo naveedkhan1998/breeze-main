@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -59,12 +64,23 @@ export default function ChartControls({
         </div>
         <div className="grid grid-cols-3 gap-3">
           {timeframeOptions.map((tf) => (
-            <Button key={tf} size="sm" variant={timeframe === tf ? "default" : "outline"} className="rounded-lg" onClick={() => onTfChange(tf)} aria-pressed={timeframe === tf}>
+            <Button
+              key={tf}
+              size="sm"
+              variant={timeframe === tf ? "default" : "outline"}
+              className="rounded-lg"
+              onClick={() => onTfChange(tf)}
+              aria-pressed={timeframe === tf}
+            >
               {tf}m
             </Button>
           ))}
         </div>
-        <Button size="sm" className="w-full mt-4 rounded-lg" onClick={() => setIsCustomTfDialogOpen(true)}>
+        <Button
+          size="sm"
+          className="w-full mt-4 rounded-lg"
+          onClick={() => setIsCustomTfDialogOpen(true)}
+        >
           Custom
         </Button>
       </Card>
@@ -77,7 +93,14 @@ export default function ChartControls({
         </div>
         <div className="flex space-x-3">
           {chartTypes.map((type) => (
-            <Button key={type} size="sm" variant={chartType === type ? "default" : "outline"} className="rounded-lg" onClick={() => onChartTypeChange(type)} aria-pressed={chartType === type}>
+            <Button
+              key={type}
+              size="sm"
+              variant={chartType === type ? "default" : "outline"}
+              className="rounded-lg"
+              onClick={() => onChartTypeChange(type)}
+              aria-pressed={chartType === type}
+            >
               {type}
             </Button>
           ))}
@@ -92,11 +115,18 @@ export default function ChartControls({
         </div>
         <div className="space-y-3">
           {indicators.map((indicator) => (
-            <div key={indicator.name} className="flex items-center justify-between">
+            <div
+              key={indicator.name}
+              className="flex items-center justify-between"
+            >
               <Label htmlFor={`indicator-${indicator.name}`} className="">
                 {indicator.name}
               </Label>
-              <Switch id={`indicator-${indicator.name}`} checked={indicator.active} onCheckedChange={() => onToggleIndicator(indicator.name)} />
+              <Switch
+                id={`indicator-${indicator.name}`}
+                checked={indicator.active}
+                onCheckedChange={() => onToggleIndicator(indicator.name)}
+              />
             </div>
           ))}
         </div>
@@ -109,7 +139,11 @@ export default function ChartControls({
           <Label htmlFor="show-volume" className="">
             Show Volume
           </Label>
-          <Switch id="show-volume" checked={showVolume} onCheckedChange={onShowVolumeChange} />
+          <Switch
+            id="show-volume"
+            checked={showVolume}
+            onCheckedChange={onShowVolumeChange}
+          />
         </div>
       </Card>
 
@@ -123,15 +157,24 @@ export default function ChartControls({
           <Label htmlFor="auto-refresh" className="">
             Enable
           </Label>
-          <Switch id="auto-refresh" checked={autoRefresh} onCheckedChange={onAutoRefreshChange} />
+          <Switch
+            id="auto-refresh"
+            checked={autoRefresh}
+            onCheckedChange={onAutoRefreshChange}
+          />
         </div>
       </Card>
 
       {/* Custom Timeframe Dialog */}
-      <Dialog open={isCustomTfDialogOpen} onOpenChange={setIsCustomTfDialogOpen}>
+      <Dialog
+        open={isCustomTfDialogOpen}
+        onOpenChange={setIsCustomTfDialogOpen}
+      >
         <DialogContent className="p-6 rounded-lg shadow-lg ">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold ">Custom Timeframe</DialogTitle>
+            <DialogTitle className="text-lg font-semibold ">
+              Custom Timeframe
+            </DialogTitle>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -144,13 +187,26 @@ export default function ChartControls({
               <Label htmlFor="custom-timeframe" className="">
                 Enter custom timeframe (minutes):
               </Label>
-              <Input type="number" id="custom-timeframe" value={customTimeframeInput} onChange={(e) => setCustomTimeframeInput(e.target.value)} required min={1} className="mt-2" />
+              <Input
+                type="number"
+                id="custom-timeframe"
+                value={customTimeframeInput}
+                onChange={(e) => setCustomTimeframeInput(e.target.value)}
+                required
+                min={1}
+                className="mt-2"
+              />
             </div>
             <div className="flex justify-end space-x-3">
               <Button type="submit" className="rounded-lg">
                 Apply
               </Button>
-              <Button type="button" variant="secondary" onClick={() => setIsCustomTfDialogOpen(false)} className="rounded-lg">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsCustomTfDialogOpen(false)}
+                className="rounded-lg"
+              >
                 Cancel
               </Button>
             </div>

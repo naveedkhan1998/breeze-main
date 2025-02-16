@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { createChart, IChartApi, ISeriesApi, Time, HistogramData, ITimeScaleApi } from "lightweight-charts";
+import {
+  createChart,
+  IChartApi,
+  ISeriesApi,
+  Time,
+  HistogramData,
+  ITimeScaleApi,
+} from "lightweight-charts";
 
 interface VolumeChartProps {
   volumeData: HistogramData<Time>[];
@@ -7,7 +14,11 @@ interface VolumeChartProps {
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
 }
 
-const VolumeChart: React.FC<VolumeChartProps> = ({ volumeData, mode, setTimeScale }) => {
+const VolumeChart: React.FC<VolumeChartProps> = ({
+  volumeData,
+  mode,
+  setTimeScale,
+}) => {
   const volumeChartContainerRef = useRef<HTMLDivElement | null>(null);
   const volumeChartRef = useRef<IChartApi | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
@@ -121,7 +132,12 @@ const VolumeChart: React.FC<VolumeChartProps> = ({ volumeData, mode, setTimeScal
     }
   }, [volumeData]);
 
-  return <div ref={volumeChartContainerRef} className="relative w-full h-full overflow-hidden rounded-lg shadow-lg"></div>;
+  return (
+    <div
+      ref={volumeChartContainerRef}
+      className="relative w-full h-full overflow-hidden rounded-lg shadow-lg"
+    ></div>
+  );
 };
 
 export default VolumeChart;

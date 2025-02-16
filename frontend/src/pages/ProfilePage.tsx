@@ -6,7 +6,11 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("profile");
 
   if (!data) {
-    return <div className="flex items-center justify-center h-screen text-white bg-gray-900">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-white bg-gray-900">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -15,7 +19,9 @@ const ProfilePage = () => {
         <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "profile" ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" : "text-gray-600 dark:text-gray-400"
+              activeTab === "profile"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
             } font-semibold`}
             onClick={() => setActiveTab("profile")}
           >
@@ -23,7 +29,9 @@ const ProfilePage = () => {
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "settings" ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" : "text-gray-600 dark:text-gray-400"
+              activeTab === "settings"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
             } font-semibold`}
             onClick={() => setActiveTab("settings")}
           >
@@ -31,7 +39,9 @@ const ProfilePage = () => {
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "notifications" ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400" : "text-gray-600 dark:text-gray-400"
+              activeTab === "notifications"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
             } font-semibold`}
             onClick={() => setActiveTab("notifications")}
           >
@@ -42,27 +52,45 @@ const ProfilePage = () => {
         <div className="p-6">
           {activeTab === "profile" && (
             <div className="flex items-center space-x-6">
-              <img src={data.avatar} alt="User Avatar" className="w-24 h-24 border-4 border-blue-500 rounded-full" />
+              <img
+                src={data.avatar}
+                alt="User Avatar"
+                className="w-24 h-24 border-4 border-blue-500 rounded-full"
+              />
               <div>
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{data.name}</h2>
-                <p className="text-lg text-gray-600 dark:text-gray-400">Email: {data.email}</p>
-                <p className="text-lg text-gray-600 dark:text-gray-400">Role: {data.is_admin ? "Admin" : "User"}</p>
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+                  {data.name}
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Email: {data.email}
+                </p>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Role: {data.is_admin ? "Admin" : "User"}
+                </p>
               </div>
             </div>
           )}
 
           {activeTab === "settings" && (
             <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">Settings</h3>
-              <p className="text-gray-600 dark:text-gray-400">Here you can adjust your personal settings.</p>
+              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
+                Settings
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Here you can adjust your personal settings.
+              </p>
               {/* Settings form or other UI elements would go here */}
             </div>
           )}
 
           {activeTab === "notifications" && (
             <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">Notifications</h3>
-              <p className="text-gray-600 dark:text-gray-400">Manage your notification preferences here.</p>
+              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
+                Notifications
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Manage your notification preferences here.
+              </p>
               {/* Notification settings UI elements would go here */}
             </div>
           )}

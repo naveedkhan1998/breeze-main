@@ -10,7 +10,10 @@ export function formatDate(originalDate: string) {
 import { CandlestickData, LineData } from "lightweight-charts";
 import { Candle } from "./common-types";
 
-export const calculateMA = (data: CandlestickData[], period: number): LineData[] => {
+export const calculateMA = (
+  data: CandlestickData[],
+  period: number,
+): LineData[] => {
   const maData: LineData[] = [];
 
   for (let i = period - 1; i < data.length; i++) {
@@ -27,7 +30,11 @@ export const calculateMA = (data: CandlestickData[], period: number): LineData[]
   return maData;
 };
 
-export const calculateBollingerBands = (data: Candle[], period: number = 20, stdDev: number = 2) => {
+export const calculateBollingerBands = (
+  data: Candle[],
+  period: number = 20,
+  stdDev: number = 2,
+) => {
   if (data.length < period) return [];
 
   const bands = [];
@@ -78,7 +85,10 @@ export const calculateRSI = (data: Candle[], period: number = 14) => {
 
   let avgGain = gains / period;
   let avgLoss = losses / period;
-  rsi.push({ time: data[period].time, value: 100 - 100 / (1 + avgGain / avgLoss) });
+  rsi.push({
+    time: data[period].time,
+    value: 100 - 100 / (1 + avgGain / avgLoss),
+  });
 
   for (let i = period + 1; i < data.length; i++) {
     const diff = data[i].close - data[i - 1].close;
@@ -89,12 +99,20 @@ export const calculateRSI = (data: Candle[], period: number = 14) => {
       avgGain = (avgGain * (period - 1)) / period;
       avgLoss = (avgLoss * (period - 1) - diff) / period;
     }
-    rsi.push({ time: data[i].time, value: 100 - 100 / (1 + avgGain / avgLoss) });
+    rsi.push({
+      time: data[i].time,
+      value: 100 - 100 / (1 + avgGain / avgLoss),
+    });
   }
   return rsi;
 };
 
-export const calculateMACD = (data: Candle[], shortPeriod: number = 12, longPeriod: number = 26, signalPeriod: number = 9) => {
+export const calculateMACD = (
+  data: Candle[],
+  shortPeriod: number = 12,
+  longPeriod: number = 26,
+  signalPeriod: number = 9,
+) => {
   const ema = (data: Candle[], period: number) => {
     const k = 2 / (period + 1);
     const emaArray = [];
@@ -113,7 +131,7 @@ export const calculateMACD = (data: Candle[], shortPeriod: number = 12, longPeri
   const signalLine = ema(
     //@ts-expect-error no shit 2
     macdLine.map((value, index) => ({ close: value, time: data[index].time })),
-    signalPeriod
+    signalPeriod,
   );
   const histogram = macdLine.map((value, index) => value - signalLine[index]);
 

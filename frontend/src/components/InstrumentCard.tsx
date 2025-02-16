@@ -1,7 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { HiChartBar, HiTrash, HiClock, HiCurrencyDollar, HiOfficeBuilding } from "react-icons/hi";
+import {
+  HiChartBar,
+  HiTrash,
+  HiClock,
+  HiCurrencyDollar,
+  HiOfficeBuilding,
+} from "react-icons/hi";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,7 +20,11 @@ interface InstrumentCardProps {
   isDeleting: boolean;
 }
 
-export const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDelete, isDeleting }) => {
+export const InstrumentCard: React.FC<InstrumentCardProps> = ({
+  instrument,
+  onDelete,
+  isDeleting,
+}) => {
   const isLoading = !instrument.percentage?.is_loading;
 
   const getSeriesColor = (series: string) => {
@@ -33,11 +43,15 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDe
       <div className="space-y-2">
         <div className="flex items-center">
           <HiOfficeBuilding className="w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400" />
-          <span className="text-sm text-zinc-600 dark:text-zinc-300">{instrument.company_name}</span>
+          <span className="text-sm text-zinc-600 dark:text-zinc-300">
+            {instrument.company_name}
+          </span>
         </div>
         <div className="flex items-center">
           <HiCurrencyDollar className="w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400" />
-          <span className="text-sm text-zinc-600 dark:text-zinc-300">{instrument.exchange_code}</span>
+          <span className="text-sm text-zinc-600 dark:text-zinc-300">
+            {instrument.exchange_code}
+          </span>
         </div>
       </div>
     );
@@ -57,7 +71,10 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDe
           <div className="space-y-4">
             {commonDetails}
             <div className="flex flex-col gap-2">
-              <Badge variant="secondary" className={getSeriesColor(instrument.series)}>
+              <Badge
+                variant="secondary"
+                className={getSeriesColor(instrument.series)}
+              >
                 {instrument.option_type} Option
               </Badge>
               <div className="flex items-center">
@@ -74,12 +91,17 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDe
           <div className="space-y-4">
             {commonDetails}
             <div className="flex flex-col gap-2">
-              <Badge variant="secondary" className={getSeriesColor(instrument.series)}>
+              <Badge
+                variant="secondary"
+                className={getSeriesColor(instrument.series)}
+              >
                 Future
               </Badge>
               <div className="flex items-center">
                 <HiClock className="w-4 h-4 mr-2 text-zinc-500 dark:text-zinc-400" />
-                <span className="text-sm text-zinc-600 dark:text-zinc-300">Expires: {getExpiryDate()}</span>
+                <span className="text-sm text-zinc-600 dark:text-zinc-300">
+                  Expires: {getExpiryDate()}
+                </span>
               </div>
             </div>
           </div>
@@ -97,11 +119,19 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDe
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="h-full">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="h-full"
+    >
       <Card className="h-full overflow-hidden transition-all duration-300 bg-white dark:bg-zinc-900 hover:shadow-lg">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{instrument.exchange_code}</h3>
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+              {instrument.exchange_code}
+            </h3>
           </div>
 
           <div className="mb-6">{renderInstrumentDetails()}</div>
@@ -109,10 +139,17 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDe
           {instrument.percentage && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Progress</span>
-                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{instrument.percentage.percentage.toFixed(2)}%</span>
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Progress
+                </span>
+                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  {instrument.percentage.percentage.toFixed(2)}%
+                </span>
               </div>
-              <Progress value={instrument.percentage.percentage} className="h-2 bg-zinc-200 dark:bg-zinc-700" />
+              <Progress
+                value={instrument.percentage.percentage}
+                className="h-2 bg-zinc-200 dark:bg-zinc-700"
+              />
               {!instrument.percentage.percentage && (
                 <div className="flex justify-center">
                   <div className="w-4 h-4 border-2 rounded-full border-zinc-600 animate-spin border-t-transparent" />
@@ -123,13 +160,26 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument, onDe
         </CardContent>
 
         <CardFooter className="grid grid-cols-2 gap-3 p-6 border-t bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-700">
-          <Link to={`/graphs/${instrument.id}`} state={{ obj: instrument }} className="w-full">
-            <Button disabled={isLoading} variant="default" className="w-full bg-zinc-900 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
+          <Link
+            to={`/graphs/${instrument.id}`}
+            state={{ obj: instrument }}
+            className="w-full"
+          >
+            <Button
+              disabled={isLoading}
+              variant="default"
+              className="w-full bg-zinc-900 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
               <HiChartBar className="w-4 h-4 mr-2" />
               View Graph
             </Button>
           </Link>
-          <Button variant="destructive" onClick={() => onDelete(instrument.id)} className="w-full bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700" disabled={isDeleting}>
+          <Button
+            variant="destructive"
+            onClick={() => onDelete(instrument.id)}
+            className="w-full bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
+            disabled={isDeleting}
+          >
             <HiTrash className="w-4 h-4 mr-2" />
             Delete
           </Button>

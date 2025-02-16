@@ -50,4 +50,10 @@ export const userAuthApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation, useGetLoggedUserQuery, useGoogleLoginQuery, useLazySendEmailQuery } = userAuthApi;
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useGetLoggedUserQuery,
+  useGoogleLoginQuery,
+  useLazySendEmailQuery,
+} = userAuthApi;
