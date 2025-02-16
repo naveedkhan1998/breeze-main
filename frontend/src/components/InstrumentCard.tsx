@@ -143,6 +143,20 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({
               </Link>
             </Button>
             <Button
+              asChild
+              disabled={isLoading}
+              variant="default"
+              className="flex-1 gap-2"
+            >
+              <Link
+                to={`/trading/${instrument.id}`}
+                state={{ instrument: instrument }}
+              >
+                <ChartBarIcon className="w-4 h-4" />
+                View Graph V2
+              </Link>
+            </Button>
+            <Button
               variant="outline"
               onClick={() => onDelete(instrument.id)}
               className="gap-2 text-destructive hover:text-destructive-foreground hover:bg-destructive"

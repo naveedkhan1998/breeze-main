@@ -25,6 +25,7 @@ import DashBoardPage from "./pages/DashBoardPage";
 import { checkEnvironment } from "./utils/environment.ts";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import { Toaster } from "@/components/ui/toaster";
+import TradingViewPage from "./pages/TradingViewPage.tsx";
 
 const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
 
@@ -64,6 +65,7 @@ export default function App() {
     { path: "/dashboard", element: <DashBoardPage />, private: true },
     { path: "/instruments", element: <InstrumentsPage />, private: true },
     { path: "/graphs/:id", element: <GraphsPage />, private: true },
+    { path: "/trading/:id", element: <TradingViewPage />, private: true },
     { path: "/accounts", element: <AccountsPage />, private: true },
     { path: "/contact", element: <ContactPage />, private: true },
     { path: "/login", element: <LoginRegPage />, private: false },
