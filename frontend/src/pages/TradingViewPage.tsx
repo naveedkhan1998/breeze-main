@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 import { ChartContainer } from "@/components/chart/ChartContainer";
@@ -14,30 +14,40 @@ interface LocationState {
 export const TradingViewPage: React.FC = () => {
   const location = useLocation();
   const { instrument } = (location.state as LocationState) || {};
-  console.log("instrument", instrument);
 
-  if (!instrument) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="space-y-4 text-center">
-          <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            No Instrument Selected
-          </h2>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Please select an instrument to view its chart
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Fallback instrument for development/testing
+  const fallbackInstrument: Instrument = {
+    id: 1,
+    exchange_code: "SBIN",
+    company_name: "State Bank of India",
+    series: "EQUITY",
+  };
+
+  // Use the passed instrument or fallback for development
+  const chartInstrument = instrument || fallbackInstrument;
+
+  useEffect(() => {
+    // Update page title
+    document.title = `${chartInstrument.exchange_code} - Chart | Breeze`;
+
+    // Clean up
+    return () => {
+      document.title = "Breeze";
+    };
+  }, [chartInstrument.exchange_code]);
 
   return (
-    <ChartProvider instrument={instrument}>
-      <div className="flex flex-col h-screen bg-white dark:bg-zinc-950">
-        <ChartHeader />
-        <div className="flex flex-1 overflow-hidden">
-          <ChartSidebar />
-          <ChartContainer />
+    <ChartProvider instrument={chartInstrument}>
+      {/* Fixed positioning to take full viewport height minus navbar */}
+      <div className="fixed inset-0 z-10 top-16 bg-background">
+        <div className="flex flex-col w-full h-full">
+          <ChartHeader />
+          <div className="flex flex-1 w-full h-full overflow-hidden">
+            <ChartSidebar />
+            <div className="relative flex-1 w-full h-full">
+              <ChartContainer />
+            </div>
+          </div>
         </div>
       </div>
     </ChartProvider>

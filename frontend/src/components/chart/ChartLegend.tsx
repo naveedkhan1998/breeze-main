@@ -3,9 +3,9 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { useChart } from "./ChartContext";
 import { formatPrice, formatVolume } from "@/lib/chart-utils";
-
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Candle } from "@/common-types";
+import { Badge } from "@/components/ui/badge";
 
 interface ChartLegendProps {
   data: Candle;
@@ -16,22 +16,35 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({ data }) => {
   const change = ((data.close - data.open) / data.open) * 100;
   const isPositive = change >= 0;
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
-    <Card className="absolute z-10 max-w-xs p-3 border shadow-lg top-4 left-4 bg-card/80 backdrop-blur-sm">
+    <Card className="absolute z-10 max-w-xs p-3 border shadow-lg top-12 left-4 bg-card/90 backdrop-blur-sm">
       <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold truncate">
-            {instrument.company_name}
-          </h3>
-          <span className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
-            {instrument.exchange_code}
-          </span>
-          <span className="px-2 py-0.5 text-xs rounded-full bg-secondary/10 text-secondary">
-            {timeframe}m
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold truncate">
+              {instrument.exchange_code}
+            </h3>
+            <Badge variant="outline" className="text-xs">
+              {timeframe}m
+            </Badge>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {formatDate(data.date)}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
             <span className="text-xs text-muted-foreground">Open</span>
             <p className="text-sm font-medium">{formatPrice(data.open)}</p>

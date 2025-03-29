@@ -1,5 +1,5 @@
 // components/chart/ChartToolbar.tsx
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -57,46 +57,52 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
 );
 
 export const ChartToolbar: React.FC = () => {
-  const { isFullscreen, toggleFullscreen, autoRefresh, toggleAutoRefresh } =
-    useChart();
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { 
+    isFullscreen, 
+    toggleFullscreen, 
+    autoRefresh, 
+    toggleAutoRefresh,
+    isSidebarOpen,
+    toggleSidebar
+  } = useChart();
+  
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   const handleDownload = () => {
     // Implement CSV download logic
+    alert("Downloading chart data...");
   };
 
   const handleZoomIn = () => {
-    // Implement zoom in logic
+    // This would typically interface with the chart API
+    alert("Zoom in");
   };
 
   const handleZoomOut = () => {
-    // Implement zoom out logic
+    // This would typically interface with the chart API
+    alert("Zoom out");
   };
 
   const handleReset = () => {
     // Reset chart view to default
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarVisible(!isSidebarVisible);
+    alert("Reset view");
   };
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-2 border-b bg-background/80 backdrop-blur-sm">
+    <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-2 bg-background/80 backdrop-blur-sm">
       <div className="flex items-center space-x-1">
         <ToolbarButton
           icon={
-            isSidebarVisible ? (
+            isSidebarOpen ? (
               <PanelLeftClose className="w-4 h-4" />
             ) : (
               <PanelLeftOpen className="w-4 h-4" />
             )
           }
-          label={isSidebarVisible ? "Hide Sidebar" : "Show Sidebar"}
+          label={isSidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
           onClick={toggleSidebar}
         />
-        <div className="h-4 mx-2 border-l" />
+        <div className="h-4 mx-2 border-l border-border" />
         <ToolbarButton
           icon={<ZoomIn className="w-4 h-4" />}
           label="Zoom In"
@@ -116,7 +122,7 @@ export const ChartToolbar: React.FC = () => {
 
       <div className="flex items-center space-x-1">
         <ToolbarButton
-          icon={<RefreshCw className="w-4 h-4" />}
+          icon={<RefreshCw className={`w-4 h-4 ${autoRefresh ? "text-primary" : ""}`} />}
           label={autoRefresh ? "Disable Auto-Refresh" : "Enable Auto-Refresh"}
           onClick={toggleAutoRefresh}
         />

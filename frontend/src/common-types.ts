@@ -10,35 +10,53 @@ export interface RefreshTokenResult {
   };
 }
 
-export interface PercentageInstrument {
+export interface Percentage {
   percentage: number;
   is_loading: boolean;
 }
+
 export interface Instrument {
   id: number;
-  percentage: PercentageInstrument;
-  stock_token: string | null;
-  token: string | null;
-  instrument: string | null;
-  short_name: string | null;
-  series: string | null;
-  company_name: string | null;
-  expiry: string | null;
-  strike_price: number | null;
-  option_type: string | null;
-  exchange_code: string | null;
-  exchange: number;
+  symbol?: string;
+  exchange_code: string;
+  instrument_token?: string;
+  exchange_token?: string;
+  tradingsymbol?: string;
+  name?: string;
+  company_name?: string;
+  last_price?: number;
+  expiry?: string;
+  strike_price?: number;
+  tick_size?: number;
+  lot_size?: number;
+  instrument_type?: string;
+  option_type?: string;
+  exchange?: string;
+  series?: string;
+  segment?: string;
+  percentage?: Percentage;
 }
 
-export type Candle = {
+export interface Order {
+  id: number;
+  order_id: string;
+  exchange_order_id: string;
+  tradingsymbol: string;
+  status: string;
+  transaction_type: string;
+  average_price?: number;
+  price: number;
+  instrument: Instrument;
+}
+
+export interface Candle {
+  date: string;
   open: number;
   high: number;
   low: number;
   close: number;
-  date: string;
-  volume?: number;
-  time?: string;
-};
+  volume: number;
+}
 
 export interface BreezeAccount {
   id: number;
@@ -49,6 +67,26 @@ export interface BreezeAccount {
   last_updated: string;
   is_active: boolean;
   user: number;
+}
+
+export interface ChartIndicator {
+  id: string;
+  name: string;
+  type: "overlay" | "separate" | "volume";
+  isEnabled: boolean;
+  options?: {
+    period?: number;
+    source?: "close" | "open" | "high" | "low";
+    [key: string]: number | string | boolean | undefined;
+  };
+  color?: string;
+}
+
+export interface Trade {
+  time: string;
+  price: number;
+  volume: number;
+  side: "buy" | "sell";
 }
 
 export interface Indicator {

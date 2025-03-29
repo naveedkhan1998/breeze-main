@@ -1,93 +1,211 @@
 // components/chart/ChartSettings.tsx
 import React from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TimeframeSelector } from "./sidebar/TimeframeSelector";
-import { ChartTypeSelector } from "./sidebar/ChartTypeSelector";
-import { IndicatorSettings } from "./sidebar/IndicatorSettings";
-import { DisplaySettings } from "./sidebar/DisplaySettings";
+
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+
 import { useChart } from "./ChartContext";
+import { Label } from "@/components/ui/label";
+
+import { Switch } from "@/components/ui/switch";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 interface ChartSettingsProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const ChartSettings: React.FC<ChartSettingsProps> = ({ onClose }) => {
-  const { instrument } = useChart();
+  const {
+    chartType,
+    setChartType,
+    timeframe,
+    setTimeframe,
+    showVolume,
+    toggleVolume,
+    indicators,
+    toggleIndicator,
+  } = useChart();
+
+  const timeframeOptions = [
+    { value: 1, label: "1 Minute" },
+    { value: 5, label: "5 Minutes" },
+    { value: 15, label: "15 Minutes" },
+    { value: 30, label: "30 Minutes" },
+    { value: 60, label: "1 Hour" },
+    { value: 240, label: "4 Hours" },
+    { value: 1440, label: "1 Day" },
+  ];
+
+  const chartTypeOptions = [
+    { value: "Candlestick", label: "Candlestick" },
+    { value: "Line", label: "Line" },
+    { value: "Area", label: "Area" },
+    { value: "Bar", label: "Bar" },
+  ];
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-4 border-b">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Chart Settings</h2>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="w-4 h-4" />
-        </Button>
+        {onClose && (
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Done
+          </Button>
+        )}
       </div>
 
-      <div className="flex-1 px-4 py-2">
-        <Tabs defaultValue="general" className="h-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="indicators">Indicators</TabsTrigger>
-            <TabsTrigger value="appearance">Appearance</TabsTrigger>
-            <TabsTrigger value="alerts">Alerts</TabsTrigger>
-          </TabsList>
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue="general"
+        className="w-full"
+      >
+        {/* General Settings */}
+        <AccordionItem value="general">
+          <AccordionTrigger>General</AccordionTrigger>
+          <AccordionContent className="pb-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="chart-type">Chart Type</Label>
+              <Select
+                value={chartType}
+                onValueChange={(value) => setChartType(value as never)}
+              >
+                <SelectTrigger id="chart-type">
+                  <SelectValue placeholder="Select chart type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {chartTypeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <ScrollArea className="h-[calc(100vh-12rem)] mt-4">
-            <TabsContent value="general" className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Instrument Info</h3>
-                  <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-muted">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Symbol</p>
-                      <p className="text-sm font-medium">
-                        {instrument.exchange_code}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Exchange</p>
-                      <p className="text-sm font-medium">
-                        {instrument.exchange}
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-muted-foreground">Company</p>
-                      <p className="text-sm font-medium">
-                        {instrument.company_name}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="timeframe">Timeframe</Label>
+              <Select
+                value={timeframe.toString()}
+                onValueChange={(value) =>
+                  setTimeframe(parseInt(value) as never)
+                }
+              >
+                <SelectTrigger id="timeframe">
+                  <SelectValue placeholder="Select timeframe" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeframeOptions.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value.toString()}
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                <TimeframeSelector />
-                <ChartTypeSelector />
-                <DisplaySettings />
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="show-volume">Show Volume</Label>
+              <Switch
+                id="show-volume"
+                checked={showVolume}
+                onCheckedChange={toggleVolume}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Indicators Settings */}
+        <AccordionItem value="indicators">
+          <AccordionTrigger>Indicators</AccordionTrigger>
+          <AccordionContent className="pb-4 space-y-4">
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="ma-indicator">Moving Average (20)</Label>
+              <Switch
+                id="ma-indicator"
+                checked={indicators.ma}
+                onCheckedChange={() => toggleIndicator("ma")}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="bollinger-indicator">Bollinger Bands</Label>
+              <Switch
+                id="bollinger-indicator"
+                checked={indicators.bollinger}
+                onCheckedChange={() => toggleIndicator("bollinger")}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="rsi-indicator">RSI (14)</Label>
+              <Switch
+                id="rsi-indicator"
+                checked={indicators.rsi}
+                onCheckedChange={() => toggleIndicator("rsi")}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="macd-indicator">MACD</Label>
+              <Switch
+                id="macd-indicator"
+                checked={indicators.macd}
+                onCheckedChange={() => toggleIndicator("macd")}
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="volume-indicator">Volume</Label>
+              <Switch
+                id="volume-indicator"
+                checked={indicators.volume}
+                onCheckedChange={() => toggleIndicator("volume")}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Display Settings */}
+        <AccordionItem value="display">
+          <AccordionTrigger>Display</AccordionTrigger>
+          <AccordionContent className="pb-4 space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="grid-lines">Grid Lines</Label>
+                <Switch id="grid-lines" defaultChecked />
               </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="indicators" className="space-y-6">
-              <IndicatorSettings />
-            </TabsContent>
+            <div className="space-y-2">
+              <Label>Chart Zoom</Label>
+              <Slider defaultValue={[50]} max={100} step={1} className="py-4" />
+            </div>
 
-            <TabsContent value="appearance" className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">Chart Appearance</h3>
-                {/* Add appearance settings here */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="crosshair">Crosshair</Label>
+                <Switch id="crosshair" defaultChecked />
               </div>
-            </TabsContent>
-
-            <TabsContent value="alerts" className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">Price Alerts</h3>
-                {/* Add alert settings here */}
-              </div>
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
-      </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 };

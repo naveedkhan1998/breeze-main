@@ -1,29 +1,43 @@
 // components/chart/ChartContext.tsx
-import { Instrument } from "@/common-types";
-import React, { createContext, useContext, useState, useCallback } from "react";
+import { Instrument, Candle } from "@/common-types";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
+
+export type TimeframeOption = 1 | 5 | 15 | 30 | 60 | 240 | 1440;
+export type ChartType = "Candlestick" | "Line" | "Area" | "Bar";
 
 interface ChartState {
-  timeframe: number;
-  chartType: "Candlestick" | "Line";
+  timeframe: TimeframeOption;
+  chartType: ChartType;
   showVolume: boolean;
   autoRefresh: boolean;
   isFullscreen: boolean;
+  isSidebarOpen: boolean;
+  selectedCandle: Candle | null;
   indicators: {
     ma: boolean;
     bollinger: boolean;
     rsi: boolean;
     macd: boolean;
+    volume: boolean;
   };
 }
 
 interface ChartContextType extends ChartState {
   instrument: Instrument;
-  setTimeframe: (tf: number) => void;
-  setChartType: (type: "Candlestick" | "Line") => void;
+  setTimeframe: (tf: TimeframeOption) => void;
+  setChartType: (type: ChartType) => void;
   toggleVolume: () => void;
   toggleAutoRefresh: () => void;
   toggleFullscreen: () => void;
+  toggleSidebar: () => void;
   toggleIndicator: (name: keyof ChartState["indicators"]) => void;
+  setSelectedCandle: (candle: Candle | null) => void;
 }
 
 const ChartContext = createContext<ChartContextType | undefined>(undefined);
@@ -32,28 +46,31 @@ export function ChartProvider({
   children,
   instrument,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   instrument: Instrument;
 }) {
   const [state, setState] = useState<ChartState>({
     timeframe: 15,
     chartType: "Candlestick",
-    showVolume: true,
+    showVolume: false,
     autoRefresh: false,
     isFullscreen: false,
+    isSidebarOpen: true,
+    selectedCandle: null,
     indicators: {
       ma: false,
       bollinger: false,
       rsi: false,
-      macd: true,
+      macd: false,
+      volume: false,
     },
   });
 
-  const setTimeframe = useCallback((tf: number) => {
+  const setTimeframe = useCallback((tf: TimeframeOption) => {
     setState((prev) => ({ ...prev, timeframe: tf }));
   }, []);
 
-  const setChartType = useCallback((type: "Candlestick" | "Line") => {
+  const setChartType = useCallback((type: ChartType) => {
     setState((prev) => ({ ...prev, chartType: type }));
   }, []);
 
@@ -69,6 +86,10 @@ export function ChartProvider({
     setState((prev) => ({ ...prev, isFullscreen: !prev.isFullscreen }));
   }, []);
 
+  const toggleSidebar = useCallback(() => {
+    setState((prev) => ({ ...prev, isSidebarOpen: !prev.isSidebarOpen }));
+  }, []);
+
   const toggleIndicator = useCallback(
     (name: keyof ChartState["indicators"]) => {
       setState((prev) => ({
@@ -82,6 +103,10 @@ export function ChartProvider({
     [],
   );
 
+  const setSelectedCandle = useCallback((candle: Candle | null) => {
+    setState((prev) => ({ ...prev, selectedCandle: candle }));
+  }, []);
+
   return (
     <ChartContext.Provider
       value={{
@@ -92,7 +117,9 @@ export function ChartProvider({
         toggleVolume,
         toggleAutoRefresh,
         toggleFullscreen,
+        toggleSidebar,
         toggleIndicator,
+        setSelectedCandle,
       }}
     >
       {children}

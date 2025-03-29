@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   RotateCw,
   Menu,
+  Settings,
 } from "lucide-react";
 import { useChart } from "./ChartContext";
 import { formatPrice } from "@/lib/chart-utils";
@@ -26,13 +27,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChartSettings } from "./ChartSettings";
+import { Badge } from "@/components/ui/badge";
 
 export const ChartHeader: React.FC = () => {
   const navigate = useNavigate();
-  const { instrument, isFullscreen, toggleFullscreen, timeframe } = useChart();
+  const { instrument, isFullscreen, toggleFullscreen, timeframe, showVolume, toggleVolume } = useChart();
   const [settingsOpen, setSettingsOpen] = React.useState(false);
 
-  // You would typically get this from your real-time data
+  // This would typically come from your real-time data
   const currentPrice = 150.25;
   const priceChange = 2.5;
   const percentChange = 1.67;
@@ -40,6 +42,7 @@ export const ChartHeader: React.FC = () => {
 
   const handleDownload = () => {
     // Implement your CSV download logic here
+    alert("Downloading data...");
   };
 
   return (
@@ -49,22 +52,21 @@ export const ChartHeader: React.FC = () => {
           variant="ghost"
           size="icon"
           onClick={() => navigate(-1)}
-          className="lg:hidden"
         >
           <ArrowLeft className="w-4 h-4" />
         </Button>
 
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold tracking-tight">
-            {instrument.company_name}
+          <h1 className="text-lg font-semibold tracking-tight line-clamp-1">
+            {instrument.company_name || instrument.exchange_code}
           </h1>
           <div className="flex items-center gap-2">
-            <span className="px-2 py-1 text-xs rounded-md bg-primary/10 text-primary">
+            <Badge className="px-2 py-1 text-xs">
               {instrument.exchange_code}
-            </span>
-            <span className="px-2 py-1 text-xs rounded-md bg-secondary/10 text-secondary">
+            </Badge>
+            <Badge variant="outline" className="px-2 py-1 text-xs">
               {timeframe}m
-            </span>
+            </Badge>
           </div>
         </div>
       </div>
@@ -80,7 +82,7 @@ export const ChartHeader: React.FC = () => {
             }`}
           >
             {isPositive ? "+" : ""}
-            {priceChange} ({percentChange}%)
+            {priceChange.toFixed(2)} ({percentChange.toFixed(2)}%)
           </span>
         </div>
 
@@ -130,10 +132,10 @@ export const ChartHeader: React.FC = () => {
         <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon">
-              <Menu className="w-4 h-4" />
+              <Settings className="w-4 h-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent>
+          <SheetContent className="sm:max-w-md">
             <ChartSettings onClose={() => setSettingsOpen(false)} />
           </SheetContent>
         </Sheet>
@@ -150,6 +152,9 @@ export const ChartHeader: React.FC = () => {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={toggleFullscreen}>
               {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={toggleVolume}>
+              {showVolume ? "Hide Volume" : "Show Volume"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

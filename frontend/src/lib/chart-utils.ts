@@ -9,13 +9,65 @@ import {
 } from "lightweight-charts";
 
 import { Candle } from "@/common-types";
-import { formatDate } from "@/common-functions";
 import {
   calculateBollingerBands,
   calculateMA,
   calculateMACD,
   calculateRSI,
 } from "./indicators";
+
+// Format date for chart time axis (referenced from outside)
+// Note: Converts dates to unix timestamps for better compatibility
+export function formatDate(dateStr: string): number {
+  const date = new Date(dateStr);
+  // Use timestamp in seconds for lightweight-charts
+  return Math.floor(date.getTime() / 1000);
+}
+
+// Format price with appropriate decimal places
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(price);
+}
+
+// Format volume with appropriate unit (K, M, B)
+export function formatVolume(volume: number): string {
+  if (volume >= 1_000_000_000) {
+    return `${(volume / 1_000_000_000).toFixed(2)}B`;
+  }
+  if (volume >= 1_000_000) {
+    return `${(volume / 1_000_000).toFixed(2)}M`;
+  }
+  if (volume >= 1_000) {
+    return `${(volume / 1_000).toFixed(2)}K`;
+  }
+  return volume.toString();
+}
+
+// Format time for tooltip display
+export function formatTimeTooltip(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// Get appropriate theme colors based on current theme
+export function getThemeColors(isDark: boolean) {
+  return {
+    background: isDark ? "#18181b" : "#ffffff",
+    text: isDark ? "#e4e4e7" : "#27272a",
+    grid: isDark ? "#27272a" : "#e4e4e7",
+    upColor: isDark ? "#22c55e" : "#16a34a",
+    downColor: isDark ? "#ef4444" : "#dc2626",
+    primary: isDark ? "#3b82f6" : "#2563eb",
+    secondary: isDark ? "#8b5cf6" : "#7c3aed",
+    neutral: isDark ? "#6b7280" : "#9ca3af",
+  };
+}
 
 export const getChartOptions = (
   isDarkTheme: boolean,
@@ -74,6 +126,7 @@ interface CreateSeriesOptions {
     bollinger: boolean;
     rsi: boolean;
     macd: boolean;
+    volume: boolean;
   };
 }
 
@@ -88,7 +141,7 @@ export const createSeries = ({
   const series: ISeriesApi<SeriesType>[] = [];
 
   // Format data for the chart
-  const chartData = data.map((candle) => ({
+  let chartData = data.map((candle) => ({
     time: formatDate(candle.date) as Time,
     open: candle.open,
     high: candle.high,
@@ -96,6 +149,24 @@ export const createSeries = ({
     close: candle.close,
     value: candle.volume,
   }));
+
+  // Remove duplicates by creating a Map with time as key
+  const uniqueDataMap = new Map();
+  chartData.forEach((item) => {
+    uniqueDataMap.set(item.time, item);
+  });
+
+  // Convert back to array and sort by time
+  chartData = Array.from(uniqueDataMap.values()).sort((a, b) => {
+    // Ensure proper ascending order by time
+    return Number(a.time) - Number(b.time);
+  });
+
+  // Ensure we have at least one data point
+  if (chartData.length === 0) {
+    console.error("No valid chart data after processing");
+    return series;
+  }
 
   // Main price series
   const mainSeries =
@@ -107,33 +178,51 @@ export const createSeries = ({
           wickUpColor: isDarkTheme ? "#22c55e" : "#16a34a",
           wickDownColor: isDarkTheme ? "#ef4444" : "#dc2626",
         })
-      : chart.addLineSeries({
-          color: isDarkTheme ? "#3b82f6" : "#2563eb",
-          lineWidth: 2,
-        });
+      : type === "Area"
+        ? chart.addAreaSeries({
+            lineColor: isDarkTheme ? "#3b82f6" : "#2563eb",
+            topColor: isDarkTheme
+              ? "rgba(59, 130, 246, 0.4)"
+              : "rgba(37, 99, 235, 0.4)",
+            bottomColor: isDarkTheme
+              ? "rgba(59, 130, 246, 0.05)"
+              : "rgba(37, 99, 235, 0.05)",
+            lineWidth: 2,
+          })
+        : type === "Bar"
+          ? chart.addBarSeries({
+              upColor: isDarkTheme ? "#22c55e" : "#16a34a",
+              downColor: isDarkTheme ? "#ef4444" : "#dc2626",
+            })
+          : chart.addLineSeries({
+              color: isDarkTheme ? "#3b82f6" : "#2563eb",
+              lineWidth: 2,
+            });
 
   mainSeries.setData(chartData);
   series.push(mainSeries);
 
   // Volume series
-  if (showVolume) {
+  if (showVolume && indicators.volume) {
     const volumeSeries = chart.addHistogramSeries({
-      color: isDarkTheme ? "#3b82f6" : "#2563eb",
-      priceFormat: { type: "volume" },
+      color: isDarkTheme ? "#3b82f680" : "#2563eb80",
+      priceFormat: {
+        type: "volume",
+      },
       priceScaleId: "volume",
     });
 
-    const volumeData = data.map((candle, index) => ({
-      time: formatDate(candle.date) as Time,
-      value: candle.volume,
+    const volumeData = chartData.map((candle, index) => ({
+      time: candle.time,
+      value: candle.value ?? 0,
       color:
-        candle.close >= (data[index - 1]?.close ?? candle.close)
+        index > 0 && candle.close > chartData[index - 1].close
           ? isDarkTheme
-            ? "#22c55e80"
-            : "#16a34a80"
+            ? "rgba(34, 197, 94, 0.5)"
+            : "rgba(22, 163, 74, 0.5)"
           : isDarkTheme
-            ? "#ef444480"
-            : "#dc262680",
+            ? "rgba(239, 68, 68, 0.5)"
+            : "rgba(220, 38, 38, 0.5)",
     }));
 
     volumeSeries.setData(volumeData);
@@ -143,8 +232,9 @@ export const createSeries = ({
   // Technical indicators
   if (indicators.ma) {
     const maSeries = chart.addLineSeries({
-      color: isDarkTheme ? "#eab308" : "#ca8a04",
+      color: isDarkTheme ? "#f59e0b" : "#d97706",
       lineWidth: 1,
+      priceLineVisible: false,
     });
     maSeries.setData(calculateMA(chartData));
     series.push(maSeries);
@@ -178,7 +268,45 @@ export const createSeries = ({
       color: isDarkTheme ? "#8b5cf6" : "#7c3aed",
       lineWidth: 1,
       priceScaleId: "rsi",
+      priceFormat: {
+        type: "custom",
+        formatter: (price: number) => price.toFixed(2),
+      },
     });
+
+    // Add RSI levels
+    chart
+      .addLineSeries({
+        color: isDarkTheme
+          ? "rgba(107, 114, 128, 0.3)"
+          : "rgba(156, 163, 175, 0.3)",
+        lineWidth: 1,
+        priceScaleId: "rsi",
+        priceLineVisible: false,
+      })
+      .setData(
+        chartData.map((item) => ({
+          time: item.time,
+          value: 70, // Overbought level
+        })),
+      );
+
+    chart
+      .addLineSeries({
+        color: isDarkTheme
+          ? "rgba(107, 114, 128, 0.3)"
+          : "rgba(156, 163, 175, 0.3)",
+        lineWidth: 1,
+        priceScaleId: "rsi",
+        priceLineVisible: false,
+      })
+      .setData(
+        chartData.map((item) => ({
+          time: item.time,
+          value: 30, // Oversold level
+        })),
+      );
+
     rsiSeries.setData(calculateRSI(chartData));
     series.push(rsiSeries);
   }
@@ -186,19 +314,22 @@ export const createSeries = ({
   if (indicators.macd) {
     const { macd, signal, histogram } = calculateMACD(chartData);
 
+    const macdPane = "macd";
+
     const macdSeries = chart.addLineSeries({
       color: isDarkTheme ? "#3b82f6" : "#2563eb",
       lineWidth: 1,
-      priceScaleId: "macd",
+      priceScaleId: macdPane,
     });
+
     const signalSeries = chart.addLineSeries({
       color: isDarkTheme ? "#ef4444" : "#dc2626",
       lineWidth: 1,
-      priceScaleId: "macd",
+      priceScaleId: macdPane,
     });
+
     const histogramSeries = chart.addHistogramSeries({
-      color: isDarkTheme ? "#22c55e" : "#16a34a",
-      priceScaleId: "macd",
+      priceScaleId: macdPane,
     });
 
     macdSeries.setData(macd);
@@ -209,18 +340,4 @@ export const createSeries = ({
   }
 
   return series;
-};
-
-export const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(price);
-};
-
-export const formatVolume = (volume: number): string => {
-  return new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: 2,
-  }).format(volume);
 };
