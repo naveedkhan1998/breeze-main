@@ -1,13 +1,14 @@
 from django.contrib import admin
+
 from core.models import (
+    BreezeAccount,
+    Candle,
     Exchanges,
     Instrument,
-    BreezeAccount,
-    Tick,
-    SubscribedInstruments,
-    Candle,
     Percentage,
     PercentageInstrument,
+    SubscribedInstruments,
+    Tick,
 )
 
 # Register your models here.

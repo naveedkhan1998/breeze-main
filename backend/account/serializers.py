@@ -1,10 +1,12 @@
-from rest_framework import serializers
-from account.utils import Util
-from .models import User
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import DjangoUnicodeDecodeError, force_bytes, smart_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from rest_framework import serializers
+
+from account.utils import Util
 from main.settings import BASE_DIR, MAIN_URL_2
+
+from .models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

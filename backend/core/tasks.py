@@ -1,18 +1,20 @@
+from datetime import datetime, time, timedelta
 import json
 import time as PythonTime
-from pytz import timezone
+
 from celery import shared_task
-from core.helper import date_parser
-from core.breeze import breeze_session_manager, BreezeConnect
 from celery.utils.log import get_task_logger
-from datetime import datetime, timedelta, time
-from account.models import User
-from core.models import (
-    Tick,
-    SubscribedInstruments,
-    Candle,
-)
 from django.core.cache import cache
+from pytz import timezone
+
+from account.models import User
+from core.breeze import BreezeConnect, breeze_session_manager
+from core.helper import date_parser
+from core.models import (
+    Candle,
+    SubscribedInstruments,
+    Tick,
+)
 
 logger = get_task_logger(__name__)
 

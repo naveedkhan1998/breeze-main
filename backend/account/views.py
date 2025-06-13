@@ -1,6 +1,12 @@
+from django.contrib.auth import authenticate
+from rest_framework import status
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .renderers import UserRenderer
 from .serializers import (
     SendPasswordResetEmailSerializer,
     UserChangePasswordSerializer,
@@ -9,11 +15,6 @@ from .serializers import (
     UserProfileSerializer,
     UserRegistrationSerializer,
 )
-from django.contrib.auth import authenticate
-from .renderers import UserRenderer
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 
 # Create your views here.
 
