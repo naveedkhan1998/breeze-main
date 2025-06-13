@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0002_percentageinstrument'),
+        ("core", "0002_percentageinstrument"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='breezeaccount',
-            name='last_updated',
+            model_name="breezeaccount",
+            name="last_updated",
             field=models.DateTimeField(auto_now=True),
         ),
     ]

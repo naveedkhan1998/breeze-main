@@ -18,30 +18,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import { InstrumentCard } from "@/components/InstrumentCard";
 import { Instrument } from "../common-types";
 import BreezeStatusCard from "@/components/BreezeStatusCard";
-
-const getAveragePercentage = (instrument: Instrument): number => {
-  return instrument.percentage?.percentage || 0;
-};
-
-const isLocalhost = (): boolean => {
-  const hostname = window.location.hostname;
-  return (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "[::1]" ||
-    /^localhost:\d+$/.test(hostname)
-  );
-};
 
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery("");
   const [deleteInstrument] = useDeleteInstrumentMutation();
   const [startWebsocket] = useStartWebsocketMutation();
-
   const [deletingRowIds, setDeletingRowIds] = useState<number[]>([]);
   const [isHealthChecking, setIsHealthChecking] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,6 +34,7 @@ const HomePage: React.FC = () => {
   );
   const [activeTab, setActiveTab] = useState("all");
 
+  // Keep all the original functionality
   const sortedAndFilteredInstruments = useMemo(() => {
     if (!data?.data) return [];
     let filtered = data.data.filter((instrument: Instrument) =>
@@ -65,11 +50,12 @@ const HomePage: React.FC = () => {
     }
     return filtered.sort((a: Instrument, b: Instrument) => {
       return sortOption === "percentage"
-        ? getAveragePercentage(b) - getAveragePercentage(a)
-        : a.exchange_code?.localeCompare(b.exchange_code || "");
+        ? (a.percentage?.percentage || 0) - (b.percentage?.percentage || 0)
+        : (a.exchange_code || "").localeCompare(b.exchange_code || "");
     });
   }, [data, searchTerm, sortOption, activeTab]);
 
+  // Keep original delete handler
   const handleDelete = async (id: number) => {
     setDeletingRowIds((prev) => [...prev, id]);
     try {
@@ -84,6 +70,7 @@ const HomePage: React.FC = () => {
     }
   };
 
+  // Keep original health check
   const performHealthCheck = async () => {
     setIsHealthChecking(true);
     const workers = [
@@ -137,8 +124,9 @@ const HomePage: React.FC = () => {
     }
   };
 
+  // Keep original effects
   useEffect(() => {
-    if (!isLocalhost()) {
+    if (window.location.hostname !== "localhost") {
       performHealthCheck();
       const interval = setInterval(performHealthCheck, 120000);
       return () => clearInterval(interval);
@@ -149,7 +137,7 @@ const HomePage: React.FC = () => {
     const interval = setInterval(() => {
       if (
         data?.data?.some(
-          (instrument: Instrument) => instrument.percentage?.is_loading,
+          (instrument: Instrument) => !instrument.percentage?.is_loading,
         )
       ) {
         refetch();
@@ -157,29 +145,59 @@ const HomePage: React.FC = () => {
         clearInterval(interval);
       }
     }, 2000);
-
     return () => clearInterval(interval);
   }, [data, refetch]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted ">
-      <div className="container px-4 py-8 mx-auto">
-        <div className="mb-8">
-          <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            Instrument Dashboard
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Monitor and manage your subscribed instruments in real-time.
-          </p>
+    <div className="container min-h-screen m-auto bg-background">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container px-4 py-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight bg-clip-text bg-gradient-to-r from-primary to-accent">
+                Instrument Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Monitor and manage your subscribed instruments in real-time
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {window.location.hostname !== "localhost" && (
+                <Button
+                  onClick={performHealthCheck}
+                  disabled={isHealthChecking}
+                  variant="outline"
+                  size="sm"
+                >
+                  <HiRefresh
+                    className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`}
+                  />
+                  {isHealthChecking ? "Checking..." : "Health Check"}
+                </Button>
+              )}
+              <Button onClick={refetch} variant="outline" size="sm">
+                <HiRefresh className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+              <Button
+                onClick={() => startWebsocket({})}
+                variant="default"
+                size="sm"
+              >
+                <HiRefresh className="w-4 h-4 mr-2" />
+                Live Feed
+              </Button>
+            </div>
+          </div>
         </div>
+      </div>
 
+      <div className="container px-4 py-6">
         <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-3">
           <BreezeStatusCard />
-          <Card>
+          <Card className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">
-                Total Instruments
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Instruments</CardTitle>
               <HiChartBar className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -187,96 +205,65 @@ const HomePage: React.FC = () => {
                 {sortedAndFilteredInstruments.length}
               </div>
               <p className="text-xs text-muted-foreground">
-                {sortedAndFilteredInstruments.length} active instruments
+                Active instruments
               </p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">
-                Last Updated
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Last Update</CardTitle>
               <HiClock className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
                 {new Date().toLocaleTimeString()}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Auto-refreshes every 2 seconds
-              </p>
+              <p className="text-xs text-muted-foreground">Updates every 2s</p>
             </CardContent>
           </Card>
         </div>
 
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:space-y-0">
-              <div className="flex space-x-2">
-                {!isLocalhost() && (
-                  <Button
-                    onClick={performHealthCheck}
-                    disabled={isHealthChecking}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <HiRefresh
-                      className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`}
-                    />
-                    {isHealthChecking ? "Checking..." : "Check Worker Health"}
-                  </Button>
-                )}
-                <Button onClick={refetch} variant="outline" size="sm">
-                  <HiRefresh className="w-4 h-4 mr-2" />
-                  Refresh Data
-                </Button>
-                <Button
-                  onClick={() => startWebsocket({})}
-                  variant="outline"
-                  size="sm"
-                >
-                  <HiRefresh className="w-4 h-4 mr-2" />
-                  Start Live Feed
-                </Button>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="text"
-                  placeholder="Search instruments..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full md:w-64"
-                />
-                <Select
-                  value={sortOption}
-                  onValueChange={(value) =>
-                    setSortOption(value as "percentage" | "name")
-                  }
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentage</SelectItem>
-                    <SelectItem value="name">Name</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col justify-between gap-4 mb-6 md:flex-row md:items-center">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full md:w-auto"
+          >
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="equity">Equity</TabsTrigger>
+              <TabsTrigger value="future">Future</TabsTrigger>
+              <TabsTrigger value="option">Option</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="equity">Equity</TabsTrigger>
-            <TabsTrigger value="future">Future</TabsTrigger>
-            <TabsTrigger value="option">Option</TabsTrigger>
-          </TabsList>
-        </Tabs>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <Input
+              type="text"
+              placeholder="Search instruments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full md:w-64"
+            />
+            <Select
+              value={sortOption}
+              onValueChange={(value) =>
+                setSortOption(value as "percentage" | "name")
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="percentage">Percentage</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-        {data ? (
-          <AnimatePresence>
+        <AnimatePresence>
+          {data ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -299,12 +286,12 @@ const HomePage: React.FC = () => {
                 </motion.div>
               ))}
             </motion.div>
-          </AnimatePresence>
-        ) : (
-          <div className="flex items-center justify-center h-64">
-            <div className="w-8 h-8 border-4 rounded-full border-primary border-t-transparent animate-spin"></div>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center justify-center h-64">
+              <div className="w-8 h-8 border-4 rounded-full border-primary border-t-transparent animate-spin" />
+            </div>
+          )}
+        </AnimatePresence>
 
         {sortedAndFilteredInstruments.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64">

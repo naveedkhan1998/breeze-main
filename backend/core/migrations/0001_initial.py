@@ -8,97 +8,205 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='BreezeAccount',
+            name="BreezeAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(default='ADMIN', max_length=255)),
-                ('api_key', models.CharField(default=' ', max_length=255)),
-                ('api_secret', models.CharField(default=' ', max_length=255)),
-                ('session_token', models.CharField(blank=True, max_length=255, null=True)),
-                ('last_updated', models.DateTimeField(auto_now_add=True)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(default="ADMIN", max_length=255)),
+                ("api_key", models.CharField(default=" ", max_length=255)),
+                ("api_secret", models.CharField(default=" ", max_length=255)),
+                (
+                    "session_token",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("last_updated", models.DateTimeField(auto_now_add=True)),
+                ("is_active", models.BooleanField(default=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Exchanges',
+            name="Exchanges",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(default='NSE', max_length=255)),
-                ('file', models.FileField(upload_to='')),
-                ('code', models.CharField(default='1', max_length=255)),
-                ('exchange', models.CharField(default='NSE', max_length=255)),
-                ('is_option', models.BooleanField(default=False)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(default="NSE", max_length=255)),
+                ("file", models.FileField(upload_to="")),
+                ("code", models.CharField(default="1", max_length=255)),
+                ("exchange", models.CharField(default="NSE", max_length=255)),
+                ("is_option", models.BooleanField(default=False)),
+                ("is_active", models.BooleanField(default=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Percentage',
+            name="Percentage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('source', models.CharField(blank=True, max_length=255, null=True)),
-                ('value', models.FloatField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("source", models.CharField(blank=True, max_length=255, null=True)),
+                ("value", models.FloatField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='SubscribedInstruments',
+            name="SubscribedInstruments",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('stock_token', models.CharField(blank=True, max_length=255, null=True)),
-                ('token', models.CharField(blank=True, max_length=255, null=True)),
-                ('instrument', models.CharField(blank=True, max_length=255, null=True)),
-                ('short_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('series', models.CharField(blank=True, max_length=255, null=True)),
-                ('company_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('expiry', models.DateField(blank=True, null=True)),
-                ('strike_price', models.FloatField(blank=True, null=True)),
-                ('option_type', models.CharField(blank=True, max_length=255, null=True)),
-                ('exchange_code', models.CharField(blank=True, max_length=255, null=True)),
-                ('exchange', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.exchanges')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "stock_token",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("token", models.CharField(blank=True, max_length=255, null=True)),
+                ("instrument", models.CharField(blank=True, max_length=255, null=True)),
+                ("short_name", models.CharField(blank=True, max_length=255, null=True)),
+                ("series", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "company_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("expiry", models.DateField(blank=True, null=True)),
+                ("strike_price", models.FloatField(blank=True, null=True)),
+                (
+                    "option_type",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "exchange_code",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "exchange",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.exchanges"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Tick',
+            name="Tick",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ltp', models.FloatField(blank=True, null=True)),
-                ('date', models.DateTimeField(blank=True, null=True)),
-                ('used', models.BooleanField(default=False)),
-                ('instrument', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.subscribedinstruments')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("ltp", models.FloatField(blank=True, null=True)),
+                ("date", models.DateTimeField(blank=True, null=True)),
+                ("used", models.BooleanField(default=False)),
+                (
+                    "instrument",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.subscribedinstruments",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Instrument',
+            name="Instrument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('stock_token', models.CharField(blank=True, max_length=255, null=True)),
-                ('token', models.CharField(blank=True, max_length=255, null=True)),
-                ('instrument', models.CharField(blank=True, max_length=255, null=True)),
-                ('short_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('series', models.CharField(blank=True, max_length=255, null=True)),
-                ('company_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('expiry', models.DateField(blank=True, null=True)),
-                ('strike_price', models.FloatField(blank=True, null=True)),
-                ('option_type', models.CharField(blank=True, max_length=255, null=True)),
-                ('exchange_code', models.CharField(blank=True, max_length=255, null=True)),
-                ('exchange', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.exchanges')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "stock_token",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("token", models.CharField(blank=True, max_length=255, null=True)),
+                ("instrument", models.CharField(blank=True, max_length=255, null=True)),
+                ("short_name", models.CharField(blank=True, max_length=255, null=True)),
+                ("series", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "company_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("expiry", models.DateField(blank=True, null=True)),
+                ("strike_price", models.FloatField(blank=True, null=True)),
+                (
+                    "option_type",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "exchange_code",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "exchange",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.exchanges"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Candle',
+            name="Candle",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('open', models.FloatField()),
-                ('high', models.FloatField()),
-                ('low', models.FloatField()),
-                ('close', models.FloatField()),
-                ('date', models.DateTimeField()),
-                ('is_active', models.BooleanField(default=True)),
-                ('instrument', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.subscribedinstruments')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("open", models.FloatField()),
+                ("high", models.FloatField()),
+                ("low", models.FloatField()),
+                ("close", models.FloatField()),
+                ("date", models.DateTimeField()),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "instrument",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.subscribedinstruments",
+                    ),
+                ),
             ],
         ),
     ]

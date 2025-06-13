@@ -7,43 +7,81 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('email', models.EmailField(max_length=255, unique=True, verbose_name='Email')),
-                ('avatar', models.ImageField(default='/profile_icon.png', null=True, upload_to='user/avatar/', verbose_name='avatar')),
-                ('name', models.CharField(max_length=200)),
-                ('tc', models.BooleanField()),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_email_verify', models.BooleanField(default=False)),
-                ('is_admin', models.BooleanField(default=False)),
-                ('otp', models.IntegerField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_in_session', models.BooleanField(default=False)),
-                ('is_teacher', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        max_length=255, unique=True, verbose_name="Email"
+                    ),
+                ),
+                (
+                    "avatar",
+                    models.ImageField(
+                        default="/profile_icon.png",
+                        null=True,
+                        upload_to="user/avatar/",
+                        verbose_name="avatar",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                ("tc", models.BooleanField()),
+                ("is_active", models.BooleanField(default=True)),
+                ("is_email_verify", models.BooleanField(default=False)),
+                ("is_admin", models.BooleanField(default=False)),
+                ("otp", models.IntegerField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_in_session", models.BooleanField(default=False)),
+                ("is_teacher", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='UserOtps',
+            name="UserOtps",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=255, unique=True, verbose_name='Email')),
-                ('otp', models.IntegerField()),
-                ('attempts', models.IntegerField(default=5)),
-                ('is_used', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        max_length=255, unique=True, verbose_name="Email"
+                    ),
+                ),
+                ("otp", models.IntegerField()),
+                ("attempts", models.IntegerField(default=5)),
+                ("is_used", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
     ]

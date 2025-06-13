@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0005_alter_percentageinstrument_instrument'),
+        ("core", "0005_alter_percentageinstrument_instrument"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='candle',
-            name='volume',
+            model_name="candle",
+            name="volume",
             field=models.FloatField(null=True),
         ),
     ]

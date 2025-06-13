@@ -1,33 +1,33 @@
 # views.py
 
-from rest_framework import viewsets, status
+from functools import lru_cache
+import logging
+
+from django.core.cache import cache
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
-from functools import lru_cache
-from django.core.cache import cache
 
+from core.breeze import breeze_session_manager
 from core.models import (
     BreezeAccount,
+    Candle,
     Exchanges,
     Instrument,
-    SubscribedInstruments,
-    Candle,
     PercentageInstrument,
+    SubscribedInstruments,
 )
 from core.serializers import (
-    InstrumentSerializer,
-    SubscribedSerializer,
-    CandleSerializer,
     AllInstrumentSerializer,
     BreezeAccountSerializer,
+    CandleSerializer,
+    InstrumentSerializer,
+    SubscribedSerializer,
 )
-from core.breeze import breeze_session_manager, BreezeSessionManager
-from core.tasks import resample_candles, load_instrument_candles, websocket_start
-import logging
-
+from core.tasks import load_instrument_candles, resample_candles, websocket_start
 
 logger = logging.getLogger(__name__)
 

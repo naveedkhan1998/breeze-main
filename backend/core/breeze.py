@@ -1,7 +1,9 @@
 import logging
+
 from breeze_connect import BreezeConnect
-from core.models import BreezeAccount
 from django.shortcuts import get_object_or_404
+
+from core.models import BreezeAccount
 
 logger = logging.getLogger(__name__)
 

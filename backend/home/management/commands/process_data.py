@@ -1,16 +1,18 @@
 # data_manager/management/commands/process_data.py
 
+import csv
+from datetime import datetime
+import logging
 import os
 import shutil
-import zipfile
 import urllib.request
-from datetime import datetime
-from django.core.management.base import BaseCommand, CommandError
+import zipfile
+
 from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+
 from core.models import Exchanges, Instrument, Percentage
-import logging
-import csv
 
 logger = logging.getLogger(__name__)
 
@@ -206,9 +208,9 @@ class Command(BaseCommand):
                 ins_list = []
                 line_count = 0
 
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     reader = csv.reader(f)
-                    header = next(reader, None)  # Skip header
+                    next(reader, None)  # Skip header
 
                     for index, data in enumerate(
                         reader, start=2

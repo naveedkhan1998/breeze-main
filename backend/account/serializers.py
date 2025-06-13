@@ -1,18 +1,12 @@
-from ast import Pass
-from dataclasses import field
-import imp
-from unittest.util import _MAX_LENGTH
-from xml.dom import ValidationErr
-from rest_framework import serializers
-import random
-import datetime
-import pytz
-from account.utils import Util
-from .models import User
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import DjangoUnicodeDecodeError, force_bytes, smart_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from rest_framework import serializers
+
+from account.utils import Util
 from main.settings import BASE_DIR, MAIN_URL_2
+
+from .models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -27,7 +21,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         password = attrs.get("password")
         password2 = attrs.get("password2")
-        email = attrs.get("email")
         if password != password2:
             raise serializers.ValidationError("Passwords don't match")
         return attrs
@@ -49,7 +42,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_avatar(obj):
         try:
             return MAIN_URL_2 + obj.avatar.url
-        except:
+        except (AttributeError, ValueError):
             return None
 
     avatar = serializers.SerializerMethodField("get_avatar")
@@ -152,6 +145,6 @@ class UserPasswordResetSerializer(serializers.Serializer):
             user.set_password(password)
             user.save()
             return attrs
-        except DjangoUnicodeDecodeError as identifier:
+        except DjangoUnicodeDecodeError:
             PasswordResetTokenGenerator().check_token(user, token)
             raise serializers.ValidationError("Token is not Valid or Expired")

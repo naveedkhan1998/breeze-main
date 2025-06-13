@@ -1,74 +1,99 @@
-import { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { Search } from "lucide-react";
-import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Instrument from "../components/Instrument";
 
-const InstrumentsPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+interface ExchangeTabProps {
+  value: string;
+  label: string;
+}
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+interface SearchBarProps {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+interface Exchange {
+  value: string;
+  label: string;
+  instrumentExchange: string;
+}
+
+const ExchangeTab: React.FC<ExchangeTabProps> = ({ value, label }) => (
+  <TabsTrigger
+    value={value}
+    className="flex-1 py-3 text-sm font-medium transition-colors hover:text-primary"
+  >
+    {label}
+  </TabsTrigger>
+);
+
+const SearchBar: React.FC<SearchBarProps> = ({ value, onChange }) => (
+  <div className="relative w-full max-w-md">
+    <Search className="absolute w-4 h-4 -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
+    <Input
+      type="text"
+      placeholder="Search instruments..."
+      value={value}
+      onChange={onChange}
+      className="w-full h-10 pl-10 pr-4 bg-background/50 backdrop-blur-sm"
+    />
+  </div>
+);
+
+const InstrumentsPage: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const exchanges: Exchange[] = [
+    { value: "NSE", label: "NSE", instrumentExchange: "NSE" },
+    { value: "BSE", label: "BSE", instrumentExchange: "BSE" },
+    { value: "NFO", label: "NFO", instrumentExchange: "FON" },
+  ];
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
   return (
-    <div className="min-h-screen p-2 bg-gradient-to-b from-background to-muted sm:p-4">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-6xl mx-auto mt-4 sm:mt-8"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text sm:text-3xl">
-              Instruments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="sticky z-10 p-4 mb-4 bg-white rounded-lg shadow-md dark:bg-zinc-900 top-16 ">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-grow">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="searchTerm"
-                    type="text"
-                    placeholder="Search instruments..."
-                    value={searchTerm}
-                    onChange={handleChange}
-                    className="pl-8"
-                  />
-                </div>
-              </div>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background/80 to-muted">
+      <div className="container px-4 py-8 mx-auto">
+        <Card className="backdrop-blur-sm bg-background/95">
+          <CardHeader className="border-b">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text">
+                Instruments Explorer
+              </CardTitle>
+              <SearchBar value={searchTerm} onChange={handleSearchChange} />
             </div>
-
+          </CardHeader>
+          <CardContent className="p-6">
             <Tabs defaultValue="NSE" className="w-full">
-              <TabsList className="w-full">
-                <TabsTrigger value="NSE" className="flex-1">
-                  NSE
-                </TabsTrigger>
-                <TabsTrigger value="BSE" className="flex-1">
-                  BSE
-                </TabsTrigger>
-                <TabsTrigger value="NFO" className="flex-1">
-                  NFO
-                </TabsTrigger>
+              <TabsList className="w-full mb-6 bg-muted/50">
+                {exchanges.map((exchange) => (
+                  <ExchangeTab
+                    key={exchange.value}
+                    value={exchange.value}
+                    label={exchange.label}
+                  />
+                ))}
               </TabsList>
-              <TabsContent value="NSE">
-                <Instrument exchange="NSE" searchTerm={searchTerm} />
-              </TabsContent>
-              <TabsContent value="BSE">
-                <Instrument exchange="BSE" searchTerm={searchTerm} />
-              </TabsContent>
-              <TabsContent value="NFO">
-                <Instrument exchange="FON" searchTerm={searchTerm} />
-              </TabsContent>
+
+              {exchanges.map((exchange) => (
+                <TabsContent key={exchange.value} value={exchange.value}>
+                  <div className="border rounded-lg bg-card">
+                    <Instrument
+                      exchange={exchange.instrumentExchange}
+                      searchTerm={searchTerm}
+                    />
+                  </div>
+                </TabsContent>
+              ))}
             </Tabs>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 };

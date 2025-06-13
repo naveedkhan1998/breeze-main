@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0007_alter_percentageinstrument_instrument'),
+        ("core", "0007_alter_percentageinstrument_instrument"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tick',
-            name='ltq',
+            model_name="tick",
+            name="ltq",
             field=models.FloatField(blank=True, null=True),
         ),
     ]

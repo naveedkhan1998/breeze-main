@@ -1,18 +1,20 @@
+from datetime import datetime, time, timedelta
 import json
 import time as PythonTime
-from pytz import timezone
+
 from celery import shared_task
-from core.helper import date_parser
-from core.breeze import breeze_session_manager, BreezeConnect
 from celery.utils.log import get_task_logger
-from datetime import datetime, timedelta, time
-from account.models import User
-from core.models import (
-    Tick,
-    SubscribedInstruments,
-    Candle,
-)
 from django.core.cache import cache
+from pytz import timezone
+
+from account.models import User
+from core.breeze import BreezeConnect, breeze_session_manager
+from core.helper import date_parser
+from core.models import (
+    Candle,
+    SubscribedInstruments,
+    Tick,
+)
 
 logger = get_task_logger(__name__)
 
@@ -59,9 +61,9 @@ def websocket_start(user_id: int):
                     ins.percentage.percentage = 0
                     ins.percentage.is_loading = False
                     ins.percentage.save()
-                    sess.breeze.subscribe_feeds(stock_token=ins.stock_token)
+                    sess.subscribe_feeds(stock_token=ins.stock_token)
 
-        sess.breeze.on_ticks = on_ticks
+        sess.on_ticks = on_ticks
         logger.info("WebSocket connection established and initial subscriptions set.")
 
         # Access Redis via Django's cache
@@ -79,7 +81,7 @@ def websocket_start(user_id: int):
 
                     if stock_token:
                         # Subscribe to the new instrument
-                        sess.breeze.subscribe_feeds(stock_token=stock_token)
+                        sess.subscribe_feeds(stock_token=stock_token)
                         logger.info(f"Subscribed to new instrument: {stock_token}")
 
             except Exception as e:
@@ -93,7 +95,7 @@ def websocket_start(user_id: int):
     finally:
         # Clean up: Disconnect WebSocket and release the lock
         try:
-            sess.breeze.ws_disconnect()
+            sess.ws_disconnect()
             logger.info("WebSocket connection closed.")
         except Exception as e:
             logger.error(f"Error while disconnecting WebSocket: {e}", exc_info=True)
@@ -182,7 +184,6 @@ def sub_candle_maker(ins_id: int):
         for tick in ticks:
             # buy_volume = tick.get("totalBuyQt", 0)
             # sell_volume = tick.get("totalSellQ", 0)
-            volume = 0
             candle_time = tick.date.replace(second=0, microsecond=0)
             candle, created = Candle.objects.get_or_create(
                 instrument_id=ins_id,
@@ -390,13 +391,12 @@ def fetch_historical_data(
                     "call" if instrument.option_type.upper() == "CE" else "put"
                 )
                 strike_price = str(instrument.strike_price)
-                expiry_parsed = date_parser(expiry) if expiry else None
+                date_parser(expiry) if expiry else None
             else:
                 market = "NSE" if stock_token.startswith("4") else "BSE"
                 product_type = "futures"
                 option_type = None
                 strike_price = None
-                expiry_parsed = None
 
             current_data = breeze_session.get_historical_data_v2(
                 interval="1minute",

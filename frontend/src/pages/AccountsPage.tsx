@@ -110,7 +110,7 @@ const AccountsPage = () => {
             animate={{ y: 0 }}
             className="text-4xl font-bold md:text-5xl"
           >
-            <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+            <span className=" bg-gradient-to-r from-primary to-accent bg-clip-text">
               Breeze Account
             </span>
           </motion.h1>
