@@ -182,7 +182,6 @@ def sub_candle_maker(ins_id: int):
         for tick in ticks:
             # buy_volume = tick.get("totalBuyQt", 0)
             # sell_volume = tick.get("totalSellQ", 0)
-            volume = 0
             candle_time = tick.date.replace(second=0, microsecond=0)
             candle, created = Candle.objects.get_or_create(
                 instrument_id=ins_id,
@@ -390,13 +389,12 @@ def fetch_historical_data(
                     "call" if instrument.option_type.upper() == "CE" else "put"
                 )
                 strike_price = str(instrument.strike_price)
-                expiry_parsed = date_parser(expiry) if expiry else None
+                date_parser(expiry) if expiry else None
             else:
                 market = "NSE" if stock_token.startswith("4") else "BSE"
                 product_type = "futures"
                 option_type = None
                 strike_price = None
-                expiry_parsed = None
 
             current_data = breeze_session.get_historical_data_v2(
                 interval="1minute",
