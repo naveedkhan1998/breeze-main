@@ -1,6 +1,6 @@
 from ast import Pass
 from dataclasses import field
-import imp
+
 from unittest.util import _MAX_LENGTH
 from xml.dom import ValidationErr
 from rest_framework import serializers

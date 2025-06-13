@@ -9,16 +9,17 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:latest
+    image: redis:7.2.4-alpine
     container_name: breeze-redis
+    restart: always
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,19 +45,11 @@ services:
       context: backend/
       dockerfile: Dockerfile.dev
     container_name: breeze-backend
+    image: breeze-backend
     env_file:
       - ./.envs/env.dev
     volumes:
       - ./backend/:/app/
-    entrypoint: |
-      bash -c "
-      python3 manage.py wait_for_db &&
-      python3 manage.py migrate --noinput --skip-checks &&
-      python3 manage.py initadmin &&
-      celery -A main beat --detach &&
-      python3 manage.py process_data &&
-      python3 manage.py runserver 0.0.0.0:8000
-      "
     depends_on:
       postgres:
         condition: service_healthy
@@ -76,11 +69,9 @@ services:
       - ./frontend/package.json:/usr/app/package.json
       - ./frontend/package-lock.json:/usr/app/package-lock.json
 
-  celery-worker:
-    build:
-      context: backend/
-      dockerfile: Dockerfile.dev
-    container_name: breeze-celery-worker
+  celery-beat:
+    image: "breeze-backend"
+    container_name: breeze-celery-beat
     env_file:
       - ./.envs/env.dev
     depends_on:
@@ -92,35 +83,42 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/:/app/
-    entrypoint: |
-      bash -c "
-      rm -f /var/run/celery/w1.pid &&
-      rm -f /var/run/celery/w2.pid &&
-      rm -f /var/run/celery/w3.pid &&
-      rm -f /var/run/celery/beat.pid &&
-      celery -A main purge --force &&
-      celery multi start w1 w2 w3 -A main --logfile=/var/log/celery/%n.log --loglevel=ERROR &&
-      tail -f /var/log/celery/w*.log"
+    entrypoint: ["./scripts/run_celery_beat.sh"]
     restart: always
 
-  # celery-beat:
-  #   build:
-  #     context: backend/
-  #     dockerfile: Dockerfile.dev
-  #   container_name: breeze-celery-beat
-  #   env_file:
-  #     - ./.envs/env.dev
-  #   depends_on:
-  #     backend:
-  #       condition: service_started
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   volumes:
-  #     - ./backend/:/app/
-  #   entrypoint: celery -A main beat --loglevel=INFO
-  #   restart: always
+  celery-worker:
+    image: "breeze-backend"
+    container_name: breeze-celery-worker
+    env_file:
+      - ./.envs/env.dev
+    environment:
+      PYTHONWARNINGS: "ignore:DateTimeField .* received a naive datetime:RuntimeWarning:django.db.models.fields"
+    depends_on:
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/:/app/
+    entrypoint: ["./scripts/run_celery_worker.sh"]
+    restart: always
+
+  flower:
+    image: "breeze-backend"
+    container_name: breeze-flower
+    volumes:
+      - ./backend/:/app/
+    env_file:
+      - ./.envs/env.dev
+    ports:
+      - "5555:5555"
+    entrypoint: celery -A main flower --loglevel=INFO
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: always
 
 volumes:
   redis-data:

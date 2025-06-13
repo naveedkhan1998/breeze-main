@@ -1,64 +1,46 @@
-# Use Ubuntu 20.04 as the base image
-FROM ubuntu:20.04
+FROM python:3.13-bookworm
 
-# Set environment variables
+# Set environment variable to ensure Python output is unbuffered
 ENV PYTHONUNBUFFERED=1
-ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system packages, Python 3.9, and curl
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        software-properties-common \
-        curl && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        python3.9 \
-        python3.9-dev \
-        python3.9-distutils \
-        python3.9-venv \
-        libffi-dev \
-        libssl-dev \
-        netcat-openbsd \
-        chromium-driver && \
-    ln -sf /usr/bin/python3.9 /usr/bin/python3 && \
-    ln -sf /usr/bin/python3.9 /usr/local/bin/python && \
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3 get-pip.py && \
-    rm get-pip.py && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    netcat-openbsd \
+    chromium-driver \
+    wget \
+    curl \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and setuptools
-RUN pip install --no-cache-dir --upgrade pip setuptools
+# Install uv
+# Download the latest installer
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+
+# Run the installer then remove it
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+# Ensure the installed binary is on the `PATH`
+ENV PATH="/root/.local/bin/:$PATH"
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the requirements file
-COPY requirements.txt /app/requirements.txt
+# Copy only the dependency file first for better layer caching
+COPY pyproject.toml /app/pyproject.toml
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r /app/requirements.txt
-
-# Remove build dependencies to reduce image size
-RUN apt-get purge -y --auto-remove \
-        build-essential \
-        libffi-dev \
-        libssl-dev && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Install Python package requirements using uv
+# This layer will only be rebuilt if pyproject.toml changes
+RUN uv pip install --system --no-cache -r pyproject.toml
 
 # Copy the rest of the application code
 COPY . /app
 
-# Make the start script executable
-RUN chmod +x /app/start.sh
+# Make the scripts directory executable
+RUN chmod +x /app/scripts/*.sh
 
 # Expose the port
 EXPOSE 8000
 
-# Set the entrypoint
-ENTRYPOINT ["./start.sh"]
+# Use the run_backend.sh script as entrypoint
+ENTRYPOINT ["./scripts/run_backend.sh"]
