@@ -24,7 +24,7 @@ from core.serializers import (
     AllInstrumentSerializer,
     BreezeAccountSerializer,
 )
-from core.breeze import breeze_session_manager, BreezeSessionManager
+from core.breeze import breeze_session_manager
 from core.tasks import resample_candles, load_instrument_candles, websocket_start
 import logging
 

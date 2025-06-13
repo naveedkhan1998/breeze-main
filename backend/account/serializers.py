@@ -1,12 +1,5 @@
-from ast import Pass
-from dataclasses import field
 
-from unittest.util import _MAX_LENGTH
-from xml.dom import ValidationErr
 from rest_framework import serializers
-import random
-import datetime
-import pytz
 from account.utils import Util
 from .models import User
 from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
@@ -152,6 +145,6 @@ class UserPasswordResetSerializer(serializers.Serializer):
             user.set_password(password)
             user.save()
             return attrs
-        except DjangoUnicodeDecodeError as identifier:
+        except DjangoUnicodeDecodeError:
             PasswordResetTokenGenerator().check_token(user, token)
             raise serializers.ValidationError("Token is not Valid or Expired")
