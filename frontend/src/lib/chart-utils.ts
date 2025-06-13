@@ -341,3 +341,240 @@ export const createSeries = ({
 
   return series;
 };
+
+// New function to create indicator series for sub-charts
+export interface CreateIndicatorSeriesOptions {
+  chart: IChartApi;
+  type: string; // 'RSI', 'MACD', 'Volume', etc.
+  data: Candle[];
+  isDarkTheme: boolean;
+}
+
+export const createIndicatorSeries = ({
+  chart,
+  type,
+  data,
+  isDarkTheme,
+}: CreateIndicatorSeriesOptions): ISeriesApi<SeriesType>[] => {
+  const series: ISeriesApi<SeriesType>[] = [];
+
+  // Format data for the chart
+  let chartData = data.map((candle) => ({
+    time: formatDate(candle.date) as Time,
+    open: candle.open,
+    high: candle.high,
+    low: candle.low,
+    close: candle.close,
+    value: candle.volume,
+  }));
+
+  // Remove duplicates by creating a Map with time as key
+  const uniqueDataMap = new Map();
+  chartData.forEach((item) => {
+    uniqueDataMap.set(item.time, item);
+  });
+
+  // Convert back to array and sort by time
+  chartData = Array.from(uniqueDataMap.values()).sort((a, b) => {
+    // Ensure proper ascending order by time
+    return Number(a.time) - Number(b.time);
+  });
+
+  // Ensure we have at least one data point
+  if (chartData.length === 0) {
+    console.error("No valid chart data after processing");
+    return series;
+  }
+
+  // Create appropriate indicator based on type
+  switch (type) {
+    case "RSI": {
+      const rsiSeries = chart.addLineSeries({
+        color: isDarkTheme ? "#8b5cf6" : "#7c3aed",
+        lineWidth: 2,
+        priceFormat: {
+          type: "custom",
+          formatter: (price: number) => price.toFixed(2),
+        },
+      });
+
+      // Add RSI levels (overbought at 70, oversold at 30)
+      const overboughtSeries = chart.addLineSeries({
+        color: isDarkTheme
+          ? "rgba(107, 114, 128, 0.5)"
+          : "rgba(156, 163, 175, 0.5)",
+        lineWidth: 1,
+        lineStyle: 2, // Dashed line
+        priceLineVisible: false,
+      });
+
+      const oversoldSeries = chart.addLineSeries({
+        color: isDarkTheme
+          ? "rgba(107, 114, 128, 0.5)"
+          : "rgba(156, 163, 175, 0.5)",
+        lineWidth: 1,
+        lineStyle: 2, // Dashed line
+        priceLineVisible: false,
+      });
+
+      const midlineSeries = chart.addLineSeries({
+        color: isDarkTheme
+          ? "rgba(107, 114, 128, 0.3)"
+          : "rgba(156, 163, 175, 0.3)",
+        lineWidth: 1,
+        lineStyle: 2, // Dashed line
+        priceLineVisible: false,
+      });
+
+      overboughtSeries.setData(
+        chartData.map((item) => ({
+          time: item.time,
+          value: 70, // Overbought level
+        })),
+      );
+
+      oversoldSeries.setData(
+        chartData.map((item) => ({
+          time: item.time,
+          value: 30, // Oversold level
+        })),
+      );
+
+      midlineSeries.setData(
+        chartData.map((item) => ({
+          time: item.time,
+          value: 50, // Middle level
+        })),
+      );
+
+      rsiSeries.setData(calculateRSI(chartData));
+      series.push(rsiSeries, overboughtSeries, oversoldSeries, midlineSeries);
+      break;
+    }
+
+    case "MACD": {
+      const { macd, signal, histogram } = calculateMACD(chartData);
+
+      const macdSeries = chart.addLineSeries({
+        color: isDarkTheme ? "#3b82f6" : "#2563eb",
+        lineWidth: 2,
+        title: 'MACD',
+      });
+
+      const signalSeries = chart.addLineSeries({
+        color: isDarkTheme ? "#ef4444" : "#dc2626",
+        lineWidth: 2,
+        title: 'Signal',
+      });
+
+      const histogramSeries = chart.addHistogramSeries({
+        color: isDarkTheme ? "#6b7280" : "#9ca3af",
+        title: 'Histogram',
+      });
+
+      // Set histogram colors based on values
+      const coloredHistogram = histogram.map(item => ({
+        ...item,
+        color: item.value >= 0 
+          ? (isDarkTheme ? "#22c55e" : "#16a34a") 
+          : (isDarkTheme ? "#ef4444" : "#dc2626")
+      }));
+
+      macdSeries.setData(macd);
+      signalSeries.setData(signal);
+      histogramSeries.setData(coloredHistogram);
+
+      // Create a zero line
+      const zeroLine = chart.addLineSeries({
+        color: isDarkTheme
+          ? "rgba(107, 114, 128, 0.5)"
+          : "rgba(156, 163, 175, 0.5)",
+        lineWidth: 1,
+        lineStyle: 2, // Dashed line
+        priceLineVisible: false,
+      });
+
+      zeroLine.setData(
+        chartData.map((item) => ({
+          time: item.time,
+          value: 0,
+        })),
+      );
+
+      series.push(macdSeries, signalSeries, histogramSeries, zeroLine);
+      break;
+    }
+
+    case "Volume": {
+      const volumeSeries = chart.addHistogramSeries({
+        priceFormat: {
+          type: "volume",
+        },
+      });
+
+      const volumeData = chartData.map((candle, index) => ({
+        time: candle.time,
+        value: candle.value ?? 0,
+        color:
+          index > 0 && candle.close > chartData[index - 1].close
+            ? isDarkTheme
+              ? "rgba(34, 197, 94, 0.7)"
+              : "rgba(22, 163, 74, 0.7)"
+            : isDarkTheme
+              ? "rgba(239, 68, 68, 0.7)"
+              : "rgba(220, 38, 38, 0.7)",
+      }));
+
+      volumeSeries.setData(volumeData);
+      series.push(volumeSeries);
+      break;
+    }
+
+    case "Bollinger": {
+      const { upper, middle, lower } = calculateBollingerBands(chartData);
+
+      const upperSeries = chart.addLineSeries({
+        color: isDarkTheme ? "#22c55e" : "#16a34a",
+        lineWidth: 1,
+        title: 'Upper Band',
+      });
+
+      const middleSeries = chart.addLineSeries({
+        color: isDarkTheme ? "#6b7280" : "#71717a",
+        lineWidth: 2,
+        title: 'Middle Band (SMA)',
+      });
+
+      const lowerSeries = chart.addLineSeries({
+        color: isDarkTheme ? "#ef4444" : "#dc2626",
+        lineWidth: 1,
+        title: 'Lower Band',
+      });
+
+      upperSeries.setData(upper);
+      middleSeries.setData(middle);
+      lowerSeries.setData(lower);
+
+      // Also add price to compare with bollinger bands
+      const priceSeries = chart.addLineSeries({
+        color: isDarkTheme ? "#3b82f6" : "#2563eb",
+        lineWidth: 1,
+        lineStyle: 2, // Dashed line
+        title: 'Price',
+      });
+
+      priceSeries.setData(chartData.map(candle => ({
+        time: candle.time,
+        value: candle.close,
+      })));
+
+      series.push(upperSeries, middleSeries, lowerSeries, priceSeries);
+      break;
+    }
+
+    default:
+      console.error(`Unknown indicator type: ${type}`);
+  }
+
+  return series;
+};
