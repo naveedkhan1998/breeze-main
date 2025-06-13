@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 from account.utils import Util
 from .models import User
@@ -42,7 +41,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_avatar(obj):
         try:
             return MAIN_URL_2 + obj.avatar.url
-        except:
+        except (AttributeError, ValueError):
             return None
 
     avatar = serializers.SerializerMethodField("get_avatar")
