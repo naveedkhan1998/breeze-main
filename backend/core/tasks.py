@@ -59,9 +59,9 @@ def websocket_start(user_id: int):
                     ins.percentage.percentage = 0
                     ins.percentage.is_loading = False
                     ins.percentage.save()
-                    sess.breeze.subscribe_feeds(stock_token=ins.stock_token)
+                    sess.subscribe_feeds(stock_token=ins.stock_token)
 
-        sess.breeze.on_ticks = on_ticks
+        sess.on_ticks = on_ticks
         logger.info("WebSocket connection established and initial subscriptions set.")
 
         # Access Redis via Django's cache
@@ -79,7 +79,7 @@ def websocket_start(user_id: int):
 
                     if stock_token:
                         # Subscribe to the new instrument
-                        sess.breeze.subscribe_feeds(stock_token=stock_token)
+                        sess.subscribe_feeds(stock_token=stock_token)
                         logger.info(f"Subscribed to new instrument: {stock_token}")
 
             except Exception as e:
@@ -93,7 +93,7 @@ def websocket_start(user_id: int):
     finally:
         # Clean up: Disconnect WebSocket and release the lock
         try:
-            sess.breeze.ws_disconnect()
+            sess.ws_disconnect()
             logger.info("WebSocket connection closed.")
         except Exception as e:
             logger.error(f"Error while disconnecting WebSocket: {e}", exc_info=True)
