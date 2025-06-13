@@ -147,7 +147,8 @@ function toast({ ...props }: Toast) {
       type: actionTypes.UPDATE_TOAST,
       toast: { ...props, id },
     });
-  const dismiss = () => dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id });
+  const dismiss = () =>
+    dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id });
 
   dispatch({
     type: actionTypes.ADD_TOAST,
@@ -184,7 +185,8 @@ function useToast() {
   return {
     ...state,
     toast,
-    dismiss: (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
+    dismiss: (toastId?: string) =>
+      dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
   };
 }
 
