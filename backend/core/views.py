@@ -66,7 +66,17 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
         instance = get_object_or_404(self.get_queryset(), pk=pk)
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
+            # Check if session-related fields are being updated
+            session_fields = ['api_key', 'api_secret', 'session_token']
+            credentials_updated = any(field in request.data for field in session_fields)
+            
             serializer.save()
+            
+            # Clear cached session if credentials were updated
+            if credentials_updated:
+                breeze_session_manager.clear_session(request.user.id)
+                logger.info(f"Cleared cached session for user {request.user.id} due to credential update.")
+            
             return Response(
                 {"msg": "Account updated successfully", "data": serializer.data},
                 status=status.HTTP_200_OK,
@@ -157,6 +167,49 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
                     "msg": "Error starting WebSocket",
                     "data": "WebSocket could not start",
                 },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @action(detail=False, methods=["post"], url_path="refresh_session")
+    def refresh_session(self, request):
+        """
+        Manually refresh the Breeze session for the authenticated user.
+        
+        Returns:
+            Response: JSON containing the refresh status.
+        """
+        try:
+            user_id = request.user.id
+            
+            # Refresh the session (clears old and creates new)
+            session = breeze_session_manager.refresh_session(user_id)
+            
+            # Test the new session
+            check_session = session.get_funds()
+            
+            if check_session.get("Status") == 200:
+                logger.info(f"Session refreshed successfully for user {user_id}")
+                return Response(
+                    {"msg": "Session refreshed successfully", "data": {"session_status": True}},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                logger.warning(f"Session refresh failed for user {user_id}: {check_session}")
+                return Response(
+                    {"msg": "Session refresh failed", "data": {"session_status": False}},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+        except BreezeAccount.DoesNotExist:
+            logger.warning(f"No BreezeAccount found for user ID {request.user.id}.")
+            return Response(
+                {"msg": "No account found", "data": {"session_status": False}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            logger.error(f"Error refreshing session for user {request.user.id}: {e}", exc_info=True)
+            return Response(
+                {"msg": "Error refreshing session", "data": {"session_status": False}},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

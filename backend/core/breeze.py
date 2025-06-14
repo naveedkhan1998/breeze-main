@@ -20,6 +20,22 @@ class BreezeSessionManager:
         """
         self.sessions = {}
 
+    def refresh_session(self, user_id):
+        """
+        Refreshes the session for a user by clearing the old one and creating a new one.
+
+        Args:
+            user_id (int): The ID of the user whose session needs to be refreshed.
+
+        Returns:
+            BreezeConnect: The new BreezeConnect session for the user.
+        """
+        # Clear the existing session first
+        self.clear_session(user_id)
+
+        # Initialize a new session
+        return self.initialize_session(user_id)
+
     def initialize_session(self, user_id):
         """
         Initializes or retrieves a session for the specified user.
@@ -47,6 +63,8 @@ class BreezeSessionManager:
             return breeze
         except Exception as e:
             logger.error(f"Failed to initialize BreezeSession for user {user_id}: {e}")
+            # Clear any potentially corrupted session
+            self.clear_session(user_id)
             raise e
 
     def get_session(self, user_id):
