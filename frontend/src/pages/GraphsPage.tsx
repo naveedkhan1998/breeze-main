@@ -240,7 +240,7 @@ const GraphsPage: React.FC = () => {
     );
   }
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-background to-secondary dark:from-background dark:to-card">
+    <div className="flex flex-col h-[calc(100dvh-4rem)] bg-gradient-to-br from-background to-secondary dark:from-background dark:to-card">
       {/* Modern Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b bg-card/80 backdrop-blur-md border-border">
         <div className="flex items-center gap-4">
