@@ -10,21 +10,18 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { HiAdjustments, HiClock, HiChartBar, HiRefresh } from "react-icons/hi";
+import { HiClock, HiChartBar, HiRefresh } from "react-icons/hi";
 import { SeriesType } from "lightweight-charts";
-import { Indicator } from "../common-types";
 
 interface ChartControlsProps {
   timeframe: number;
   chartType: SeriesType;
   showVolume: boolean;
   autoRefresh: boolean;
-  indicators: Indicator[];
   onTfChange: (tf: number) => void;
   onChartTypeChange: (type: SeriesType) => void;
   onShowVolumeChange: (show: boolean) => void;
   onAutoRefreshChange: (auto: boolean) => void;
-  onToggleIndicator: (name: string) => void;
 }
 
 export default function ChartControls({
@@ -32,12 +29,10 @@ export default function ChartControls({
   chartType,
   showVolume,
   autoRefresh,
-  indicators,
   onTfChange,
   onChartTypeChange,
   onShowVolumeChange,
   onAutoRefreshChange,
-  onToggleIndicator,
 }: ChartControlsProps) {
   const [isCustomTfDialogOpen, setIsCustomTfDialogOpen] = useState(false);
   const [customTimeframeInput, setCustomTimeframeInput] = useState("");
@@ -103,31 +98,6 @@ export default function ChartControls({
             >
               {type}
             </Button>
-          ))}
-        </div>
-      </Card>
-
-      {/* Indicators Section */}
-      <Card className="p-6 border rounded-lg shadow-sm ">
-        <div className="flex items-center mb-4">
-          <HiAdjustments className="mr-2 text-2xl text-yellow-500" />
-          <h3 className="text-lg font-semibold ">Indicators</h3>
-        </div>
-        <div className="space-y-3">
-          {indicators.map((indicator) => (
-            <div
-              key={indicator.name}
-              className="flex items-center justify-between"
-            >
-              <Label htmlFor={`indicator-${indicator.name}`} className="">
-                {indicator.name}
-              </Label>
-              <Switch
-                id={`indicator-${indicator.name}`}
-                checked={indicator.active}
-                onCheckedChange={() => onToggleIndicator(indicator.name)}
-              />
-            </div>
           ))}
         </div>
       </Card>

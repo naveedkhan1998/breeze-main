@@ -13,30 +13,9 @@ import {
 import { Instrument } from "../common-types";
 import { Card } from "@/components/ui/card";
 
-interface MAIndicator {
-  name: "MA";
-  active: boolean;
-  data: LineData[];
-}
-
-interface BollingerBandsDataItem {
-  time: Time;
-  upper: number;
-  lower: number;
-}
-
-interface BollingerBandsIndicator {
-  name: "Bollinger Bands";
-  active: boolean;
-  data: BollingerBandsDataItem[];
-}
-
-type Indicator = MAIndicator | BollingerBandsIndicator;
-
 interface MainChartProps {
   seriesData: BarData[] | LineData[];
   chartType: "Candlestick" | "Line";
-  indicators: Indicator[];
   mode: boolean;
   obj: Instrument;
   timeframe: number;
@@ -46,7 +25,6 @@ interface MainChartProps {
 const MainChart: React.FC<MainChartProps> = ({
   seriesData,
   chartType,
-  indicators,
   mode,
   obj,
   timeframe,
@@ -55,7 +33,6 @@ const MainChart: React.FC<MainChartProps> = ({
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick" | "Line"> | null>(null);
-  const indicatorSeriesRef = useRef<{ [key: string]: ISeriesApi<"Line"> }>({});
   const prevChartTypeRef = useRef<SeriesType>(chartType);
 
   const renderMainChart = useCallback(() => {
@@ -280,116 +257,6 @@ const MainChart: React.FC<MainChartProps> = ({
           },
         });
       }
-
-      indicators.forEach((indicator) => {
-        if (indicator.active) {
-          if (!indicatorSeriesRef.current[indicator.name]) {
-            switch (indicator.name) {
-              case "MA": {
-                const maIndicator = indicator as MAIndicator;
-                const maSeries = mainChartRef.current!.addLineSeries({
-                  color: mode ? "#FBBF24" : "#F59E0B",
-                  lineWidth: 2,
-                  lastValueVisible: true,
-                });
-                maSeries.setData(maIndicator.data);
-                indicatorSeriesRef.current[indicator.name] = maSeries;
-                break;
-              }
-              case "Bollinger Bands": {
-                const bbIndicator = indicator as BollingerBandsIndicator;
-                const upperBandSeries = mainChartRef.current!.addLineSeries({
-                  color: mode ? "#34D399" : "#10B981",
-                  lineWidth: 1,
-                  lastValueVisible: true,
-                });
-                const lowerBandSeries = mainChartRef.current!.addLineSeries({
-                  color: mode ? "#F87171" : "#EF4444",
-                  lineWidth: 1,
-                  lastValueVisible: true,
-                });
-                upperBandSeries.setData(
-                  bbIndicator.data.map((d) => ({
-                    time: d.time,
-                    value: d.upper,
-                  })),
-                );
-                lowerBandSeries.setData(
-                  bbIndicator.data.map((d) => ({
-                    time: d.time,
-                    value: d.lower,
-                  })),
-                );
-                indicatorSeriesRef.current[`${indicator.name}_upper`] =
-                  upperBandSeries;
-                indicatorSeriesRef.current[`${indicator.name}_lower`] =
-                  lowerBandSeries;
-                break;
-              }
-            }
-          } else {
-            switch (indicator.name) {
-              case "MA": {
-                const maIndicator = indicator as MAIndicator;
-                indicatorSeriesRef.current[indicator.name].applyOptions({
-                  color: mode ? "#FBBF24" : "#F59E0B",
-                });
-                indicatorSeriesRef.current[indicator.name].setData(
-                  maIndicator.data,
-                );
-                break;
-              }
-              case "Bollinger Bands": {
-                const bbIndicator = indicator as BollingerBandsIndicator;
-                indicatorSeriesRef.current[
-                  `${indicator.name}_upper`
-                ].applyOptions({
-                  color: mode ? "#34D399" : "#10B981",
-                });
-                indicatorSeriesRef.current[
-                  `${indicator.name}_lower`
-                ].applyOptions({
-                  color: mode ? "#F87171" : "#EF4444",
-                });
-                indicatorSeriesRef.current[`${indicator.name}_upper`].setData(
-                  bbIndicator.data.map((d) => ({
-                    time: d.time,
-                    value: d.upper,
-                  })),
-                );
-                indicatorSeriesRef.current[`${indicator.name}_lower`].setData(
-                  bbIndicator.data.map((d) => ({
-                    time: d.time,
-                    value: d.lower,
-                  })),
-                );
-                break;
-              }
-            }
-          }
-        } else {
-          if (indicatorSeriesRef.current[indicator.name]) {
-            mainChartRef.current!.removeSeries(
-              indicatorSeriesRef.current[indicator.name],
-            );
-            delete indicatorSeriesRef.current[indicator.name];
-          }
-          if (indicator.name === "Bollinger Bands") {
-            if (indicatorSeriesRef.current[`${indicator.name}_upper`]) {
-              mainChartRef.current!.removeSeries(
-                indicatorSeriesRef.current[`${indicator.name}_upper`],
-              );
-              delete indicatorSeriesRef.current[`${indicator.name}_upper`];
-            }
-            if (indicatorSeriesRef.current[`${indicator.name}_lower`]) {
-              mainChartRef.current!.removeSeries(
-                indicatorSeriesRef.current[`${indicator.name}_lower`],
-              );
-              delete indicatorSeriesRef.current[`${indicator.name}_lower`];
-            }
-          }
-        }
-      });
     }
   }, [
     seriesData,
@@ -398,7 +265,6 @@ const MainChart: React.FC<MainChartProps> = ({
     obj?.exchange_code,
     timeframe,
     chartType,
-    indicators,
     setTimeScale,
   ]);
 

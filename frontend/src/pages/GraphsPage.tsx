@@ -15,10 +15,6 @@ import {
 import { useGetCandlesQuery } from "../services/instrumentService";
 import {
   formatDate,
-  calculateMA,
-  calculateBollingerBands,
-  calculateRSI,
-  calculateMACD,
 } from "../common-functions";
 import { Candle, Instrument } from "../common-types";
 import { SeriesOptionsMap, Time } from "lightweight-charts";
@@ -27,7 +23,6 @@ import GraphHeader from "../components/GraphHeader";
 import ChartControls from "../components/ChartControls";
 import MainChart from "../components/MainChart";
 import VolumeChart from "../components/VolumeChart";
-import IndicatorChart from "../components/IndicatorChart";
 import ResponsiveSidebar from "../components/ResponsiveSidebar";
 
 interface LocationState {
@@ -43,25 +38,16 @@ const GraphsPage: React.FC = () => {
   const [timeframe, setTimeFrame] = useState<number>(15);
   const [chartType, setChartType] = useState<"Candlestick" | "Line">(
     "Candlestick",
-  );
-  const [showVolume, setShowVolume] = useState<boolean>(true);
+  );  const [showVolume, setShowVolume] = useState<boolean>(true);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [indicators, setIndicators] = useState<any[]>([
-    { name: "MA", active: false, data: [] },
-    { name: "Bollinger Bands", active: false, data: [] },
-    { name: "RSI", active: false, data: [] },
-    { name: "MACD", active: true, data: [] },
-  ]);
 
   const { data, refetch, isLoading, isError } = useGetCandlesQuery({
     id: obj?.id,
     tf: timeframe,
   });
-
   const mainChartRef = useRef<any>(null);
   const volumeChartRef = useRef<any>(null);
-  const indicatorChartRef = useRef<any>(null);
   const chartSectionRef = useRef<HTMLDivElement>(null);
 
   const seriesData = useMemo(() => {
@@ -95,33 +81,6 @@ const GraphsPage: React.FC = () => {
       },
     );
   }, [data]);
-
-  useEffect(() => {
-    if (seriesData.length > 0) {
-      const updatedIndicators = indicators.map((indicator) => {
-        let data: any = [];
-        switch (indicator.name) {
-          case "MA":
-            data = calculateMA(seriesData, 20);
-            break;
-          case "Bollinger Bands":
-            data = calculateBollingerBands(seriesData);
-            break;
-          case "RSI":
-            data = calculateRSI(seriesData);
-            break;
-          case "MACD":
-            data = calculateMACD(seriesData);
-            break;
-          default:
-            break;
-        }
-        return { ...indicator, data };
-      });
-      setIndicators(updatedIndicators);
-    }
-  }, [seriesData]);
-
   useEffect(() => {
     let intervalId: number | null = null;
     if (autoRefresh) {
@@ -135,7 +94,6 @@ const GraphsPage: React.FC = () => {
       }
     };
   }, [autoRefresh, refetch]);
-
   const syncCharts = useCallback(() => {
     if (!mainChartRef.current) return;
 
@@ -143,8 +101,6 @@ const GraphsPage: React.FC = () => {
       const charts = [];
       if (showVolume && volumeChartRef.current)
         charts.push(volumeChartRef.current);
-      if (indicators.some((ind) => ind.active) && indicatorChartRef.current)
-        charts.push(indicatorChartRef.current);
       return charts;
     };
 
@@ -178,14 +134,14 @@ const GraphsPage: React.FC = () => {
         handleVisibleTimeRangeChange,
       );
     };
-  }, [showVolume, indicators]);
+  }, [showVolume]);
 
   useEffect(() => {
     const cleanup = syncCharts();
     return () => {
       if (cleanup) cleanup();
     };
-  }, [syncCharts, seriesData, showVolume, indicators]);
+  }, [syncCharts, seriesData, showVolume]);
 
   const handleTfChange = (tf: number) => {
     setTimeFrame(tf);
@@ -209,15 +165,6 @@ const GraphsPage: React.FC = () => {
     link.click();
     document.body.removeChild(link);
   };
-
-  const toggleIndicator = (name: string) => {
-    setIndicators((prevIndicators) =>
-      prevIndicators.map((ind) =>
-        ind.name === name ? { ...ind, active: !ind.active } : ind,
-      ),
-    );
-  };
-
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       chartSectionRef.current
@@ -285,31 +232,26 @@ const GraphsPage: React.FC = () => {
               maxSize={30}
               className="hidden md:block"
             >
-              <ResponsiveSidebar isFullscreen={isFullscreen}>
-                <ChartControls
+              <ResponsiveSidebar isFullscreen={isFullscreen}>                <ChartControls
                   timeframe={timeframe}
                   chartType={chartType}
                   showVolume={showVolume}
                   autoRefresh={autoRefresh}
-                  indicators={indicators}
                   onTfChange={handleTfChange}
                   onChartTypeChange={(type: keyof SeriesOptionsMap) =>
                     setChartType(type as "Candlestick" | "Line")
                   }
                   onShowVolumeChange={setShowVolume}
                   onAutoRefreshChange={setAutoRefresh}
-                  onToggleIndicator={toggleIndicator}
                 />
               </ResponsiveSidebar>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={80}>
               <ResizablePanelGroup direction="vertical">
-                <ResizablePanel defaultSize={70}>
-                  <MainChart
+                <ResizablePanel defaultSize={70}>                  <MainChart
                     seriesData={seriesData}
                     chartType={chartType}
-                    indicators={indicators}
                     mode={isDarkMode}
                     obj={obj}
                     timeframe={timeframe}
@@ -317,35 +259,18 @@ const GraphsPage: React.FC = () => {
                       (mainChartRef.current = timeScale)
                     }
                   />
-                </ResizablePanel>
-                <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={30}>
-                  <ResizablePanelGroup direction="horizontal">
-                    {showVolume && (
-                      <>
-                        <ResizablePanel defaultSize={50}>
-                          <VolumeChart
-                            volumeData={volumeData}
-                            mode={isDarkMode}
-                            setTimeScale={(timeScale: any) =>
-                              (volumeChartRef.current = timeScale)
-                            }
-                          />
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                      </>
-                    )}
-                    <ResizablePanel defaultSize={50}>
-                      <IndicatorChart
-                        indicators={indicators}
-                        mode={isDarkMode}
-                        setTimeScale={(timeScale: any) =>
-                          (indicatorChartRef.current = timeScale)
-                        }
-                      />
-                    </ResizablePanel>
-                  </ResizablePanelGroup>
-                </ResizablePanel>
+                </ResizablePanel>                <ResizableHandle withHandle />
+                {showVolume && (
+                  <ResizablePanel defaultSize={30}>
+                    <VolumeChart
+                      volumeData={volumeData}
+                      mode={isDarkMode}
+                      setTimeScale={(timeScale: any) =>
+                        (volumeChartRef.current = timeScale)
+                      }
+                    />
+                  </ResizablePanel>
+                )}
               </ResizablePanelGroup>
             </ResizablePanel>
           </ResizablePanelGroup>
