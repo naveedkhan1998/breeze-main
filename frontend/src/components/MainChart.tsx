@@ -42,45 +42,45 @@ const MainChart: React.FC<MainChartProps> = ({
 
         const chart = createChart(mainChartContainerRef.current, {
           layout: {
-            textColor: mode ? "#E5E7EB" : "#1F2937",
-            background: { color: mode ? "#111827" : "#FFFFFF" },
+            textColor: mode ? "#E2E8F0" : "#475569",
+            background: { color: "transparent" },
             fontSize: 12,
-            fontFamily: "Inter, -apple-system, system-ui, sans-serif",
+            fontFamily: "Inter, -apple-system, sans-serif",
           },
           timeScale: {
             timeVisible: true,
             secondsVisible: false,
-            borderColor: mode ? "#374151" : "#E5E7EB",
+            borderColor: mode ? "#334155" : "#CBD5E1",
           },
           rightPriceScale: {
-            borderColor: mode ? "#4B5563" : "#D1D5DB",
+            borderColor: mode ? "#334155" : "#CBD5E1",
             scaleMargins: {
-              top: 0.1,
-              bottom: 0.1,
+              top: 0.05,
+              bottom: 0.05,
             },
           },
           crosshair: {
             mode: 1,
             vertLine: {
               width: 1,
-              color: mode ? "#6B7280" : "#9CA3AF",
-              style: 1,
+              color: mode ? "#64748B" : "#94A3B8",
+              style: 2,
             },
             horzLine: {
               visible: true,
               labelVisible: true,
-              color: mode ? "#6B7280" : "#9CA3AF",
+              color: mode ? "#64748B" : "#94A3B8",
               width: 1,
-              style: 1,
+              style: 2,
             },
           },
           grid: {
             vertLines: {
-              color: mode ? "#374151" : "#E5E7EB",
+              color: mode ? "#1E293B" : "#F1F5F9",
               style: 1,
             },
             horzLines: {
-              color: mode ? "#374151" : "#E5E7EB",
+              color: mode ? "#1E293B" : "#F1F5F9",
               style: 1,
             },
           },
@@ -91,14 +91,14 @@ const MainChart: React.FC<MainChartProps> = ({
         const mainSeries =
           chartType === "Candlestick"
             ? chart.addCandlestickSeries({
-                upColor: mode ? "#34D399" : "#10B981",
-                downColor: mode ? "#F87171" : "#EF4444",
+                upColor: mode ? "#10B981" : "#059669",
+                downColor: mode ? "#EF4444" : "#DC2626",
                 borderVisible: false,
-                wickUpColor: mode ? "#34D399" : "#10B981",
-                wickDownColor: mode ? "#F87171" : "#EF4444",
+                wickUpColor: mode ? "#10B981" : "#059669",
+                wickDownColor: mode ? "#EF4444" : "#DC2626",
               })
             : chart.addLineSeries({
-                color: mode ? "#60A5FA" : "#3B82F6",
+                color: mode ? "#3B82F6" : "#2563EB",
                 lineWidth: 2,
                 crosshairMarkerVisible: true,
                 crosshairMarkerRadius: 4,
@@ -111,36 +111,41 @@ const MainChart: React.FC<MainChartProps> = ({
 
         const legendContainer = document.createElement("div");
         legendContainer.className =
-          "absolute top-4 left-4 p-3 rounded-lg bg-card text-card-foreground shadow-lg border z-[10] min-w-[240px]";
+          "absolute top-4 left-4 p-4 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-xl z-[10] min-w-[280px]";
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
         const headerRow = document.createElement("div");
-        headerRow.className = "flex items-center gap-2 mb-2";
+        headerRow.className = "flex items-center justify-between mb-3";
 
         const companyName = document.createElement("span");
-        companyName.className = "text-sm font-semibold";
+        companyName.className = "text-lg font-bold text-slate-900 dark:text-slate-100";
         companyName.textContent = obj?.company_name || "";
+
+        const badgeContainer = document.createElement("div");
+        badgeContainer.className = "flex items-center gap-2";
 
         const exchangeBadge = document.createElement("span");
         exchangeBadge.className =
-          "px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary";
+          "px-2 py-1 text-xs font-medium rounded-md bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
         exchangeBadge.textContent = obj?.exchange_code || "";
 
         const timeframeBadge = document.createElement("span");
         timeframeBadge.className =
-          "px-2 py-0.5 text-xs rounded-full bg-secondary/10 text-secondary ml-auto";
-        timeframeBadge.textContent = `${timeframe}`;
+          "px-2 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+        timeframeBadge.textContent = `${timeframe}m`;
+
+        badgeContainer.appendChild(exchangeBadge);
+        badgeContainer.appendChild(timeframeBadge);
 
         headerRow.appendChild(companyName);
-        headerRow.appendChild(exchangeBadge);
-        headerRow.appendChild(timeframeBadge);
+        headerRow.appendChild(badgeContainer);
 
         const separator = document.createElement("div");
-        separator.className = "h-px my-2 bg-border";
+        separator.className = "h-px my-3 bg-slate-200 dark:bg-slate-700";
 
         const priceRow = document.createElement("div");
-        priceRow.className = "grid grid-cols-2 gap-2 text-xs";
+        priceRow.className = "grid grid-cols-2 gap-3 text-sm";
 
         legendContainer.appendChild(headerRow);
         legendContainer.appendChild(separator);
@@ -163,21 +168,35 @@ const MainChart: React.FC<MainChartProps> = ({
 
                 priceItems.forEach(({ label, value }) => {
                   const item = document.createElement("div");
-                  item.className = "flex items-center justify-between";
-                  item.innerHTML = `
-                    <span class="text-muted-foreground">${label}</span>
-                    <span class="font-medium">${value}</span>
-                  `;
+                  item.className = "flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50";
+                  
+                  const labelSpan = document.createElement("span");
+                  labelSpan.className = "text-slate-600 dark:text-slate-400 font-medium";
+                  labelSpan.textContent = label;
+                  
+                  const valueSpan = document.createElement("span");
+                  valueSpan.className = "font-semibold text-slate-900 dark:text-slate-100";
+                  valueSpan.textContent = value;
+                  
+                  item.appendChild(labelSpan);
+                  item.appendChild(valueSpan);
                   priceRow.appendChild(item);
                 });
               } else if (chartType === "Line" && "value" in data) {
                 const { value } = data as LineData;
                 const item = document.createElement("div");
-                item.className = "flex items-center justify-between col-span-2";
-                item.innerHTML = `
-                  <span class="text-muted-foreground">Price</span>
-                  <span class="font-medium">${value.toFixed(2)}</span>
-                `;
+                item.className = "flex items-center justify-between col-span-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50";
+                
+                const labelSpan = document.createElement("span");
+                labelSpan.className = "text-slate-600 dark:text-slate-400 font-medium";
+                labelSpan.textContent = "Price";
+                
+                const valueSpan = document.createElement("span");
+                valueSpan.className = "font-semibold text-slate-900 dark:text-slate-100";
+                valueSpan.textContent = value.toFixed(2);
+                
+                item.appendChild(labelSpan);
+                item.appendChild(valueSpan);
                 priceRow.appendChild(item);
               }
             }
@@ -210,14 +229,14 @@ const MainChart: React.FC<MainChartProps> = ({
           const mainSeries =
             chartType === "Candlestick"
               ? mainChartRef.current.addCandlestickSeries({
-                  upColor: mode ? "#34D399" : "#10B981",
-                  downColor: mode ? "#F87171" : "#EF4444",
+                  upColor: mode ? "#10B981" : "#059669",
+                  downColor: mode ? "#EF4444" : "#DC2626",
                   borderVisible: false,
-                  wickUpColor: mode ? "#34D399" : "#10B981",
-                  wickDownColor: mode ? "#F87171" : "#EF4444",
+                  wickUpColor: mode ? "#10B981" : "#059669",
+                  wickDownColor: mode ? "#EF4444" : "#DC2626",
                 })
               : mainChartRef.current.addLineSeries({
-                  color: mode ? "#60A5FA" : "#3B82F6",
+                  color: mode ? "#3B82F6" : "#2563EB",
                   lineWidth: 2,
                   crosshairMarkerVisible: true,
                   crosshairMarkerRadius: 4,
@@ -233,26 +252,29 @@ const MainChart: React.FC<MainChartProps> = ({
 
         mainChartRef.current.applyOptions({
           layout: {
-            textColor: mode ? "#E5E7EB" : "#1F2937",
-            background: { color: mode ? "#111827" : "#FFFFFF" },
+            textColor: mode ? "#E2E8F0" : "#475569",
+            background: { color: "transparent" },
+          },
+          timeScale: {
+            borderColor: mode ? "#334155" : "#CBD5E1",
           },
           rightPriceScale: {
-            borderColor: mode ? "#4B5563" : "#D1D5DB",
+            borderColor: mode ? "#334155" : "#CBD5E1",
           },
           crosshair: {
             vertLine: {
-              color: mode ? "#6B7280" : "#9CA3AF",
+              color: mode ? "#64748B" : "#94A3B8",
             },
             horzLine: {
-              color: mode ? "#6B7280" : "#9CA3AF",
+              color: mode ? "#64748B" : "#94A3B8",
             },
           },
           grid: {
             vertLines: {
-              color: mode ? "#374151" : "#E5E7EB",
+              color: mode ? "#1E293B" : "#F1F5F9",
             },
             horzLines: {
-              color: mode ? "#374151" : "#E5E7EB",
+              color: mode ? "#1E293B" : "#F1F5F9",
             },
           },
         });

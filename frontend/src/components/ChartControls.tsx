@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { HiClock, HiChartBar, HiRefresh } from "react-icons/hi";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { HiClock, HiChartBar, HiPlay, HiPause } from "react-icons/hi";
 import { SeriesType } from "lightweight-charts";
 
 interface ChartControlsProps {
@@ -46,68 +47,89 @@ export default function ChartControls({
     }
   };
 
-  const timeframeOptions = [5, 15, 30, 60, 240, 1440];
-  const chartTypes: SeriesType[] = ["Candlestick"];
+  const timeframeOptions = [
+    { value: 1, label: "1m" },
+    { value: 5, label: "5m" },
+    { value: 15, label: "15m" },
+    { value: 30, label: "30m" },
+    { value: 60, label: "1h" },
+    { value: 240, label: "4h" },
+    { value: 1440, label: "1D" },
+  ];
+
+  const chartTypes: { value: SeriesType; label: string }[] = [
+    { value: "Candlestick", label: "Candles" },
+    { value: "Line", label: "Line" },
+  ];
 
   return (
-    <div className="flex flex-col flex-grow p-6 space-y-8 rounded-lg shadow-lg ">
+    <div className="space-y-6">
       {/* Timeframe Section */}
-      <Card className="p-6 border rounded-lg shadow-sm ">
-        <div className="flex items-center mb-4">
-          <HiClock className="mr-2 text-2xl text-blue-500" />
-          <h3 className="text-lg font-semibold ">Timeframe</h3>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <HiClock className="h-4 w-4 text-chart-1" />
+          <h4 className="text-sm font-semibold text-foreground">
+            Timeframe
+          </h4>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           {timeframeOptions.map((tf) => (
             <Button
-              key={tf}
+              key={tf.value}
               size="sm"
-              variant={timeframe === tf ? "default" : "outline"}
-              className="rounded-lg"
-              onClick={() => onTfChange(tf)}
-              aria-pressed={timeframe === tf}
+              variant={timeframe === tf.value ? "default" : "outline"}
+              className="h-8 text-xs transition-all hover:scale-105"
+              onClick={() => onTfChange(tf.value)}
             >
-              {tf}m
+              {tf.label}
             </Button>
           ))}
         </div>
         <Button
           size="sm"
-          className="w-full mt-4 rounded-lg"
+          variant="ghost"
+          className="w-full h-8 text-xs border border-dashed"
           onClick={() => setIsCustomTfDialogOpen(true)}
         >
           Custom
         </Button>
-      </Card>
+      </div>
+
+      <Separator />
 
       {/* Chart Type Section */}
-      <Card className="p-6 border rounded-lg shadow-sm ">
-        <div className="flex items-center mb-4">
-          <HiChartBar className="mr-2 text-2xl text-green-500" />
-          <h3 className="text-lg font-semibold ">Chart Type</h3>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <HiChartBar className="h-4 w-4 text-chart-2" />
+          <h4 className="text-sm font-semibold text-foreground">
+            Chart Type
+          </h4>
         </div>
-        <div className="flex space-x-3">
+        <div className="grid grid-cols-2 gap-2">
           {chartTypes.map((type) => (
             <Button
-              key={type}
+              key={type.value}
               size="sm"
-              variant={chartType === type ? "default" : "outline"}
-              className="rounded-lg"
-              onClick={() => onChartTypeChange(type)}
-              aria-pressed={chartType === type}
+              variant={chartType === type.value ? "default" : "outline"}
+              className="h-8 text-xs transition-all hover:scale-105"
+              onClick={() => onChartTypeChange(type.value)}
             >
-              {type}
+              {type.label}
             </Button>
           ))}
         </div>
-      </Card>
+      </div>
 
-      {/* Display Options Section */}
-      <Card className="p-6 border rounded-lg shadow-sm ">
-        <h3 className="mb-4 text-lg font-semibold ">Display Options</h3>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="show-volume" className="">
-            Show Volume
+      <Separator />
+
+      {/* Display Options */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-foreground">
+          Display Options
+        </h4>
+        <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+          <Label htmlFor="show-volume" className="text-sm">
+            Volume Chart
           </Label>
           <Switch
             id="show-volume"
@@ -115,17 +137,32 @@ export default function ChartControls({
             onCheckedChange={onShowVolumeChange}
           />
         </div>
-      </Card>
+      </div>
+
+      <Separator />
 
       {/* Auto-Refresh Section */}
-      <Card className="p-6 border rounded-lg shadow-sm ">
-        <div className="flex items-center mb-4">
-          <HiRefresh className="mr-2 text-2xl text-purple-500" />
-          <h3 className="text-lg font-semibold ">Auto-Refresh</h3>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            {autoRefresh ? (
+              <HiPause className="h-4 w-4 text-chart-4" />
+            ) : (
+              <HiPlay className="h-4 w-4 text-chart-2" />
+            )}
+            <h4 className="text-sm font-semibold text-foreground">
+              Auto-Refresh
+            </h4>
+          </div>
+          {autoRefresh && (
+            <Badge variant="secondary" className="text-xs animate-pulse">
+              Live
+            </Badge>
+          )}
         </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="auto-refresh" className="">
-            Enable
+        <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+          <Label htmlFor="auto-refresh" className="text-sm">
+            Enable Live Updates
           </Label>
           <Switch
             id="auto-refresh"
@@ -133,16 +170,21 @@ export default function ChartControls({
             onCheckedChange={onAutoRefreshChange}
           />
         </div>
-      </Card>
+        {autoRefresh && (
+          <p className="text-xs text-muted-foreground">
+            Data refreshes every second
+          </p>
+        )}
+      </div>
 
       {/* Custom Timeframe Dialog */}
       <Dialog
         open={isCustomTfDialogOpen}
         onOpenChange={setIsCustomTfDialogOpen}
       >
-        <DialogContent className="p-6 rounded-lg shadow-lg ">
+        <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold ">
+            <DialogTitle className="text-lg font-semibold">
               Custom Timeframe
             </DialogTitle>
           </DialogHeader>
@@ -153,31 +195,35 @@ export default function ChartControls({
             }}
             className="space-y-4"
           >
-            <div>
-              <Label htmlFor="custom-timeframe" className="">
-                Enter custom timeframe (minutes):
+            <div className="space-y-2">
+              <Label htmlFor="custom-timeframe" className="text-sm font-medium">
+                Enter timeframe in minutes:
               </Label>
               <Input
                 type="number"
                 id="custom-timeframe"
                 value={customTimeframeInput}
                 onChange={(e) => setCustomTimeframeInput(e.target.value)}
+                placeholder="e.g., 45"
                 required
                 min={1}
-                className="mt-2"
+                className="h-9"
               />
+              <p className="text-xs text-slate-500">
+                Examples: 3, 7, 45, 120, etc.
+              </p>
             </div>
-            <div className="flex justify-end space-x-3">
-              <Button type="submit" className="rounded-lg">
-                Apply
-              </Button>
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
-                variant="secondary"
+                variant="outline"
+                size="sm"
                 onClick={() => setIsCustomTfDialogOpen(false)}
-                className="rounded-lg"
               >
                 Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                Apply
               </Button>
             </div>
           </form>

@@ -29,38 +29,50 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
 
     const chart = createChart(volumeChartContainerRef.current, {
       layout: {
-        textColor: mode ? "#E5E7EB" : "#1F2937",
-        background: { color: mode ? "#111827" : "#FFFFFF" },
-        fontSize: 12,
+        textColor: mode ? "#E2E8F0" : "#475569",
+        background: { color: "transparent" },
+        fontSize: 11,
+        fontFamily: "Inter, -apple-system, sans-serif",
       },
       timeScale: {
         visible: true,
         timeVisible: true,
         secondsVisible: false,
+        borderColor: mode ? "#334155" : "#CBD5E1",
       },
       rightPriceScale: {
-        borderColor: mode ? "#4B5563" : "#D1D5DB",
+        borderColor: mode ? "#334155" : "#CBD5E1",
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
       },
       grid: {
         vertLines: {
           visible: false,
         },
         horzLines: {
-          color: mode ? "#374151" : "#E5E7EB",
+          color: mode ? "#1E293B" : "#F1F5F9",
+          style: 1,
         },
       },
       crosshair: {
         mode: 1,
         vertLine: {
           width: 1,
-          color: mode ? "#6B7280" : "#9CA3AF",
-          style: 1,
+          color: mode ? "#64748B" : "#94A3B8",
+          style: 2,
         },
         horzLine: {
           visible: true,
           labelVisible: true,
+          color: mode ? "#64748B" : "#94A3B8",
+          width: 1,
+          style: 2,
         },
       },
+      handleScroll: true,
+      handleScale: true,
     });
 
     const volumeSeries = chart.addHistogramSeries({
@@ -68,7 +80,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
         type: "volume",
       },
       priceScaleId: "right",
-      color: mode ? "#60A5FA" : "#3B82F6",
+      base: 0,
     });
 
     volumeSeries.setData(volumeData);
@@ -99,28 +111,28 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
     if (volumeChartRef.current) {
       volumeChartRef.current.applyOptions({
         layout: {
-          textColor: mode ? "#E5E7EB" : "#1F2937",
-          background: { color: mode ? "#111827" : "#FFFFFF" },
+          textColor: mode ? "#E2E8F0" : "#475569",
+          background: { color: "transparent" },
+        },
+        timeScale: {
+          borderColor: mode ? "#334155" : "#CBD5E1",
         },
         rightPriceScale: {
-          borderColor: mode ? "#4B5563" : "#D1D5DB",
+          borderColor: mode ? "#334155" : "#CBD5E1",
         },
         grid: {
           horzLines: {
-            color: mode ? "#374151" : "#E5E7EB",
+            color: mode ? "#1E293B" : "#F1F5F9",
           },
         },
         crosshair: {
           vertLine: {
-            color: mode ? "#6B7280" : "#9CA3AF",
+            color: mode ? "#64748B" : "#94A3B8",
+          },
+          horzLine: {
+            color: mode ? "#64748B" : "#94A3B8",
           },
         },
-      });
-    }
-
-    if (volumeSeriesRef.current) {
-      volumeSeriesRef.current.applyOptions({
-        color: mode ? "#60A5FA" : "#3B82F6",
       });
     }
   }, [mode]);
@@ -133,10 +145,13 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
   }, [volumeData]);
 
   return (
-    <div
-      ref={volumeChartContainerRef}
-      className="relative w-full h-full overflow-hidden rounded-lg shadow-lg"
-    ></div>
+    <div className="h-full w-full">
+      <div
+        ref={volumeChartContainerRef}
+        className="relative w-full h-full"
+        style={{ height: "calc(100% - 40px)" }}
+      />
+    </div>
   );
 };
 
