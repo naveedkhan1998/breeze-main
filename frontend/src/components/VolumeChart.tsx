@@ -145,7 +145,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
   }, [volumeData]);
 
   return (
-    <div className="h-full w-full">
+    <div className="w-full h-full">
       <div
         ref={volumeChartContainerRef}
         className="relative w-full h-full"
