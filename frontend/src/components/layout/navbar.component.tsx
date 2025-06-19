@@ -67,7 +67,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <img src="/vite.svg" alt="Logo" className="w-8 h-8" />
+            <img src="/android-chrome-192x192.png" alt="Logo" className="w-8 h-8 rounded" />
             <span className="text-xl font-bold tracking-tight text-transparent bg-gradient-to-r from-primary to-primary/60 bg-clip-text">
               ICICI Breeze
             </span>
