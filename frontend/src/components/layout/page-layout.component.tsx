@@ -1,5 +1,6 @@
 import React from "react";
-import Navbar from "../Navbar";
+import { Helmet } from "react-helmet";
+import Navbar from "./navbar.component";
 
 interface PageLayoutProps {
   children?: React.ReactNode;
@@ -36,24 +37,31 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   subheader,
   actions,
 }) => {
+  const pageTitle = header?.toString() || "ICICI Breeze";
+
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <Navbar />
-      <div className="flex-1 w-full">
-        <div className="px-4 py-8 mx-auto sm:px-6 lg:px-8">
-          <div className="flex items-start justify-between mb-8">
-            <div className="flex-1">
-              {header}
-              {subheader}
+    <>
+      <Helmet>
+        <title>{pageTitle} - ICICI Breeze</title>
+      </Helmet>
+      <div className="flex flex-col min-h-screen bg-background">
+        <Navbar />
+        <div className="flex-1 w-full">
+          <div className="px-4 py-6 mx-auto sm:px-6 lg:px-8">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex-1">
+                {header}
+                {subheader}
+              </div>
+              {actions && <div className="flex-shrink-0 ml-4">{actions}</div>}
             </div>
-            {actions && <div className="flex-shrink-0 ml-4">{actions}</div>}
-          </div>
-          <div className="p-6 border rounded-lg shadow-sm bg-card text-card-foreground">
-            {children}
+            <div className="p-6 border rounded-lg shadow-sm bg-card text-card-foreground">
+              {children}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
