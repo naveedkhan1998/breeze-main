@@ -6,7 +6,6 @@ import { Flowbite } from "flowbite-react";
 import { useAppSelector } from "./app/hooks";
 import { getCurrentToken } from "./features/authSlice";
 import { useHealthCheckQuery } from "./services/baseApi";
-import Navbar from "./components/Navbar";
 import Toast from "./components/ToastContainer";
 import LoadingScreen from "./components/LoadingScreen";
 
@@ -74,7 +73,6 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Flowbite>
-          <Navbar />
           <AnnouncementBanner />
           <Routes>
             {routes.map(({ path, element, private: isPrivate }) => (

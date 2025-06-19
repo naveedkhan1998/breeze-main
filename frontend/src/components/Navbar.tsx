@@ -57,7 +57,7 @@ const Navbar: React.FC = () => {
     <nav
       className={`sticky top-0 z-30 w-full transition-all duration-300 ${isScrolled ? "bg-background/90 shadow-md backdrop-blur-lg" : "bg-background"}`}
     >
-      <div className="container flex items-center justify-between h-16 px-4 mx-auto">
+      <div className="flex items-center justify-between h-16 px-4 mx-auto">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
           <img src="/vite.svg" alt="Logo" className="w-8 h-8" />
