@@ -31,13 +31,30 @@ export const PageContent: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => <main className="flex-1 w-full">{children}</main>;
 
+const extractTextContent = (element: React.ReactNode): string => {
+  if (typeof element === "string") return element;
+  if (typeof element === "number") return element.toString();
+  if (React.isValidElement(element)) {
+    if (typeof element.props.children === "string") {
+      return element.props.children;
+    }
+    if (Array.isArray(element.props.children)) {
+      return element.props.children
+        .map((child: React.ReactNode) => extractTextContent(child))
+        .join("");
+    }
+    return extractTextContent(element.props.children);
+  }
+  return "ICICI Breeze";
+};
+
 export const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   header,
   subheader,
   actions,
 }) => {
-  const pageTitle = header?.toString() || "ICICI Breeze";
+  const pageTitle = header ? extractTextContent(header) : "ICICI Breeze";
 
   return (
     <>
