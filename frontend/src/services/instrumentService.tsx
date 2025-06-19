@@ -47,7 +47,7 @@ export const instrumentApi = baseApi.injectEndpoints({
     }),
     deleteInstrument: builder.mutation({
       query: ({ id }) => ({
-        url: `core/subscribed_instruments/${id}`,
+        url: `core/subscribed_instruments/${id}/`,
         method: "DELETE",
         headers: {
           "Content-type": "application/json",
