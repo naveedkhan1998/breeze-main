@@ -111,28 +111,29 @@ const MainChart: React.FC<MainChartProps> = ({
 
         const legendContainer = document.createElement("div");
         legendContainer.className =
-          "absolute top-4 left-4 p-4 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-xl z-[10] min-w-[280px]";
+          "absolute top-6 left-6 p-5 rounded-2xl glass-card min-w-[320px] max-w-[400px] shadow-2xl z-[10] transition-all duration-300 hover:shadow-3xl";
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
         const headerRow = document.createElement("div");
-        headerRow.className = "flex items-center justify-between mb-3";
+        headerRow.className = "flex items-center justify-between mb-4";
 
         const companyName = document.createElement("span");
-        companyName.className = "text-lg font-bold text-slate-900 dark:text-slate-100";
+        companyName.className =
+          "text-xl font-bold text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text";
         companyName.textContent = obj?.company_name || "";
 
         const badgeContainer = document.createElement("div");
-        badgeContainer.className = "flex items-center gap-2";
+        badgeContainer.className = "flex items-center gap-3";
 
         const exchangeBadge = document.createElement("span");
         exchangeBadge.className =
-          "px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-md dark:bg-blue-900/30 dark:text-blue-400";
+          "status-badge px-3 py-1.5 text-xs font-semibold text-blue-700 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg dark:from-blue-900/40 dark:to-blue-800/30 dark:text-blue-300 border-blue-200/50 dark:border-blue-700/30";
         exchangeBadge.textContent = obj?.exchange_code || "";
 
         const timeframeBadge = document.createElement("span");
         timeframeBadge.className =
-          "px-2 py-1 text-xs font-medium rounded-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+          "status-badge px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-slate-100 to-slate-50 text-slate-700 dark:from-slate-800/60 dark:to-slate-700/40 dark:text-slate-300 border-slate-200/50 dark:border-slate-600/30";
         timeframeBadge.textContent = `${timeframe}m`;
 
         badgeContainer.appendChild(exchangeBadge);
@@ -142,7 +143,8 @@ const MainChart: React.FC<MainChartProps> = ({
         headerRow.appendChild(badgeContainer);
 
         const separator = document.createElement("div");
-        separator.className = "h-px my-3 bg-slate-200 dark:bg-slate-700";
+        separator.className =
+          "h-px my-4 bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-600 to-transparent";
 
         const priceRow = document.createElement("div");
         priceRow.className = "grid grid-cols-2 gap-3 text-sm";
@@ -168,16 +170,18 @@ const MainChart: React.FC<MainChartProps> = ({
 
                 priceItems.forEach(({ label, value }) => {
                   const item = document.createElement("div");
-                  item.className = "flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50";
-                  
+                  item.className = "price-item";
+
                   const labelSpan = document.createElement("span");
-                  labelSpan.className = "font-medium text-slate-600 dark:text-slate-400";
+                  labelSpan.className =
+                    "block mb-1 text-xs font-medium text-slate-500 dark:text-slate-400";
                   labelSpan.textContent = label;
-                  
+
                   const valueSpan = document.createElement("span");
-                  valueSpan.className = "font-semibold text-slate-900 dark:text-slate-100";
+                  valueSpan.className =
+                    "block text-base font-bold text-slate-900 dark:text-slate-100";
                   valueSpan.textContent = value;
-                  
+
                   item.appendChild(labelSpan);
                   item.appendChild(valueSpan);
                   priceRow.appendChild(item);
@@ -185,16 +189,18 @@ const MainChart: React.FC<MainChartProps> = ({
               } else if (chartType === "Line" && "value" in data) {
                 const { value } = data as LineData;
                 const item = document.createElement("div");
-                item.className = "flex items-center justify-between col-span-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50";
-                
+                item.className = "col-span-2 price-item";
+
                 const labelSpan = document.createElement("span");
-                labelSpan.className = "font-medium text-slate-600 dark:text-slate-400";
+                labelSpan.className =
+                  "block mb-1 text-xs font-medium text-slate-500 dark:text-slate-400";
                 labelSpan.textContent = "Price";
-                
+
                 const valueSpan = document.createElement("span");
-                valueSpan.className = "font-semibold text-slate-900 dark:text-slate-100";
+                valueSpan.className =
+                  "block text-lg font-bold text-slate-900 dark:text-slate-100";
                 valueSpan.textContent = value.toFixed(2);
-                
+
                 item.appendChild(labelSpan);
                 item.appendChild(valueSpan);
                 priceRow.appendChild(item);
@@ -295,8 +301,8 @@ const MainChart: React.FC<MainChartProps> = ({
   }, [renderMainChart]);
 
   return (
-    <Card className="w-full h-full">
-      <div ref={mainChartContainerRef} className="relative w-full h-full ">
+    <Card className="w-full h-full border-0 chart-container glass-card">
+      <div ref={mainChartContainerRef} className="relative w-full h-full">
         {/* Chart will be rendered here */}
       </div>
     </Card>

@@ -231,13 +231,25 @@ const GraphsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background">
-        <Card className="p-8 shadow-2xl bg-card/80 backdrop-blur-sm border-border">
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 border-4 rounded-full border-chart-1/30 border-t-chart-1 animate-spin"></div>
-            <div className="text-card-foreground">
-              <div className="font-semibold">Loading chart data...</div>
-              <div className="text-sm text-muted-foreground">Please wait while we fetch the latest data</div>
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <Card className="p-10 shadow-2xl glass-card border-0 max-w-md mx-auto">
+          <div className="flex flex-col items-center space-y-6">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 rounded-full border-chart-1/20 border-t-chart-1 animate-spin"></div>
+              <div className="absolute inset-0 w-16 h-16 border-4 rounded-full border-chart-2/20 border-b-chart-2 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+            </div>
+            <div className="text-center">
+              <div className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Loading chart data...
+              </div>
+              <div className="mt-2 text-sm text-muted-foreground">
+                Fetching the latest market data for analysis
+              </div>
+              <div className="flex items-center justify-center mt-4 space-x-2">
+                <div className="w-2 h-2 rounded-full bg-chart-1 animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-chart-2 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 rounded-full bg-chart-3 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+              </div>
             </div>
           </div>
         </Card>
@@ -247,15 +259,24 @@ const GraphsPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background">
-        <Card className="p-8 shadow-2xl bg-card/80 backdrop-blur-sm border-destructive/20">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-destructive/10">
-              <HiX className="w-6 h-6 text-destructive" />
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-background via-background to-destructive/5">
+        <Card className="p-10 shadow-2xl glass-card border-destructive/20 max-w-md mx-auto">
+          <div className="flex flex-col items-center space-y-6">
+            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-destructive/10 to-destructive/20">
+              <HiX className="w-10 h-10 text-destructive" />
             </div>
-            <div>
-              <div className="font-semibold text-destructive">Failed to load chart data</div>
-              <div className="text-sm text-muted-foreground">Please check your connection and try again</div>
+            <div className="text-center">
+              <div className="text-xl font-bold text-destructive">Connection Error</div>
+              <div className="mt-2 text-sm text-muted-foreground">
+                Unable to fetch chart data. Please check your connection.
+              </div>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="mt-4 action-button bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70"
+              >
+                <HiRefresh className="w-4 h-4 mr-2" />
+                Try Again
+              </Button>
             </div>
           </div>
         </Card>
@@ -265,14 +286,26 @@ const GraphsPage: React.FC = () => {
 
   if (!obj) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <Card className="p-8 shadow-2xl bg-card/80 backdrop-blur-sm border-border">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <Card className="p-10 shadow-2xl glass-card border-0 max-w-md mx-auto">
           <div className="text-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-muted">
-              <HiChartBar className="w-8 h-8 text-muted-foreground" />
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-chart-1/10 to-chart-1/20">
+              <HiChartBar className="w-10 h-10 text-chart-1" />
             </div>
-            <div className="font-semibold text-card-foreground">No instrument data available</div>
-            <div className="mt-1 text-sm text-muted-foreground">Please select an instrument to view charts</div>
+            <div className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              No Data Available
+            </div>
+            <div className="mt-2 text-sm text-muted-foreground">
+              Please select an instrument to view detailed charts
+            </div>
+            <Button 
+              onClick={() => navigate(-1)} 
+              variant="outline" 
+              className="mt-6 action-button"
+            >
+              <HiArrowLeft className="w-4 h-4 mr-2" />
+              Go Back
+            </Button>
           </div>
         </Card>
       </div>
@@ -280,10 +313,10 @@ const GraphsPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-background via-background to-muted/10">
       {/* Enhanced Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-sidebar-background/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-border/50 glass-panel shadow-lg">
+        <div className="flex items-center justify-between px-6 py-5">
           {/* Left Section - Navigation & Title */}
           <div className="flex items-center space-x-6">
             <TooltipProvider>
@@ -293,49 +326,58 @@ const GraphsPage: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(-1)}
-                    className="w-10 h-10 p-0 transition-all duration-200 hover:bg-accent hover:text-accent-foreground"
+                    className="action-button w-11 h-11 p-0 rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-accent/80 hover:to-accent/60 hover:shadow-lg"
                   >
                     <HiArrowLeft className="w-5 h-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Go back</TooltipContent>
+                <TooltipContent side="bottom" className="glass-panel border-0">
+                  Go back to instruments
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
             <div className="flex flex-col">
-              <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-bold text-sidebar-foreground">
+              <div className="flex items-center space-x-4">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-sidebar-foreground via-sidebar-foreground to-sidebar-foreground/80 bg-clip-text text-transparent">
                   {obj?.company_name || "Chart"}
                 </h1>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="secondary" className="px-2 py-1 text-xs font-medium border bg-chart-1/10 text-chart-1 border-chart-1/20">
+                <div className="flex items-center space-x-3">
+                  <Badge className="status-badge px-3 py-1.5 text-xs font-semibold border-0 bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm">
                     {obj?.exchange_code || "N/A"}
                   </Badge>
-                  <Badge variant="outline" className="px-2 py-1 text-xs font-medium">
-                    {timeframe}m
+                  <Badge className="status-badge px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-muted to-muted/80 border-border/50 shadow-sm">
+                    {timeframe}m timeframe
                   </Badge>
                 </div>
               </div>
-              <div className="flex items-center mt-1 space-x-4">
+              <div className="flex items-center mt-2 space-x-6">
                 {autoRefresh && (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-chart-2 animate-pulse"></div>
-                    <Badge variant="default" className="px-2 py-1 text-xs border bg-chart-2/10 text-chart-2 border-chart-2/20">
-                      Live
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <div className="w-3 h-3 rounded-full bg-chart-2 live-pulse"></div>
+                      <div className="absolute inset-0 w-3 h-3 rounded-full bg-chart-2 animate-ping"></div>
+                    </div>
+                    <Badge className="status-badge px-3 py-1.5 text-xs font-semibold border-0 bg-gradient-to-r from-chart-2/20 to-chart-2/10 text-chart-2 shadow-sm">
+                      <HiPlay className="w-3 h-3 mr-1" />
+                      Live Updates
                     </Badge>
                   </div>
                 )}
-                <div className="text-sm text-muted-foreground">
-                  {data?.data?.length || 0} candles loaded
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <HiChartBar className="w-4 h-4" />
+                  <span className="font-medium">
+                    {data?.data?.length || 0} data points loaded
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Section - Controls */}
-          <div className="flex items-center space-x-2">
-            {/* Quick Actions */}
-            <div className="flex items-center p-1 space-x-1 rounded-lg bg-sidebar-accent/50">
+          {/* Right Section - Enhanced Controls */}
+          <div className="flex items-center space-x-4">
+            {/* Quick Actions Panel */}
+            <div className="flex items-center p-1.5 space-x-1 rounded-xl glass-panel shadow-sm">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -343,20 +385,28 @@ const GraphsPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setAutoRefresh(!autoRefresh)}
-                      className={`h-8 px-3 transition-all duration-200 ${
+                      className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         autoRefresh 
-                          ? 'bg-chart-2/10 text-chart-2 hover:bg-chart-2/20' 
-                          : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                          ? 'bg-gradient-to-r from-chart-2/20 to-chart-2/10 text-chart-2 shadow-sm hover:shadow-md' 
+                          : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
                       }`}
                     >
                       {autoRefresh ? (
-                        <HiPause className="w-4 h-4" />
+                        <>
+                          <HiPause className="w-4 h-4 mr-2" />
+                          <span className="text-xs font-medium">Pause</span>
+                        </>
                       ) : (
-                        <HiPlay className="w-4 h-4" />
+                        <>
+                          <HiPlay className="w-4 h-4 mr-2" />
+                          <span className="text-xs font-medium">Live</span>
+                        </>
                       )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>{autoRefresh ? 'Pause' : 'Start'} live updates</TooltipContent>
+                  <TooltipContent className="glass-panel border-0">
+                    {autoRefresh ? 'Pause' : 'Start'} live market updates
+                  </TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -365,16 +415,19 @@ const GraphsPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowVolume(!showVolume)}
-                      className={`h-8 px-3 transition-all duration-200 ${
+                      className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         showVolume 
-                          ? 'bg-chart-1/10 text-chart-1 hover:bg-chart-1/20' 
-                          : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                          ? 'bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm hover:shadow-md' 
+                          : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
                       }`}
                     >
-                      <HiChartBar className="w-4 h-4" />
+                      <HiChartBar className="w-4 h-4 mr-2" />
+                      <span className="text-xs font-medium">Volume</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>{showVolume ? 'Hide' : 'Show'} volume chart</TooltipContent>
+                  <TooltipContent className="glass-panel border-0">
+                    {showVolume ? 'Hide' : 'Show'} volume analysis
+                  </TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -383,24 +436,27 @@ const GraphsPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowControls(!showControls)}
-                      className={`h-8 px-3 transition-all duration-200 ${
+                      className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         showControls 
-                          ? 'bg-chart-5/10 text-chart-5 hover:bg-chart-5/20' 
-                          : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                          ? 'bg-gradient-to-r from-chart-5/20 to-chart-5/10 text-chart-5 shadow-sm hover:shadow-md' 
+                          : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
                       }`}
                     >
-                      <HiCog className="w-4 h-4" />
+                      <HiCog className="w-4 h-4 mr-2" />
+                      <span className="text-xs font-medium">Settings</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Toggle controls panel</TooltipContent>
+                  <TooltipContent className="glass-panel border-0">
+                    Toggle chart settings panel
+                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
 
-            <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="h-8 bg-gradient-to-b from-transparent via-border to-transparent" />
 
             {/* Action Buttons */}
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -408,12 +464,14 @@ const GraphsPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={refetch}
-                      className="w-8 h-8 p-0 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      className="action-button w-10 h-10 p-0 rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-chart-3/20 hover:to-chart-3/10 hover:text-chart-3 hover:shadow-lg"
                     >
-                      <HiRefresh className="w-4 h-4" />
+                      <HiRefresh className="w-5 h-5" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Refresh data</TooltipContent>
+                  <TooltipContent className="glass-panel border-0">
+                    Refresh market data
+                  </TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -422,12 +480,14 @@ const GraphsPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={handleDownload}
-                      className="w-8 h-8 p-0 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      className="action-button w-10 h-10 p-0 rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-chart-4/20 hover:to-chart-4/10 hover:text-chart-4 hover:shadow-lg"
                     >
-                      <HiDownload className="w-4 h-4" />
+                      <HiDownload className="w-5 h-5" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Download CSV</TooltipContent>
+                  <TooltipContent className="glass-panel border-0">
+                    Export data as CSV
+                  </TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -436,42 +496,55 @@ const GraphsPage: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={toggleFullscreen}
-                      className="w-8 h-8 p-0 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      className="action-button w-10 h-10 p-0 rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-primary/20 hover:to-primary/10 hover:text-primary hover:shadow-lg"
                     >
                       {isFullscreen ? (
-                        <HiX className="w-4 h-4" />
+                        <HiX className="w-5 h-5" />
                       ) : (
-                        <HiArrowsExpand className="w-4 h-4" />
+                        <HiArrowsExpand className="w-5 h-5" />
                       )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    {isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                  <TooltipContent className="glass-panel border-0">
+                    {isFullscreen ? 'Exit fullscreen mode' : 'Enter fullscreen mode'}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
 
-            {/* More Options */}
+            {/* Enhanced More Options */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
-                  <HiDotsVertical className="w-4 h-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="action-button w-10 h-10 p-0 rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-muted/80 hover:to-muted/60 hover:shadow-lg"
+                >
+                  <HiDotsVertical className="w-5 h-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem>
-                  <HiViewGrid className="w-4 h-4 mr-2" />
-                  Toggle Layout
+              <DropdownMenuContent align="end" className="w-56 glass-panel border-0 shadow-2xl">
+                <DropdownMenuItem className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-chart-1/10 hover:to-chart-1/5">
+                  <HiViewGrid className="w-5 h-5 mr-3 text-chart-1" />
+                  <div>
+                    <div className="font-medium">Toggle Layout</div>
+                    <div className="text-xs text-muted-foreground">Switch chart arrangement</div>
+                  </div>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <HiTrendingUp className="w-4 h-4 mr-2" />
-                  Add Indicator
+                <DropdownMenuSeparator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                <DropdownMenuItem className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-chart-2/10 hover:to-chart-2/5">
+                  <HiTrendingUp className="w-5 h-5 mr-3 text-chart-2" />
+                  <div>
+                    <div className="font-medium">Add Indicator</div>
+                    <div className="text-xs text-muted-foreground">Technical analysis tools</div>
+                  </div>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <HiColorSwatch className="w-4 h-4 mr-2" />
-                  Customize Theme
+                <DropdownMenuItem className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-chart-3/10 hover:to-chart-3/5">
+                  <HiColorSwatch className="w-5 h-5 mr-3 text-chart-3" />
+                  <div>
+                    <div className="font-medium">Customize Theme</div>
+                    <div className="text-xs text-muted-foreground">Personalize appearance</div>
+                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -486,28 +559,31 @@ const GraphsPage: React.FC = () => {
           {showControls && (
             <>
               <ResizablePanel
-                defaultSize={22}
-                minSize={18}
+                defaultSize={24}
+                minSize={20}
                 maxSize={35}
                 className="min-w-0"
               >
-                <div className="h-full p-4 bg-sidebar-background/50">
-                  <Card className="h-full shadow-xl border-sidebar-border bg-sidebar-background/70 backdrop-blur-lg">
+                <div className="h-full p-4 bg-gradient-to-b from-sidebar-background/30 to-sidebar-background/10">
+                  <Card className="h-full shadow-2xl glass-card border-0">
                     <div className="flex flex-col h-full">
-                      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-                        <h3 className="font-semibold text-sidebar-foreground">
-                          Chart Controls
-                        </h3>
+                      <div className="flex items-center justify-between p-5 border-b border-sidebar-border/30">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-2 h-2 rounded-full bg-gradient-to-r from-chart-1 to-chart-2"></div>
+                          <h3 className="font-bold text-sidebar-foreground">
+                            Chart Controls
+                          </h3>
+                        </div>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setShowControls(false)}
-                          className="w-6 h-6 p-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          className="action-button w-8 h-8 p-0 rounded-lg hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
                         >
                           <HiX className="w-4 h-4" />
                         </Button>
                       </div>
-                      <div className="flex-1 p-4 overflow-y-auto scrollbar-hidden">
+                      <div className="flex-1 p-5 overflow-y-auto scroll-fade scrollbar-hidden">
                         <ChartControls
                           timeframe={timeframe}
                           chartType={chartType}
@@ -527,54 +603,59 @@ const GraphsPage: React.FC = () => {
               </ResizablePanel>
               <ResizableHandle
                 withHandle
-                className="w-1 transition-colors bg-sidebar-border hover:bg-sidebar-border/80"
+                className="w-1.5 transition-all duration-300 hover:w-2 bg-gradient-to-b from-sidebar-border/50 via-sidebar-border to-sidebar-border/50 hover:bg-gradient-to-b hover:from-chart-1/50 hover:via-chart-2/50 hover:to-chart-3/50"
               />
             </>
           )}
 
-          {/* Chart Area */}
-          <ResizablePanel defaultSize={showControls ? 78 : 100}>
+          {/* Enhanced Chart Area */}
+          <ResizablePanel defaultSize={showControls ? 76 : 100}>
             <div className="h-full p-4">
               <ResizablePanelGroup direction="vertical">
                 {/* Main Chart */}
                 <ResizablePanel defaultSize={showVolume ? 75 : 100}>
-                  <Card className="h-full shadow-2xl border-border bg-card/80 backdrop-blur-sm">
-                    <MainChart
-                      seriesData={seriesData}
-                      chartType={chartType}
-                      mode={isDarkMode}
-                      obj={obj}
-                      timeframe={timeframe}
-                      setTimeScale={(timeScale: any) =>
-                        (mainChartRef.current = timeScale)
-                      }
-                    />
-                  </Card>
+                  <MainChart
+                    seriesData={seriesData}
+                    chartType={chartType}
+                    mode={isDarkMode}
+                    obj={obj}
+                    timeframe={timeframe}
+                    setTimeScale={(timeScale: any) =>
+                      (mainChartRef.current = timeScale)
+                    }
+                  />
                 </ResizablePanel>
 
-                {/* Volume Chart */}
+                {/* Enhanced Volume Chart */}
                 {showVolume && (
                   <>
                     <ResizableHandle
                       withHandle
-                      className="h-1 my-2 transition-colors rounded-full bg-border hover:bg-border/80"
+                      className="h-1.5 my-3 transition-all duration-300 hover:h-2 rounded-full bg-gradient-to-r from-border/50 via-border to-border/50 hover:bg-gradient-to-r hover:from-chart-1/50 hover:via-chart-2/50 hover:to-chart-3/50"
                     />
                     <ResizablePanel defaultSize={25} minSize={15}>
-                      <Card className="h-full shadow-2xl border-border bg-card/80 backdrop-blur-sm">
-                        <div className="flex items-center justify-between p-3 border-b border-border bg-muted/50">
-                          <div className="flex items-center space-x-2">
-                            <HiChartBar className="w-4 h-4 text-chart-1" />
-                            <span className="text-sm font-medium text-card-foreground">
-                              Volume Analysis
-                            </span>
+                      <Card className="h-full shadow-2xl glass-card border-0">
+                        <div className="flex items-center justify-between p-4 border-b border-border/30 glass-panel">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                              <HiChartBar className="w-4 h-4 text-chart-1" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-card-foreground">
+                                Volume Analysis
+                              </span>
+                              <div className="text-xs text-muted-foreground">
+                                Trading volume patterns
+                              </div>
+                            </div>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setShowVolume(false)}
-                            className="w-6 h-6 p-0 hover:bg-accent hover:text-accent-foreground"
+                            className="action-button w-8 h-8 p-0 rounded-lg hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
                           >
-                            <HiEyeOff className="w-3 h-3" />
+                            <HiEyeOff className="w-4 h-4" />
                           </Button>
                         </div>
                         <VolumeChart
