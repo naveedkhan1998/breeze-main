@@ -65,7 +65,7 @@ const LoginRegPage: React.FC = () => {
         ))}
       </div>
 
-      <div className="container relative flex items-center justify-center min-h-screen py-8 mx-auto">
+      <div className="relative flex items-center justify-center min-h-screen py-8 mx-auto ">
         <motion.div
           className="w-full max-w-5xl"
           initial={{ opacity: 0, y: 20 }}

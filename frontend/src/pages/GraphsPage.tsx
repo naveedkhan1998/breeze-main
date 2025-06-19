@@ -13,22 +13,36 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useGetCandlesQuery } from "../services/instrumentService";
-import {
-  formatDate,
-  calculateMA,
-  calculateBollingerBands,
-  calculateRSI,
-  calculateMACD,
-} from "../common-functions";
+import { formatDate } from "../common-functions";
 import { Candle, Instrument } from "../common-types";
 import { SeriesOptionsMap, Time } from "lightweight-charts";
 import { useTheme } from "@/components/theme-provider";
-import GraphHeader from "../components/GraphHeader";
-import ChartControls from "../components/ChartControls";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+
+import {
+  HiArrowLeft,
+  HiDownload,
+  HiRefresh,
+  HiArrowsExpand,
+  HiX,
+  HiCog,
+  HiEye,
+  HiEyeOff,
+  HiChartBar,
+} from "react-icons/hi";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useNavigate } from "react-router-dom";
 import MainChart from "../components/MainChart";
 import VolumeChart from "../components/VolumeChart";
-import IndicatorChart from "../components/IndicatorChart";
-import ResponsiveSidebar from "../components/ResponsiveSidebar";
+import ChartControls from "../components/ChartControls";
 
 interface LocationState {
   obj: Instrument;
@@ -36,10 +50,12 @@ interface LocationState {
 
 const GraphsPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { obj } = (location.state as LocationState) || {};
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  // State variables
   const [timeframe, setTimeFrame] = useState<number>(15);
   const [chartType, setChartType] = useState<"Candlestick" | "Line">(
     "Candlestick",
@@ -47,21 +63,17 @@ const GraphsPage: React.FC = () => {
   const [showVolume, setShowVolume] = useState<boolean>(true);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [indicators, setIndicators] = useState<any[]>([
-    { name: "MA", active: false, data: [] },
-    { name: "Bollinger Bands", active: false, data: [] },
-    { name: "RSI", active: false, data: [] },
-    { name: "MACD", active: true, data: [] },
-  ]);
+  const [showControls, setShowControls] = useState<boolean>(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
   const { data, refetch, isLoading, isError } = useGetCandlesQuery({
     id: obj?.id,
     tf: timeframe,
   });
 
+  // Refs
   const mainChartRef = useRef<any>(null);
   const volumeChartRef = useRef<any>(null);
-  const indicatorChartRef = useRef<any>(null);
   const chartSectionRef = useRef<HTMLDivElement>(null);
 
   const seriesData = useMemo(() => {
@@ -95,33 +107,6 @@ const GraphsPage: React.FC = () => {
       },
     );
   }, [data]);
-
-  useEffect(() => {
-    if (seriesData.length > 0) {
-      const updatedIndicators = indicators.map((indicator) => {
-        let data: any = [];
-        switch (indicator.name) {
-          case "MA":
-            data = calculateMA(seriesData, 20);
-            break;
-          case "Bollinger Bands":
-            data = calculateBollingerBands(seriesData);
-            break;
-          case "RSI":
-            data = calculateRSI(seriesData);
-            break;
-          case "MACD":
-            data = calculateMACD(seriesData);
-            break;
-          default:
-            break;
-        }
-        return { ...indicator, data };
-      });
-      setIndicators(updatedIndicators);
-    }
-  }, [seriesData]);
-
   useEffect(() => {
     let intervalId: number | null = null;
     if (autoRefresh) {
@@ -135,7 +120,6 @@ const GraphsPage: React.FC = () => {
       }
     };
   }, [autoRefresh, refetch]);
-
   const syncCharts = useCallback(() => {
     if (!mainChartRef.current) return;
 
@@ -143,8 +127,6 @@ const GraphsPage: React.FC = () => {
       const charts = [];
       if (showVolume && volumeChartRef.current)
         charts.push(volumeChartRef.current);
-      if (indicators.some((ind) => ind.active) && indicatorChartRef.current)
-        charts.push(indicatorChartRef.current);
       return charts;
     };
 
@@ -178,14 +160,14 @@ const GraphsPage: React.FC = () => {
         handleVisibleTimeRangeChange,
       );
     };
-  }, [showVolume, indicators]);
+  }, [showVolume]);
 
   useEffect(() => {
     const cleanup = syncCharts();
     return () => {
       if (cleanup) cleanup();
     };
-  }, [syncCharts, seriesData, showVolume, indicators]);
+  }, [syncCharts, seriesData, showVolume]);
 
   const handleTfChange = (tf: number) => {
     setTimeFrame(tf);
@@ -209,15 +191,6 @@ const GraphsPage: React.FC = () => {
     link.click();
     document.body.removeChild(link);
   };
-
-  const toggleIndicator = (name: string) => {
-    setIndicators((prevIndicators) =>
-      prevIndicators.map((ind) =>
-        ind.name === name ? { ...ind, active: !ind.active } : ind,
-      ),
-    );
-  };
-
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       chartSectionRef.current
@@ -266,91 +239,247 @@ const GraphsPage: React.FC = () => {
       </div>
     );
   }
-
   return (
-    <div className="flex flex-col max-h-screen h-[calc(100vh-4rem)] bg-white dark:bg-zinc-950">
-      <GraphHeader
-        title={`${obj.exchange_code} Chart`}
-        onRefresh={refetch}
-        onDownload={handleDownload}
-        onToggleFullscreen={toggleFullscreen}
-        isFullscreen={isFullscreen}
-      />
-      <main className="flex flex-grow overflow-hidden">
-        <div ref={chartSectionRef} className="flex flex-grow">
-          <ResizablePanelGroup direction="horizontal" className="flex-grow">
-            <ResizablePanel
-              defaultSize={15}
-              minSize={15}
-              maxSize={30}
-              className="hidden md:block"
-            >
-              <ResponsiveSidebar isFullscreen={isFullscreen}>
-                <ChartControls
-                  timeframe={timeframe}
-                  chartType={chartType}
-                  showVolume={showVolume}
-                  autoRefresh={autoRefresh}
-                  indicators={indicators}
-                  onTfChange={handleTfChange}
-                  onChartTypeChange={(type: keyof SeriesOptionsMap) =>
-                    setChartType(type as "Candlestick" | "Line")
-                  }
-                  onShowVolumeChange={setShowVolume}
-                  onAutoRefreshChange={setAutoRefresh}
-                  onToggleIndicator={toggleIndicator}
-                />
-              </ResponsiveSidebar>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={80}>
-              <ResizablePanelGroup direction="vertical">
-                <ResizablePanel defaultSize={70}>
-                  <MainChart
-                    seriesData={seriesData}
-                    chartType={chartType}
-                    indicators={indicators}
-                    mode={isDarkMode}
-                    obj={obj}
-                    timeframe={timeframe}
-                    setTimeScale={(timeScale: any) =>
-                      (mainChartRef.current = timeScale)
-                    }
-                  />
-                </ResizablePanel>
-                <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={30}>
-                  <ResizablePanelGroup direction="horizontal">
-                    {showVolume && (
-                      <>
-                        <ResizablePanel defaultSize={50}>
-                          <VolumeChart
-                            volumeData={volumeData}
-                            mode={isDarkMode}
-                            setTimeScale={(timeScale: any) =>
-                              (volumeChartRef.current = timeScale)
-                            }
-                          />
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                      </>
-                    )}
-                    <ResizablePanel defaultSize={50}>
-                      <IndicatorChart
-                        indicators={indicators}
-                        mode={isDarkMode}
-                        setTimeScale={(timeScale: any) =>
-                          (indicatorChartRef.current = timeScale)
-                        }
-                      />
-                    </ResizablePanel>
-                  </ResizablePanelGroup>
-                </ResizablePanel>
-              </ResizablePanelGroup>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-background to-secondary dark:from-background dark:to-card">
+      {/* Modern Header */}
+      <header className="flex items-center justify-between px-6 py-4 border-b bg-card/80 backdrop-blur-md border-border">
+        <div className="flex items-center gap-4">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(-1)}
+                  className="w-8 h-8 p-0"
+                >
+                  <HiArrowLeft className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Go back</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold text-foreground">
+              {obj?.company_name || "Chart"}
+            </h1>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">
+                {obj?.exchange_code || "N/A"}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {timeframe}m
+              </Badge>
+              {autoRefresh && (
+                <Badge variant="default" className="text-xs animate-pulse">
+                  Live
+                </Badge>
+              )}
+            </div>
+          </div>
         </div>
-      </main>
+
+        {/* Header Controls */}
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowControls(!showControls)}
+                  className="h-8 px-3"
+                >
+                  <HiCog className="w-4 h-4 mr-1" />
+                  Controls
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Toggle controls</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowVolume(!showVolume)}
+                  className="h-8 px-3"
+                >
+                  {showVolume ? (
+                    <HiEye className="w-4 h-4" />
+                  ) : (
+                    <HiEyeOff className="w-4 h-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showVolume ? "Hide" : "Show"} volume
+              </TooltipContent>
+            </Tooltip>
+
+            <Separator orientation="vertical" className="h-6" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refetch}
+                  className="w-8 h-8 p-0"
+                >
+                  <HiRefresh className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Refresh</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownload}
+                  className="w-8 h-8 p-0"
+                >
+                  <HiDownload className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Download CSV</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleFullscreen}
+                  className="w-8 h-8 p-0"
+                >
+                  {isFullscreen ? (
+                    <HiX className="w-4 h-4" />
+                  ) : (
+                    <HiArrowsExpand className="w-4 h-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div ref={chartSectionRef} className="flex flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          {/* Controls Sidebar */}
+          {showControls && (
+            <>
+              <ResizablePanel
+                defaultSize={20}
+                minSize={15}
+                maxSize={35}
+                className={`transition-all duration-200 ${sidebarCollapsed ? "min-w-16" : ""}`}
+              >
+                {" "}
+                <Card className="h-full m-2 border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+                  <div className="h-full p-4 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-foreground">
+                        Chart Controls
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        className="w-6 h-6 p-0"
+                      >
+                        {sidebarCollapsed ? (
+                          <HiArrowsExpand className="w-3 h-3" />
+                        ) : (
+                          <HiX className="w-3 h-3" />
+                        )}
+                      </Button>
+                    </div>
+
+                    {!sidebarCollapsed && (
+                      <ChartControls
+                        timeframe={timeframe}
+                        chartType={chartType}
+                        showVolume={showVolume}
+                        autoRefresh={autoRefresh}
+                        onTfChange={handleTfChange}
+                        onChartTypeChange={(type: keyof SeriesOptionsMap) =>
+                          setChartType(type as "Candlestick" | "Line")
+                        }
+                        onShowVolumeChange={setShowVolume}
+                        onAutoRefreshChange={setAutoRefresh}
+                      />
+                    )}
+                  </div>
+                </Card>
+              </ResizablePanel>
+              <ResizableHandle
+                withHandle
+                className="w-1 transition-colors bg-border hover:bg-muted"
+              />
+            </>
+          )}
+
+          {/* Chart Area */}
+          <ResizablePanel defaultSize={showControls ? 80 : 100}>
+            <div className="h-full p-2">
+              <ResizablePanelGroup direction="vertical">
+                {/* Main Chart */}{" "}
+                <ResizablePanel defaultSize={showVolume ? 70 : 100}>
+                  <Card className="h-full overflow-hidden border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+                    <MainChart
+                      seriesData={seriesData}
+                      chartType={chartType}
+                      mode={isDarkMode}
+                      obj={obj}
+                      timeframe={timeframe}
+                      setTimeScale={(timeScale: any) =>
+                        (mainChartRef.current = timeScale)
+                      }
+                    />
+                  </Card>
+                </ResizablePanel>
+                {/* Volume Chart */}
+                {showVolume && (
+                  <>
+                    <ResizableHandle
+                      withHandle
+                      className="h-1 transition-colors bg-border hover:bg-muted"
+                    />
+                    <ResizablePanel defaultSize={30} minSize={15}>
+                      <Card className="h-full overflow-hidden border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+                        <div className="p-2 border-b border-border">
+                          <div className="flex items-center gap-2">
+                            <HiChartBar className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">
+                              Volume
+                            </span>
+                          </div>
+                        </div>
+                        <VolumeChart
+                          volumeData={volumeData}
+                          mode={isDarkMode}
+                          setTimeScale={(timeScale: any) =>
+                            (volumeChartRef.current = timeScale)
+                          }
+                        />
+                      </Card>
+                    </ResizablePanel>
+                  </>
+                )}
+              </ResizablePanelGroup>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
     </div>
   );
 };

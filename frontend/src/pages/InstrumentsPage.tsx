@@ -1,6 +1,13 @@
 import React, { ChangeEvent, useState } from "react";
 import { Search } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  PageLayout,
+  PageHeader,
+  PageSubHeader,
+  PageActions,
+  PageContent,
+} from "@/components/layout/page-layout.component";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Instrument from "../components/Instrument";
@@ -57,17 +64,27 @@ const InstrumentsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/80 to-muted">
-      <div className="container px-4 py-8 mx-auto">
+    <PageLayout
+      header={
+        <PageHeader>
+          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text">
+            Instruments Explorer
+          </span>
+        </PageHeader>
+      }
+      subheader={
+        <PageSubHeader>
+          Search and subscribe to instruments across different exchanges
+        </PageSubHeader>
+      }
+      actions={
+        <PageActions>
+          <SearchBar value={searchTerm} onChange={handleSearchChange} />
+        </PageActions>
+      }
+    >
+      <PageContent>
         <Card className="backdrop-blur-sm bg-background/95">
-          <CardHeader className="border-b">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text">
-                Instruments Explorer
-              </CardTitle>
-              <SearchBar value={searchTerm} onChange={handleSearchChange} />
-            </div>
-          </CardHeader>
           <CardContent className="p-6">
             <Tabs defaultValue="NSE" className="w-full">
               <TabsList className="w-full mb-6 bg-muted/50">
@@ -93,8 +110,8 @@ const InstrumentsPage: React.FC = () => {
             </Tabs>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </PageContent>
+    </PageLayout>
   );
 };
 

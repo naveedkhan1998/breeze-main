@@ -1,102 +1,152 @@
-import { useState } from "react";
 import { useGetLoggedUserQuery } from "../services/userAuthService";
+import {
+  PageLayout,
+  PageHeader,
+  PageSubHeader,
+  PageContent,
+} from "@/components/layout/page-layout.component";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Loader2 } from "lucide-react";
 
 const ProfilePage = () => {
-  const { data } = useGetLoggedUserQuery("");
-  const [activeTab, setActiveTab] = useState("profile");
+  const { data, isLoading } = useGetLoggedUserQuery("");
 
-  if (!data) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen text-white bg-gray-900">
-        Loading...
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen p-6 bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-lg dark:bg-gray-800">
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
-          <button
-            className={`flex-1 p-4 text-center ${
-              activeTab === "profile"
-                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                : "text-gray-600 dark:text-gray-400"
-            } font-semibold`}
-            onClick={() => setActiveTab("profile")}
-          >
-            Profile
-          </button>
-          <button
-            className={`flex-1 p-4 text-center ${
-              activeTab === "settings"
-                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                : "text-gray-600 dark:text-gray-400"
-            } font-semibold`}
-            onClick={() => setActiveTab("settings")}
-          >
-            Settings
-          </button>
-          <button
-            className={`flex-1 p-4 text-center ${
-              activeTab === "notifications"
-                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                : "text-gray-600 dark:text-gray-400"
-            } font-semibold`}
-            onClick={() => setActiveTab("notifications")}
-          >
-            Notifications
-          </button>
-        </div>
+    <PageLayout
+      header={
+        <PageHeader>
+          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text">
+            My Profile
+          </span>
+        </PageHeader>
+      }
+      subheader={
+        <PageSubHeader>
+          Manage your account settings and preferences
+        </PageSubHeader>
+      }
+    >
+      <PageContent>
+        <Tabs defaultValue="profile" className="w-full space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          </TabsList>
 
-        <div className="p-6">
-          {activeTab === "profile" && (
-            <div className="flex items-center space-x-6">
-              <img
-                src={data.avatar}
-                alt="User Avatar"
-                className="w-24 h-24 border-4 border-blue-500 rounded-full"
-              />
-              <div>
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-                  {data.name}
-                </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Email: {data.email}
-                </p>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Role: {data.is_admin ? "Admin" : "User"}
-                </p>
-              </div>
-            </div>
-          )}
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col items-center gap-4 sm:flex-row">
+                  <Avatar className="w-24 h-24">
+                    <AvatarImage src={data?.avatar} />
+                    <AvatarFallback>
+                      {data?.name
+                        ?.split(" ")
+                        .map((n: string) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1 text-center sm:text-left">
+                    <h3 className="text-2xl font-semibold">{data?.name}</h3>
+                    <p className="text-muted-foreground">{data?.email}</p>
+                    <Badge variant={data?.is_admin ? "default" : "secondary"}>
+                      {data?.is_admin ? "Admin" : "User"}
+                    </Badge>
+                  </div>
+                </div>
 
-          {activeTab === "settings" && (
-            <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                Settings
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Here you can adjust your personal settings.
-              </p>
-              {/* Settings form or other UI elements would go here */}
-            </div>
-          )}
+                <div className="grid gap-4 pt-4 mt-4 border-t">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input id="name" defaultValue={data?.name} />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" defaultValue={data?.email} />
+                  </div>
+                  <Button>Save Changes</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {activeTab === "notifications" && (
-            <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                Notifications
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage your notification preferences here.
-              </p>
-              {/* Notification settings UI elements would go here */}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label>Two-Factor Authentication</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Add an extra layer of security to your account
+                    </p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label>Email Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Receive email updates about your account
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notification Preferences</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label>Price Alerts</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Get notified when prices change significantly
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label>Trading Updates</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Receive updates about your trading activity
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </PageContent>
+    </PageLayout>
   );
 };
 

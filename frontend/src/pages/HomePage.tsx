@@ -21,6 +21,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InstrumentCard } from "@/components/InstrumentCard";
 import { Instrument } from "../common-types";
 import BreezeStatusCard from "@/components/BreezeStatusCard";
+import {
+  PageLayout,
+  PageHeader,
+  PageSubHeader,
+  PageActions,
+  PageContent,
+} from "@/components/layout/page-layout.component";
 
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery("");
@@ -34,7 +41,6 @@ const HomePage: React.FC = () => {
   );
   const [activeTab, setActiveTab] = useState("all");
 
-  // Keep all the original functionality
   const sortedAndFilteredInstruments = useMemo(() => {
     if (!data?.data) return [];
     let filtered = data.data.filter((instrument: Instrument) =>
@@ -55,7 +61,6 @@ const HomePage: React.FC = () => {
     });
   }, [data, searchTerm, sortOption, activeTab]);
 
-  // Keep original delete handler
   const handleDelete = async (id: number) => {
     setDeletingRowIds((prev) => [...prev, id]);
     try {
@@ -70,7 +75,6 @@ const HomePage: React.FC = () => {
     }
   };
 
-  // Keep original health check
   const performHealthCheck = async () => {
     setIsHealthChecking(true);
     const workers = [
@@ -124,7 +128,6 @@ const HomePage: React.FC = () => {
     }
   };
 
-  // Keep original effects
   useEffect(() => {
     if (window.location.hostname !== "localhost") {
       performHealthCheck();
@@ -149,50 +152,52 @@ const HomePage: React.FC = () => {
   }, [data, refetch]);
 
   return (
-    <div className="container min-h-screen m-auto bg-background">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container px-4 py-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-clip-text bg-gradient-to-r from-primary to-accent">
-                Instrument Dashboard
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Monitor and manage your subscribed instruments in real-time
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {window.location.hostname !== "localhost" && (
-                <Button
-                  onClick={performHealthCheck}
-                  disabled={isHealthChecking}
-                  variant="outline"
-                  size="sm"
-                >
-                  <HiRefresh
-                    className={`mr-2 h-4 w-4 ${isHealthChecking ? "animate-spin" : ""}`}
-                  />
-                  {isHealthChecking ? "Checking..." : "Health Check"}
-                </Button>
-              )}
-              <Button onClick={refetch} variant="outline" size="sm">
-                <HiRefresh className="w-4 h-4 mr-2" />
-                Refresh
-              </Button>
-              <Button
-                onClick={() => startWebsocket({})}
-                variant="default"
-                size="sm"
-              >
-                <HiRefresh className="w-4 h-4 mr-2" />
-                Live Feed
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container px-4 py-6">
+    <PageLayout
+      header={
+        <PageHeader>
+          <span className="bg-clip-text bg-gradient-to-r from-primary to-accent">
+            Instrument Dashboard
+          </span>
+        </PageHeader>
+      }
+      subheader={
+        <PageSubHeader>
+          Monitor and manage your subscribed instruments in real-time
+        </PageSubHeader>
+      }
+      actions={
+        <PageActions>
+          {window.location.hostname !== "localhost" && (
+            <Button
+              onClick={performHealthCheck}
+              disabled={isHealthChecking}
+              variant="outline"
+              size="sm"
+            >
+              <HiRefresh
+                className={`mr-2 h-4 w-4 ${
+                  isHealthChecking ? "animate-spin" : ""
+                }`}
+              />
+              {isHealthChecking ? "Checking..." : "Health Check"}
+            </Button>
+          )}
+          <Button onClick={refetch} variant="outline" size="sm">
+            <HiRefresh className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+          <Button
+            onClick={() => startWebsocket({})}
+            variant="default"
+            size="sm"
+          >
+            <HiRefresh className="w-4 h-4 mr-2" />
+            Live Feed
+          </Button>
+        </PageActions>
+      }
+    >
+      <PageContent>
         <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-3">
           <BreezeStatusCard />
           <Card className="overflow-hidden">
@@ -301,8 +306,8 @@ const HomePage: React.FC = () => {
             </p>
           </div>
         )}
-      </div>
-    </div>
+      </PageContent>
+    </PageLayout>
   );
 };
 
