@@ -4,7 +4,6 @@ module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{ts,tsx,js,jsx}",
-    "./node_modules/flowbite/**/*.js",
   ],
   theme: {
     extend: {
@@ -130,5 +129,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("flowbite/plugin")],
+  plugins: [require("tailwindcss-animate")],
 };

@@ -12,9 +12,9 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useGetCandlesQuery } from "../services/instrumentService";
-import { formatDate } from "../common-functions";
-import { Candle, Instrument } from "../common-types";
+import { useGetCandlesQuery } from "../app/api/instrumentService";
+import { formatDate } from "../lib/common-functions";
+import { Candle, Instrument } from "../lib/common-types";
 import { SeriesOptionsMap, Time } from "lightweight-charts";
 import { useTheme } from "@/components/theme-provider";
 import { Card } from "@/components/ui/card";

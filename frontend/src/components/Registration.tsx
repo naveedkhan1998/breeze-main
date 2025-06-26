@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAppDispatch } from "../app/hooks";
-import { useRegisterUserMutation } from "../services/userAuthService";
-import { storeToken } from "../services/LocalStorageService";
+import { useRegisterUserMutation } from "../app/api/userAuthService";
+import { storeToken } from "../app/api/LocalStorageService";
 import { setCredentials } from "../features/authSlice";
 import { toast } from "react-toastify";
-import { setToken } from "../services/auth";
+import { setToken } from "../app/api/auth";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Label } from "./ui/label";

@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../app/store";
-import { getToken } from "../services/LocalStorageService";
+import { getToken } from "../app/api/LocalStorageService";
 
 const { access_token } = getToken();
 

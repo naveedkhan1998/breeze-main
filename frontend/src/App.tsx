@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { Flowbite } from "flowbite-react";
+
 import { useAppSelector } from "./app/hooks";
 import { getCurrentToken } from "./features/authSlice";
-import { useHealthCheckQuery } from "./services/baseApi";
+import { useHealthCheckQuery } from "./app/api/baseApi";
 import Toast from "./components/ToastContainer";
 import LoadingScreen from "./components/LoadingScreen";
 
@@ -72,8 +72,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <Flowbite>
-          <AnnouncementBanner />
+        <AnnouncementBanner />
           <Routes>
             {routes.map(({ path, element, private: isPrivate }) => (
               <Route
@@ -87,7 +86,6 @@ export default function App() {
           </Routes>
           <Toast />
           <Toaster />
-        </Flowbite>
       </ThemeProvider>
     </BrowserRouter>
   );

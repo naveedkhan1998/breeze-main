@@ -14,8 +14,8 @@ import {
   useGetInstrumentsQuery,
   useGetSubscribedInstrumentsQuery,
   useSubscribeInstrumentMutation,
-} from "@/services/instrumentService";
-import { Instrument as InstrumentType } from "@/common-types";
+} from "@/app/api/instrumentService";
+import { Instrument as InstrumentType } from "@/lib/common-types";
 import { Spinner } from "./ui/spinner";
 
 // Types

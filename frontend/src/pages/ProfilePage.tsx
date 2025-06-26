@@ -1,4 +1,4 @@
-import { useGetLoggedUserQuery } from "../services/userAuthService";
+import { useGetLoggedUserQuery } from "../app/api/userAuthService";
 import {
   PageLayout,
   PageHeader,

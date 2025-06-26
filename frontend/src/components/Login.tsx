@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useLoginUserMutation } from "../services/userAuthService";
+import { useLoginUserMutation } from "../app/api/userAuthService";
 import { useAppDispatch } from "../app/hooks";
 import { setCredentials } from "../features/authSlice";
-import { storeToken } from "../services/LocalStorageService";
-import { setToken } from "../services/auth";
+import { storeToken } from "../app/api/LocalStorageService";
+import { setToken } from "../app/api/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {

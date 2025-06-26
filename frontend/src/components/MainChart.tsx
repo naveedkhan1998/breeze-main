@@ -10,7 +10,7 @@ import {
   LineData,
   MouseEventParams,
 } from "lightweight-charts";
-import { Instrument } from "../common-types";
+import { Instrument } from "../lib/common-types";
 import { Card } from "@/components/ui/card";
 
 interface MainChartProps {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { getCurrentToken, logOut } from "../../features/authSlice";
-import { removeToken as removeLocalToken } from "../../services/LocalStorageService";
+import { removeToken as removeLocalToken } from "../../app/api/LocalStorageService";
 import { toast } from "react-toastify";
 import {
   FaSignOutAlt,

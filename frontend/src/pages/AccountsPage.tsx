@@ -23,8 +23,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   useGetBreezeQuery,
   useUpdateBreezeMutation,
-} from "../services/breezeServices";
-import { BreezeAccount } from "../common-types";
+} from "../app/api/breezeServices";
+import { BreezeAccount } from "../lib/common-types";
 import CreateBreezeForm from "../components/CreateBreeze";
 import BreezeStatusCard from "@/components/BreezeStatusCard";
 import { Badge } from "@/components/ui/badge";

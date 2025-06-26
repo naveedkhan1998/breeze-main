@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, WifiOff, Wifi, AlertCircle } from "lucide-react";
-import { useCheckBreezeStatusQuery } from "@/services/breezeServices";
+import { useCheckBreezeStatusQuery } from "@/app/api/breezeServices";
 
 type BreezeStatusData = {
   data: {

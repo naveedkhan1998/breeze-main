@@ -2,8 +2,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import {
   useDeleteInstrumentMutation,
   useGetSubscribedInstrumentsQuery,
-} from "../services/instrumentService";
-import { useStartWebsocketMutation } from "../services/breezeServices";
+} from "../app/api/instrumentService";
+import { useStartWebsocketMutation } from "../app/api/breezeServices";
 import { toast } from "react-toastify";
 import { HiRefresh, HiSearch, HiChartBar, HiClock } from "react-icons/hi";
 import { AnimatePresence, motion } from "framer-motion";
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InstrumentCard } from "@/components/InstrumentCard";
-import { Instrument } from "../common-types";
+import { Instrument } from "../lib/common-types";
 import BreezeStatusCard from "@/components/BreezeStatusCard";
 import {
   PageLayout,

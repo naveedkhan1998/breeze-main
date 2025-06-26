@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Instrument } from "../common-types";
+import { Instrument } from "../lib/common-types";
 
 interface InstrumentCardProps {
   instrument: Instrument;
