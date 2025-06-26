@@ -3,180 +3,181 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 215 25% 15%;
+    --background: 0 0% 100%; /* White */
+    --foreground: 220 10% 10%; /* Dark Gray */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 220 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 214 32% 91%;
-    --secondary-foreground: 215 25% 15%;
-    --muted: 214 32% 91%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 214 32% 91%;
-    --accent-foreground: 215 25% 15%;
-    --destructive: 0 84% 60%;
+    --popover-foreground: 220 10% 10%;
+    --primary: 210 90% 40%; /* Professional Blue */
+    --primary-foreground: 0 0% 98%; /* Off-white */
+    --secondary: 210 20% 95%; /* Light Gray-Blue */
+    --secondary-foreground: 210 10% 30%; /* Medium Gray-Blue */
+    --muted: 210 20% 95%;
+    --muted-foreground: 210 10% 50%;
+    --accent: 210 90% 50%; /* Brighter Blue */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 80% 50%; /* Red */
     --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 85%;
-    --input: 214 32% 85%;
-    --ring: 217 91% 60%;
-    --chart-1: 217 91% 60%;
-    --chart-2: 142 76% 36%;
-    --chart-3: 47 96% 53%;
-    --chart-4: 262 83% 58%;
-    --chart-5: 12 76% 61%;
+    --border: 210 10% 85%; /* Light Gray */
+    --input: 210 10% 85%;
+    --ring: 210 90% 40%;
+    --chart-1: 210 90% 40%;
+    --chart-2: 120 60% 40%; /* Green */
+    --chart-3: 40 90% 50%; /* Orange */
+    --chart-4: 280 70% 50%; /* Purple */
+    --chart-5: 10 80% 60%; /* Red-Orange */
     --radius: 0.75rem;
-    --sidebar-background: 216 50% 98%;
-    --sidebar-foreground: 215 25% 15%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 220 10% 10%;
+    --sidebar-primary: 210 90% 40%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 214 32% 91%;
-    --sidebar-accent-foreground: 215 25% 15%;
-    --sidebar-border: 214 32% 85%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 210 20% 95%;
+    --sidebar-accent-foreground: 210 10% 30%;
+    --sidebar-border: 210 10% 85%;
+    --sidebar-ring: 210 90% 40%;
   }
   .dark {
-    --background: 222 84% 5%;
-    --foreground: 213 31% 91%;
-    --card: 222 84% 5%;
-    --card-foreground: 213 31% 91%;
-    --popover: 222 84% 5%;
-    --popover-foreground: 213 31% 91%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 84% 5%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 213 31% 91%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 213 31% 91%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 213 31% 91%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
-    --chart-1: 217 91% 60%;
-    --chart-2: 142 71% 45%;
-    --chart-3: 47 96% 53%;
-    --chart-4: 262 83% 58%;
-    --chart-5: 12 76% 61%;
-    --sidebar-background: 224 71% 4%;
-    --sidebar-foreground: 213 31% 91%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 224 71% 4%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 213 31% 91%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 217 91% 60%;
+    --background: 220 10% 10%; /* Dark Gray */
+    --foreground: 210 20% 90%; /* Light Gray-Blue */
+    --card: 220 10% 15%; /* Slightly Lighter Dark Gray */
+    --card-foreground: 210 20% 90%;
+    --popover: 220 10% 15%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 210 90% 60%; /* Brighter Blue */
+    --primary-foreground: 220 10% 10%;
+    --secondary: 210 10% 20%; /* Darker Gray-Blue */
+    --secondary-foreground: 210 20% 90%;
+    --muted: 210 10% 20%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 210 90% 70%; /* Even Brighter Blue */
+    --accent-foreground: 210 20% 90%;
+    --destructive: 0 70% 40%; /* Darker Red */
+    --destructive-foreground: 210 20% 90%;
+    --border: 210 10% 25%; /* Dark Gray */
+    --input: 210 10% 25%;
+    --ring: 210 90% 60%;
+    --chart-1: 210 90% 60%;
+    --chart-2: 120 50% 50%;
+    --chart-3: 40 80% 60%;
+    --chart-4: 280 60% 60%;
+    --chart-5: 10 70% 70%;
+    --sidebar-background: 220 10% 12%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 210 90% 60%;
+    --sidebar-primary-foreground: 220 10% 10%;
+    --sidebar-accent: 210 10% 20%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 210 10% 25%;
+    --sidebar-ring: 210 90% 60%;
   }
-}
-@layer base {
-  * {
-    @apply border-border;
+  @layer base {
+    * {
+      @apply border-border;
+    }
+    body {
+      @apply bg-background text-foreground;
+    }
   }
-  body {
-    @apply bg-background text-foreground;
+
+  ::-webkit-scrollbar {
+    width: 5px;
   }
-}
 
-::-webkit-scrollbar {
-  width: 5px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #3a3737;
-  border-radius: 10px;
-  border: 3px solid #797878;
-}
-
-::-webkit-scrollbar-track {
-  background-color: #2a2a2a;
-}
-
-.scrollbar-hidden::-webkit-scrollbar-thumb {
-  background-color: transparent;
-}
-
-.graphlegend {
-  @apply relative z-10 items-start p-4 -mt-16 rounded-2xl shadow-2xl bg-white/80 dark:bg-black/80 dark:text-white top-16 backdrop-blur-xl border border-white/20 dark:border-white/10;
-}
-
-/* Enhanced glass-morphism effects */
-.glass-panel {
-  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10;
-}
-
-.glass-card {
-  @apply bg-gradient-to-br from-white/80 to-white/60 dark:from-slate-900/80 dark:to-slate-800/60 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-2xl;
-}
-
-/* Chart container enhancements */
-.chart-container {
-  @apply relative overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10;
-}
-
-/* Enhanced button styles */
-.action-button {
-  @apply relative overflow-hidden transition-all duration-300 ease-out hover:scale-105 active:scale-95;
-}
-
-.action-button::before {
-  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700;
-  content: '';
-}
-
-.action-button:hover::before {
-  @apply translate-x-full;
-}
-
-/* Live indicator pulse animation */
-.live-pulse {
-  animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes live-pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
+  ::-webkit-scrollbar-thumb {
+    background-color: #3a3737;
+    border-radius: 10px;
+    border: 3px solid #797878;
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
+
+  ::-webkit-scrollbar-track {
+    background-color: #2a2a2a;
   }
-}
 
-/* Enhanced scroll indicators */
-.scroll-fade {
-  @apply relative;
-}
+  .scrollbar-hidden::-webkit-scrollbar-thumb {
+    background-color: transparent;
+  }
 
-.scroll-fade::before {
-  @apply absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background to-transparent pointer-events-none z-10;
-  content: '';
-}
+  .graphlegend {
+    @apply relative z-10 items-start p-4 -mt-16 border shadow-2xl rounded-2xl bg-white/80 dark:bg-black/80 dark:text-white top-16 backdrop-blur-xl border-white/20 dark:border-white/10;
+  }
 
-.scroll-fade::after {
-  @apply absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-background to-transparent pointer-events-none z-10;
-  content: '';
-}
+  /* Enhanced glass-morphism effects */
+  .glass-panel {
+    @apply border bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-white/20 dark:border-white/10;
+  }
 
-/* Chart legend enhancements */
-.price-item {
-  @apply relative overflow-hidden p-3 rounded-xl bg-gradient-to-r from-slate-50/80 to-slate-100/60 dark:from-slate-800/60 dark:to-slate-700/40 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/30 transition-all duration-200 hover:shadow-md hover:scale-[1.02];
-}
+  .glass-card {
+    @apply border shadow-2xl bg-gradient-to-br from-white/80 to-white/60 dark:from-slate-900/80 dark:to-slate-800/60 backdrop-blur-xl border-white/30 dark:border-white/10;
+  }
 
-/* Status badge enhancements */
-.status-badge {
-  @apply relative overflow-hidden backdrop-blur-sm border shadow-sm;
-}
+  /* Chart container enhancements */
+  .chart-container {
+    @apply relative overflow-hidden shadow-2xl rounded-2xl ring-1 ring-black/5 dark:ring-white/10;
+  }
 
-.status-badge::before {
-  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full transition-transform duration-1000;
-  content: '';
-}
+  /* Enhanced button styles */
+  .action-button {
+    @apply relative overflow-hidden transition-all duration-300 ease-out hover:scale-105 active:scale-95;
+  }
 
-.status-badge:hover::before {
-  @apply translate-x-full;
+  .action-button::before {
+    @apply absolute inset-0 transition-transform duration-700 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent;
+    content: "";
+  }
+
+  .action-button:hover::before {
+    @apply translate-x-full;
+  }
+
+  /* Live indicator pulse animation */
+  .live-pulse {
+    animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes live-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  /* Enhanced scroll indicators */
+  .scroll-fade {
+    @apply relative;
+  }
+
+  .scroll-fade::before {
+    @apply absolute top-0 left-0 right-0 z-10 h-6 pointer-events-none bg-gradient-to-b from-background to-transparent;
+    content: "";
+  }
+
+  .scroll-fade::after {
+    @apply absolute bottom-0 left-0 right-0 z-10 h-6 pointer-events-none bg-gradient-to-t from-background to-transparent;
+    content: "";
+  }
+
+  /* Chart legend enhancements */
+  .price-item {
+    @apply relative overflow-hidden p-3 rounded-xl bg-gradient-to-r from-slate-50/80 to-slate-100/60 dark:from-slate-800/60 dark:to-slate-700/40 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/30 transition-all duration-200 hover:shadow-md hover:scale-[1.02];
+  }
+
+  /* Status badge enhancements */
+  .status-badge {
+    @apply relative overflow-hidden border shadow-sm backdrop-blur-sm;
+  }
+
+  .status-badge::before {
+    @apply absolute inset-0 transition-transform duration-1000 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent;
+    content: "";
+  }
+
+  .status-badge:hover::before {
+    @apply translate-x-full;
+  }
 }

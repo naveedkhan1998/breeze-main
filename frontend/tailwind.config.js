@@ -63,20 +63,7 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Additional blue theme utilities
-        blue: {
-          50: "hsl(214, 100%, 97%)",
-          100: "hsl(214, 95%, 93%)",
-          200: "hsl(213, 97%, 87%)",
-          300: "hsl(212, 96%, 78%)",
-          400: "hsl(213, 94%, 68%)",
-          500: "hsl(217, 91%, 60%)",
-          600: "hsl(221, 83%, 53%)",
-          700: "hsl(224, 76%, 48%)",
-          800: "hsl(226, 71%, 40%)",
-          900: "hsl(224, 64%, 33%)",
-          950: "hsl(226, 70%, 21%)",
-        },
+        
       },
       keyframes: {
         "accordion-down": {
