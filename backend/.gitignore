@@ -10,3 +10,4 @@ static
 !.env.project
 !.env.vault
 .ruff_cache
+logs
