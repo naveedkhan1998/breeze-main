@@ -49,7 +49,7 @@ jobs:
       - name: Run Tests
         working-directory: ./backend
         run: |
-          uv run pytest --verbose --tb=short --cov=. --cov-report=xml --cov-report=term-missing
+          uv run pytest --verbose --tb=short
 
       - name: Backend Quality Summary
         if: always()
