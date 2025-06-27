@@ -1,0 +1,28 @@
+name: "Quality Gate"
+
+on:
+  workflow_run:
+    workflows: ["Backend", "Frontend"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'skipped'
+
+    steps:
+      - name: Check Quality Results
+        run: |
+          if [[ "${{ github.event.workflow_run.conclusion }}" == "failure" ]]; then
+            echo "❌ Code quality checks failed in ${{ github.event.workflow_run.name }}"
+            echo "### Quality Gate: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "Failed workflow: ${{ github.event.workflow_run.name }}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ Code quality checks passed for ${{ github.event.workflow_run.name }}"
+            echo "### Quality Gate: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "Successful workflow: ${{ github.event.workflow_run.name }}" >> $GITHUB_STEP_SUMMARY
+          fi
