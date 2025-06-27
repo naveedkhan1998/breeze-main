@@ -1,22 +1,27 @@
+from unittest.mock import MagicMock, patch
+
 from django.contrib.auth import get_user_model
-import pytest
-from unittest.mock import patch, MagicMock
 
 User = get_user_model()
 
+
 # Removed @pytest.mark.django_db as we are mocking the database interaction
 def test_user_create_mocked():
-    with patch.object(User.objects, 'create_user') as mock_create_user:
+    with patch.object(User.objects, "create_user") as mock_create_user:
         # Create a MagicMock object that behaves like a User instance
         mock_user_instance = MagicMock()
-        mock_user_instance.email = 'test@example.com'
-        mock_user_instance.name = 'Test User'
+        mock_user_instance.email = "test@example.com"
+        mock_user_instance.name = "Test User"
         mock_user_instance.tc = True
         mock_user_instance.is_active = True
         mock_user_instance.is_email_verify = True
         mock_user_instance.is_admin = False
-        mock_user_instance.is_staff = False  # is_staff is a property derived from is_admin
-        mock_user_instance.is_superuser = False # is_superuser is also derived from is_admin
+        mock_user_instance.is_staff = (
+            False  # is_staff is a property derived from is_admin
+        )
+        mock_user_instance.is_superuser = (
+            False  # is_superuser is also derived from is_admin
+        )
 
         # Mock the check_password method for the mock user instance
         mock_user_instance.check_password.return_value = True
@@ -25,16 +30,20 @@ def test_user_create_mocked():
         mock_create_user.return_value = mock_user_instance
 
         # Call the mocked create_user with the correct arguments
-        user = User.objects.create_user(email='test@example.com', name='Test User', tc=True, password='password123')
+        user = User.objects.create_user(
+            email="test@example.com", name="Test User", tc=True, password="password123"
+        )
 
         # Assert that create_user was called with the correct arguments
-        mock_create_user.assert_called_once_with(email='test@example.com', name='Test User', tc=True, password='password123')
+        mock_create_user.assert_called_once_with(
+            email="test@example.com", name="Test User", tc=True, password="password123"
+        )
 
         # Assert properties of the returned user object (which is our mock_user_instance)
-        assert user.email == 'test@example.com'
-        assert user.name == 'Test User'
+        assert user.email == "test@example.com"
+        assert user.name == "Test User"
         assert user.tc is True
-        assert user.check_password('password123')
+        assert user.check_password("password123")
         assert user.is_active is True
         assert user.is_email_verify is True
         assert user.is_admin is False

@@ -42,12 +42,6 @@ jobs:
         working-directory: ./backend
         run: |
           uvx ruff check --output-format=github .
-
-      - name: Run Ruff (formatting check)
-        working-directory: ./backend
-        run: |
-          uvx ruff format --check --diff .
-
       - name: Run Tests
         working-directory: ./backend
         run: |

@@ -1,13 +1,11 @@
-import unittest
 import json
-from unittest.mock import patch, MagicMock
+import unittest
+from unittest.mock import MagicMock, patch
 
 from django.test import RequestFactory
 from rest_framework import status
 
-from apps.core.views import InstrumentViewSet, BreezeAccountViewSet
-from apps.core.serializers import AllInstrumentSerializer, BreezeAccountSerializer
-from apps.core.models import BreezeAccount  # Import BreezeAccount model
+from apps.core.views import BreezeAccountViewSet, InstrumentViewSet
 
 
 class TestInstrumentViewSet(unittest.TestCase):
@@ -390,7 +388,6 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         )
         mock_session.get_funds.assert_called_once_with()
         MockCache.get.assert_called_once_with("ticks_received", False)
-
 
     @patch("apps.core.views.websocket_start")
     @patch("apps.core.views.BreezeAccountViewSet.permission_classes", new=[])

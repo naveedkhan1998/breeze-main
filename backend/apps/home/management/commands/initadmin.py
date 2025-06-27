@@ -10,7 +10,7 @@ class Command(BaseCommand):
             name = "admin"
             email = "admin@gmail.com"
             password = "admin"
-            print("Creating account for %s (%s)" % (name, email))
+            print(f"Creating account for {name} ({email})")
             tc = True
             admin = User.objects.create_superuser(
                 email=email, name=name, password=password, tc=tc
