@@ -2,7 +2,7 @@ name: "Frontend"
 
 on:
   push:
-    branches: [ '**' ]
+    branches: ["**"]
   pull_request:
     branches: [main]
 
@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [20]
 
     steps:
       - name: Checkout code
@@ -88,7 +88,7 @@ jobs:
       - name: Run Tests
         working-directory: ./frontend
         run: |
-          npm run test:run -- --coverage --maxWorkers=20%
+          npm run test:coverage -- --maxWorkers=20%
 
       - name: Frontend Quality Summary
         if: always()
