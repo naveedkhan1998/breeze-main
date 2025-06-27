@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const LoadingScreen = () => {
   const [progress, setProgress] = useState(0);
-  const [dots, setDots] = useState("");
+  const [dots, setDots] = useState('');
 
   useEffect(() => {
     const progressInterval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 100 : prev + 1));
+      setProgress(prev => (prev >= 100 ? 100 : prev + 1));
     }, 900);
 
     const dotsInterval = setInterval(() => {
-      setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+      setDots(prev => (prev.length >= 3 ? '' : prev + '.'));
     }, 500);
 
     return () => {
@@ -35,12 +35,12 @@ const LoadingScreen = () => {
             key={i}
             className="absolute rounded-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 animate-pulse"
             style={{
-              width: Math.random() * 200 + 50 + "px",
-              height: Math.random() * 200 + 50 + "px",
-              top: Math.random() * 100 + "%",
-              left: Math.random() * 100 + "%",
-              animationDelay: Math.random() * 2 + "s",
-              animationDuration: Math.random() * 3 + 2 + "s",
+              width: Math.random() * 200 + 50 + 'px',
+              height: Math.random() * 200 + 50 + 'px',
+              top: Math.random() * 100 + '%',
+              left: Math.random() * 100 + '%',
+              animationDelay: Math.random() * 2 + 's',
+              animationDuration: Math.random() * 3 + 2 + 's',
             }}
           />
         ))}
@@ -58,7 +58,7 @@ const LoadingScreen = () => {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div
                   className="w-24 h-24 border-2 rounded-full border-blue-500/20 animate-ping"
-                  style={{ animationDelay: "0.5s" }}
+                  style={{ animationDelay: '0.5s' }}
                 />
               </div>
               <Loader2 className="w-16 h-16 text-purple-500 animate-spin" />
@@ -84,7 +84,7 @@ const LoadingScreen = () => {
             {/* Status messages */}
             <div className="text-center">
               <p className="text-sm text-gray-500">
-                Estimated time remaining: {Math.ceil((100 - progress) * 0.9)}{" "}
+                Estimated time remaining: {Math.ceil((100 - progress) * 0.9)}{' '}
                 seconds
               </p>
             </div>

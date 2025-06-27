@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from 'react';
 
-import { toast } from "react-toastify";
-import { HiRefresh, HiSearch, HiChartBar, HiClock } from "react-icons/hi";
-import { AnimatePresence, motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { toast } from 'react-toastify';
+import { HiRefresh, HiSearch, HiChartBar, HiClock } from 'react-icons/hi';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import {
   PageLayout,
@@ -21,106 +21,106 @@ import {
   PageSubHeader,
   PageActions,
   PageContent,
-} from "@/components/PageLayout";
+} from '@/components/PageLayout';
 import {
   useDeleteInstrumentMutation,
   useGetSubscribedInstrumentsQuery,
-} from "@/api/instrumentService";
-import { useStartWebsocketMutation } from "@/api/breezeServices";
-import type { Instrument } from "@/types/common-types";
-import BreezeStatusCard from "../dashboard/components/BreezeStatusCard";
-import InstrumentCard from "../instruments/components/InstrumentCard";
+} from '@/api/instrumentService';
+import { useStartWebsocketMutation } from '@/api/breezeServices';
+import type { Instrument } from '@/types/common-types';
+import BreezeStatusCard from '../dashboard/components/BreezeStatusCard';
+import InstrumentCard from '../instruments/components/InstrumentCard';
 
 const HomePage: React.FC = () => {
-  const { data, refetch } = useGetSubscribedInstrumentsQuery("");
+  const { data, refetch } = useGetSubscribedInstrumentsQuery('');
   const [deleteInstrument] = useDeleteInstrumentMutation();
   const [startWebsocket] = useStartWebsocketMutation();
   const [deletingRowIds, setDeletingRowIds] = useState<number[]>([]);
   const [isHealthChecking, setIsHealthChecking] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortOption, setSortOption] = useState<"percentage" | "name">(
-    "percentage",
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState<'percentage' | 'name'>(
+    'percentage'
   );
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState('all');
 
   const sortedAndFilteredInstruments = useMemo(() => {
     if (!data?.data) return [];
     let filtered = data.data.filter((instrument: Instrument) =>
-      [instrument.exchange_code, instrument.company_name].some((field) =>
-        field?.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
+      [instrument.exchange_code, instrument.company_name].some(field =>
+        field?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     );
-    if (activeTab !== "all") {
+    if (activeTab !== 'all') {
       filtered = filtered.filter(
         (instrument: Instrument) =>
-          instrument.series === activeTab.toUpperCase(),
+          instrument.series === activeTab.toUpperCase()
       );
     }
     return filtered.sort((a: Instrument, b: Instrument) => {
-      return sortOption === "percentage"
+      return sortOption === 'percentage'
         ? (a.percentage?.percentage || 0) - (b.percentage?.percentage || 0)
-        : (a.exchange_code || "").localeCompare(b.exchange_code || "");
+        : (a.exchange_code || '').localeCompare(b.exchange_code || '');
     });
   }, [data, searchTerm, sortOption, activeTab]);
 
   const handleDelete = async (id: number) => {
-    setDeletingRowIds((prev) => [...prev, id]);
+    setDeletingRowIds(prev => [...prev, id]);
     try {
       await deleteInstrument({ id });
       await refetch();
-      toast.success("Instrument successfully deleted");
+      toast.success('Instrument successfully deleted');
     } catch (error) {
-      console.error("Error deleting instrument:", error);
-      toast.error("Failed to delete instrument");
+      console.error('Error deleting instrument:', error);
+      toast.error('Failed to delete instrument');
     } finally {
-      setDeletingRowIds((prev) => prev.filter((rowId) => rowId !== id));
+      setDeletingRowIds(prev => prev.filter(rowId => rowId !== id));
     }
   };
 
   const performHealthCheck = async () => {
     setIsHealthChecking(true);
     const workers = [
-      { name: "Worker 1", url: "https://breeze-backend-celery.onrender.com/" },
+      { name: 'Worker 1', url: 'https://breeze-backend-celery.onrender.com/' },
       {
-        name: "Worker 2",
-        url: "https://breeze-backend-celery-2.onrender.com/",
+        name: 'Worker 2',
+        url: 'https://breeze-backend-celery-2.onrender.com/',
       },
       {
-        name: "Worker 3",
-        url: "https://breeze-backend-celery-3.onrender.com/",
+        name: 'Worker 3',
+        url: 'https://breeze-backend-celery-3.onrender.com/',
       },
     ];
 
-    const toastIds = workers.map((worker) =>
-      toast.loading(`Checking ${worker.name}...`, { position: "bottom-right" }),
+    const toastIds = workers.map(worker =>
+      toast.loading(`Checking ${worker.name}...`, { position: 'bottom-right' })
     );
 
     try {
       const responses = await Promise.all(
-        workers.map((worker) =>
+        workers.map(worker =>
           fetch(worker.url)
-            .then((response) => ({
+            .then(response => ({
               worker,
-              status: response.ok ? "Healthy" : "Unhealthy",
+              status: response.ok ? 'Healthy' : 'Unhealthy',
             }))
-            .catch(() => ({ worker, status: "Error" })),
-        ),
+            .catch(() => ({ worker, status: 'Error' }))
+        )
       );
 
       responses.forEach(({ worker, status }, index) => {
         toast.update(toastIds[index], {
           render: `${worker.name}: ${status}`,
-          type: status === "Healthy" ? "success" : "error",
+          type: status === 'Healthy' ? 'success' : 'error',
           isLoading: false,
           autoClose: 1000,
         });
       });
     } catch (error) {
-      console.error("Error during health checks:", error);
+      console.error('Error during health checks:', error);
       workers.forEach((worker, index) => {
         toast.update(toastIds[index], {
           render: `${worker.name}: Check failed`,
-          type: "error",
+          type: 'error',
           isLoading: false,
           autoClose: 1000,
         });
@@ -131,7 +131,7 @@ const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (window.location.hostname !== "localhost") {
+    if (window.location.hostname !== 'localhost') {
       performHealthCheck();
       const interval = setInterval(performHealthCheck, 120000);
       return () => clearInterval(interval);
@@ -142,7 +142,7 @@ const HomePage: React.FC = () => {
     const interval = setInterval(() => {
       if (
         data?.data?.some(
-          (instrument: Instrument) => !instrument.percentage?.is_loading,
+          (instrument: Instrument) => !instrument.percentage?.is_loading
         )
       ) {
         refetch();
@@ -169,7 +169,7 @@ const HomePage: React.FC = () => {
       }
       actions={
         <PageActions>
-          {window.location.hostname !== "localhost" && (
+          {window.location.hostname !== 'localhost' && (
             <Button
               onClick={performHealthCheck}
               disabled={isHealthChecking}
@@ -178,10 +178,10 @@ const HomePage: React.FC = () => {
             >
               <HiRefresh
                 className={`mr-2 h-4 w-4 ${
-                  isHealthChecking ? "animate-spin" : ""
+                  isHealthChecking ? 'animate-spin' : ''
                 }`}
               />
-              {isHealthChecking ? "Checking..." : "Health Check"}
+              {isHealthChecking ? 'Checking...' : 'Health Check'}
             </Button>
           )}
           <Button onClick={refetch} variant="outline" size="sm">
@@ -249,13 +249,13 @@ const HomePage: React.FC = () => {
               type="text"
               placeholder="Search instruments..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full md:w-64"
             />
             <Select
               value={sortOption}
-              onValueChange={(value) =>
-                setSortOption(value as "percentage" | "name")
+              onValueChange={value =>
+                setSortOption(value as 'percentage' | 'name')
               }
             >
               <SelectTrigger className="w-[180px]">

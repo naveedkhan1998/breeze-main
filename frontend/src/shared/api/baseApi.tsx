@@ -1,37 +1,37 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getToken } from "./auth";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { getToken } from './auth';
 
 const isLocalhost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1';
 
 //https://dtemplarsarsh.pythonanywhere.com
 const baseUrl = isLocalhost
-  ? "http://localhost:8000/api"
-  : "https://breeze-backend.mnaveedk.com";
+  ? 'http://localhost:8000/api'
+  : 'https://breeze-backend.mnaveedk.com';
 
 const baseQuery = fetchBaseQuery({
   baseUrl,
   // credentials: "include",
-  prepareHeaders: (headers) => {
+  prepareHeaders: headers => {
     const token = getToken();
     if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
+      headers.set('Authorization', `Bearer ${token}`);
     }
     return headers;
   },
 });
 
 export const baseApi = createApi({
-  reducerPath: "baseApi",
+  reducerPath: 'baseApi',
   baseQuery,
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     healthCheck: builder.query({
       query: () => ({
-        url: "/",
-        method: "GET",
+        url: '/',
+        method: 'GET',
         headers: {
-          "Content-type": "application/json",
+          'Content-type': 'application/json',
         },
       }),
     }),

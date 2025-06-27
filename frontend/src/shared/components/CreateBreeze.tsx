@@ -1,12 +1,12 @@
-import { toast } from "react-toastify";
-import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
-import { Switch } from "@/components/ui/switch";
+import { Switch } from '@/components/ui/switch';
 import {
   Form,
   FormControl,
@@ -15,23 +15,23 @@ import {
   FormLabel,
   FormDescription,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 import {
   PageLayout,
   PageHeader,
   PageSubHeader,
   PageContent,
-} from "@/components/PageLayout";
-import { useCreateBreezeMutation } from "@/api/breezeServices";
+} from '@/components/PageLayout';
+import { useCreateBreezeMutation } from '@/api/breezeServices';
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  api_key: z.string().min(1, "API Key is required"),
-  api_secret: z.string().min(1, "API Secret is required"),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  api_key: z.string().min(1, 'API Key is required'),
+  api_secret: z.string().min(1, 'API Secret is required'),
   session_token: z.string().optional(),
   is_active: z.boolean().default(true),
 });
@@ -42,10 +42,10 @@ const CreateBreezeForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      api_key: "",
-      api_secret: "",
-      session_token: "",
+      name: '',
+      api_key: '',
+      api_secret: '',
+      session_token: '',
       is_active: true,
     },
   });
@@ -53,12 +53,12 @@ const CreateBreezeForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       await createBreeze(values).unwrap();
-      toast.success("Breeze account created successfully!");
+      toast.success('Breeze account created successfully!');
       form.reset();
       window.location.reload();
     } catch (error) {
-      toast.error("Failed to create breeze account.");
-      console.error("Failed to create breeze account:", error);
+      toast.error('Failed to create breeze account.');
+      console.error('Failed to create breeze account:', error);
     }
   };
 
@@ -194,7 +194,7 @@ const CreateBreezeForm = () => {
                           Creating...
                         </>
                       ) : (
-                        "Create Breeze Account"
+                        'Create Breeze Account'
                       )}
                     </Button>
                   </form>

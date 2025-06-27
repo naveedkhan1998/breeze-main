@@ -1,6 +1,6 @@
-import React from "react";
-import { Helmet } from "react-helmet";
-import Navbar from "./Navbar";
+import React from 'react';
+import { Helmet } from 'react-helmet';
+import Navbar from './Navbar';
 
 interface PageLayoutProps {
   children?: React.ReactNode;
@@ -32,20 +32,20 @@ export const PageContent: React.FC<{ children: React.ReactNode }> = ({
 }) => <main className="flex-1 w-full">{children}</main>;
 
 const extractTextContent = (element: React.ReactNode): string => {
-  if (typeof element === "string") return element;
-  if (typeof element === "number") return element.toString();
+  if (typeof element === 'string') return element;
+  if (typeof element === 'number') return element.toString();
   if (React.isValidElement(element)) {
-    if (typeof element.props.children === "string") {
+    if (typeof element.props.children === 'string') {
       return element.props.children;
     }
     if (Array.isArray(element.props.children)) {
       return element.props.children
         .map((child: React.ReactNode) => extractTextContent(child))
-        .join("");
+        .join('');
     }
     return extractTextContent(element.props.children);
   }
-  return "ICICI Breeze";
+  return 'ICICI Breeze';
 };
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -54,7 +54,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   subheader,
   actions,
 }) => {
-  const pageTitle = header ? extractTextContent(header) : "ICICI Breeze";
+  const pageTitle = header ? extractTextContent(header) : 'ICICI Breeze';
 
   return (
     <>

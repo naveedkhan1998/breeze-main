@@ -1,49 +1,49 @@
-import { baseApi } from "./baseApi";
+import { baseApi } from './baseApi';
 
 export const userAuthApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     loginUser: builder.mutation({
-      query: (credentials) => ({
-        url: "/account/login/",
-        method: "POST",
+      query: credentials => ({
+        url: '/account/login/',
+        method: 'POST',
         body: { ...credentials },
-        credentials: "omit",
+        credentials: 'omit',
       }),
     }),
     registerUser: builder.mutation({
-      query: (user) => {
+      query: user => {
         return {
-          url: "/account/register/",
-          method: "POST",
+          url: '/account/register/',
+          method: 'POST',
           body: user,
           headers: {
-            "Content-type": "application/json",
+            'Content-type': 'application/json',
           },
-          credentials: "omit",
+          credentials: 'omit',
         };
       },
     }),
     getLoggedUser: builder.query({
       query: () => {
         return {
-          url: "/account/profile",
-          method: "GET",
+          url: '/account/profile',
+          method: 'GET',
         };
       },
     }),
     googleLogin: builder.query({
       query: () => {
         return {
-          url: "/account/google",
-          method: "GET",
+          url: '/account/google',
+          method: 'GET',
         };
       },
     }),
     sendEmail: builder.query({
       query: () => {
         return {
-          url: "/account/invoke_verify_email",
-          method: "GET",
+          url: '/account/invoke_verify_email',
+          method: 'GET',
         };
       },
     }),

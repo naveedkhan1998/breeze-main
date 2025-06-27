@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
 import {
   createChart,
   IChartApi,
@@ -7,10 +7,10 @@ import {
   ITimeScaleApi,
   Time,
   LineData,
-} from "lightweight-charts";
+} from 'lightweight-charts';
 
 interface RSIIndicator {
-  name: "RSI";
+  name: 'RSI';
   active: boolean;
   data: LineData[];
 }
@@ -23,7 +23,7 @@ interface MACDDataItem {
 }
 
 interface MACDIndicator {
-  name: "MACD";
+  name: 'MACD';
   active: boolean;
   data: MACDDataItem[];
 }
@@ -44,14 +44,14 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
   const indicatorChartContainerRef = useRef<HTMLDivElement | null>(null);
   const indicatorChartRef = useRef<IChartApi | null>(null);
   const indicatorChartSeriesRef = useRef<{ [key: string]: ISeriesApi<any> }>(
-    {},
+    {}
   );
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   // Create or destroy chart based on active indicators
   useEffect(() => {
     const activeIndicators = indicators.filter(
-      (ind) => ind.active && (ind.name === "RSI" || ind.name === "MACD"),
+      ind => ind.active && (ind.name === 'RSI' || ind.name === 'MACD')
     );
 
     if (!indicatorChartContainerRef.current) return;
@@ -64,7 +64,7 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
         indicatorChartSeriesRef.current = {};
         if (resizeObserverRef.current && indicatorChartContainerRef.current) {
           resizeObserverRef.current.unobserve(
-            indicatorChartContainerRef.current,
+            indicatorChartContainerRef.current
           );
           resizeObserverRef.current.disconnect();
           resizeObserverRef.current = null;
@@ -77,8 +77,8 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
       // Create chart
       const chart = createChart(indicatorChartContainerRef.current, {
         layout: {
-          textColor: mode ? "#E5E7EB" : "#1F2937",
-          background: { color: mode ? "#111827" : "#FFFFFF" },
+          textColor: mode ? '#E5E7EB' : '#1F2937',
+          background: { color: mode ? '#111827' : '#FFFFFF' },
           fontSize: 12,
         },
         timeScale: {
@@ -86,13 +86,13 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
           secondsVisible: false,
         },
         rightPriceScale: {
-          borderColor: mode ? "#4B5563" : "#D1D5DB",
+          borderColor: mode ? '#4B5563' : '#D1D5DB',
         },
         crosshair: {
           mode: 1,
           vertLine: {
             width: 1,
-            color: mode ? "#6B7280" : "#9CA3AF",
+            color: mode ? '#6B7280' : '#9CA3AF',
             style: 1,
           },
           horzLine: {
@@ -102,10 +102,10 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
         },
         grid: {
           vertLines: {
-            color: mode ? "#374151" : "#E5E7EB",
+            color: mode ? '#374151' : '#E5E7EB',
           },
           horzLines: {
-            color: mode ? "#374151" : "#E5E7EB",
+            color: mode ? '#374151' : '#E5E7EB',
           },
         },
       });
@@ -114,7 +114,7 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
       setTimeScale(chart.timeScale());
 
       // Handle Resize
-      const resizeObserver = new ResizeObserver((entries) => {
+      const resizeObserver = new ResizeObserver(entries => {
         if (indicatorChartContainerRef.current && indicatorChartRef.current) {
           const { width, height } = entries[0].contentRect;
           indicatorChartRef.current.applyOptions({ width, height });
@@ -145,23 +145,23 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
     if (indicatorChartRef.current) {
       indicatorChartRef.current.applyOptions({
         layout: {
-          textColor: mode ? "#E5E7EB" : "#1F2937",
-          background: { color: mode ? "#111827" : "#FFFFFF" },
+          textColor: mode ? '#E5E7EB' : '#1F2937',
+          background: { color: mode ? '#111827' : '#FFFFFF' },
         },
         rightPriceScale: {
-          borderColor: mode ? "#4B5563" : "#D1D5DB",
+          borderColor: mode ? '#4B5563' : '#D1D5DB',
         },
         crosshair: {
           vertLine: {
-            color: mode ? "#6B7280" : "#9CA3AF",
+            color: mode ? '#6B7280' : '#9CA3AF',
           },
         },
         grid: {
           vertLines: {
-            color: mode ? "#374151" : "#E5E7EB",
+            color: mode ? '#374151' : '#E5E7EB',
           },
           horzLines: {
-            color: mode ? "#374151" : "#E5E7EB",
+            color: mode ? '#374151' : '#E5E7EB',
           },
         },
       });
@@ -173,50 +173,50 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
     if (!indicatorChartRef.current) return;
 
     const activeIndicators = indicators.filter(
-      (ind) => ind.active && (ind.name === "RSI" || ind.name === "MACD"),
+      ind => ind.active && (ind.name === 'RSI' || ind.name === 'MACD')
     );
 
     // Update or add series
-    activeIndicators.forEach((indicator) => {
-      if (indicator.name === "RSI") {
+    activeIndicators.forEach(indicator => {
+      if (indicator.name === 'RSI') {
         if (!indicatorChartSeriesRef.current[indicator.name]) {
           const rsiSeries = indicatorChartRef.current!.addLineSeries({
-            color: mode ? "#FBBF24" : "#F59E0B",
+            color: mode ? '#FBBF24' : '#F59E0B',
             lineWidth: 2,
           });
           rsiSeries.setData(indicator.data);
           indicatorChartSeriesRef.current[indicator.name] = rsiSeries;
         } else {
           indicatorChartSeriesRef.current[indicator.name].applyOptions({
-            color: mode ? "#FBBF24" : "#F59E0B",
+            color: mode ? '#FBBF24' : '#F59E0B',
           });
           indicatorChartSeriesRef.current[indicator.name].setData(
-            indicator.data,
+            indicator.data
           );
         }
-      } else if (indicator.name === "MACD") {
+      } else if (indicator.name === 'MACD') {
         if (!indicatorChartSeriesRef.current[`${indicator.name}_macd`]) {
           const macdSeries = indicatorChartRef.current!.addLineSeries({
-            color: mode ? "#60A5FA" : "#3B82F6",
+            color: mode ? '#60A5FA' : '#3B82F6',
             lineWidth: 2,
           });
           const signalSeries = indicatorChartRef.current!.addLineSeries({
-            color: mode ? "#F87171" : "#EF4444",
+            color: mode ? '#F87171' : '#EF4444',
             lineWidth: 2,
           });
           const histogramSeries = indicatorChartRef.current!.addHistogramSeries(
             {
-              color: mode ? "#34D399" : "#10B981",
-            },
+              color: mode ? '#34D399' : '#10B981',
+            }
           );
           macdSeries.setData(
-            indicator.data.map((d) => ({ time: d.time, value: d.macd })),
+            indicator.data.map(d => ({ time: d.time, value: d.macd }))
           );
           signalSeries.setData(
-            indicator.data.map((d) => ({ time: d.time, value: d.signal })),
+            indicator.data.map(d => ({ time: d.time, value: d.signal }))
           );
           histogramSeries.setData(
-            indicator.data.map((d) => ({ time: d.time, value: d.histogram })),
+            indicator.data.map(d => ({ time: d.time, value: d.histogram }))
           );
           indicatorChartSeriesRef.current[`${indicator.name}_macd`] =
             macdSeries;
@@ -228,52 +228,52 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
           indicatorChartSeriesRef.current[
             `${indicator.name}_macd`
           ].applyOptions({
-            color: mode ? "#60A5FA" : "#3B82F6",
+            color: mode ? '#60A5FA' : '#3B82F6',
           });
           indicatorChartSeriesRef.current[
             `${indicator.name}_signal`
           ].applyOptions({
-            color: mode ? "#F87171" : "#EF4444",
+            color: mode ? '#F87171' : '#EF4444',
           });
           indicatorChartSeriesRef.current[
             `${indicator.name}_histogram`
           ].applyOptions({
-            color: mode ? "#34D399" : "#10B981",
+            color: mode ? '#34D399' : '#10B981',
           });
           indicatorChartSeriesRef.current[`${indicator.name}_macd`].setData(
-            indicator.data.map((d) => ({ time: d.time, value: d.macd })),
+            indicator.data.map(d => ({ time: d.time, value: d.macd }))
           );
           indicatorChartSeriesRef.current[`${indicator.name}_signal`].setData(
-            indicator.data.map((d) => ({ time: d.time, value: d.signal })),
+            indicator.data.map(d => ({ time: d.time, value: d.signal }))
           );
           indicatorChartSeriesRef.current[
             `${indicator.name}_histogram`
           ].setData(
-            indicator.data.map((d) => ({ time: d.time, value: d.histogram })),
+            indicator.data.map(d => ({ time: d.time, value: d.histogram }))
           );
         }
       }
     });
 
     // Remove inactive indicators
-    const indicatorNames = ["RSI", "MACD"];
+    const indicatorNames = ['RSI', 'MACD'];
     const inactiveIndicators = indicatorNames.filter(
-      (name) => !activeIndicators.some((ind) => ind.name === name),
+      name => !activeIndicators.some(ind => ind.name === name)
     );
 
-    inactiveIndicators.forEach((indicatorName) => {
+    inactiveIndicators.forEach(indicatorName => {
       if (indicatorChartSeriesRef.current[indicatorName]) {
         indicatorChartRef.current!.removeSeries(
-          indicatorChartSeriesRef.current[indicatorName],
+          indicatorChartSeriesRef.current[indicatorName]
         );
         delete indicatorChartSeriesRef.current[indicatorName];
       }
-      if (indicatorName === "MACD") {
-        ["macd", "signal", "histogram"].forEach((suffix) => {
+      if (indicatorName === 'MACD') {
+        ['macd', 'signal', 'histogram'].forEach(suffix => {
           const key = `${indicatorName}_${suffix}`;
           if (indicatorChartSeriesRef.current[key]) {
             indicatorChartRef.current!.removeSeries(
-              indicatorChartSeriesRef.current[key],
+              indicatorChartSeriesRef.current[key]
             );
             delete indicatorChartSeriesRef.current[key];
           }
@@ -285,7 +285,7 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
   return (
     <>
       {indicators.some(
-        (ind) => ind.active && (ind.name === "RSI" || ind.name === "MACD"),
+        ind => ind.active && (ind.name === 'RSI' || ind.name === 'MACD')
       ) && (
         <div
           ref={indicatorChartContainerRef}

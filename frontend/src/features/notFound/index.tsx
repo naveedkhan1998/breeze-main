@@ -1,10 +1,6 @@
-import {
-  PageLayout,
-  PageHeader,
-  PageContent,
-} from "@/components/PageLayout";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { PageLayout, PageHeader, PageContent } from '@/components/PageLayout';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const NotFoundPage = () => {
   const navigate = useNavigate();

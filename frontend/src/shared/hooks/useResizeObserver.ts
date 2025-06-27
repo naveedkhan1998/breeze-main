@@ -1,5 +1,5 @@
 // hooks/useResizeObserver.ts
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 interface Size {
   width: number;

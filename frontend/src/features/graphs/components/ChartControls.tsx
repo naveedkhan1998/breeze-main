@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   HiClock,
   HiChartBar,
@@ -25,8 +25,8 @@ import {
   HiSparkles,
   HiChartSquareBar,
   HiAdjustments,
-} from "react-icons/hi";
-import { SeriesType } from "lightweight-charts";
+} from 'react-icons/hi';
+import { SeriesType } from 'lightweight-charts';
 
 interface ChartControlsProps {
   timeframe: number;
@@ -50,25 +50,25 @@ export default function ChartControls({
   onAutoRefreshChange,
 }: ChartControlsProps) {
   const [isCustomTfDialogOpen, setIsCustomTfDialogOpen] = useState(false);
-  const [customTimeframeInput, setCustomTimeframeInput] = useState("");
+  const [customTimeframeInput, setCustomTimeframeInput] = useState('');
 
   const handleCustomTimeframeSubmit = () => {
     const parsedTimeframe = parseInt(customTimeframeInput, 10);
     if (!isNaN(parsedTimeframe) && parsedTimeframe > 0) {
       onTfChange(parsedTimeframe);
       setIsCustomTfDialogOpen(false);
-      setCustomTimeframeInput("");
+      setCustomTimeframeInput('');
     }
   };
 
   const timeframeOptions = [
-    { value: 1, label: "1m", category: "Short Term" },
-    { value: 5, label: "5m", category: "Short Term" },
-    { value: 15, label: "15m", category: "Short Term" },
-    { value: 30, label: "30m", category: "Medium Term" },
-    { value: 60, label: "1h", category: "Medium Term" },
-    { value: 240, label: "4h", category: "Long Term" },
-    { value: 1440, label: "1D", category: "Long Term" },
+    { value: 1, label: '1m', category: 'Short Term' },
+    { value: 5, label: '5m', category: 'Short Term' },
+    { value: 15, label: '15m', category: 'Short Term' },
+    { value: 30, label: '30m', category: 'Medium Term' },
+    { value: 60, label: '1h', category: 'Medium Term' },
+    { value: 240, label: '4h', category: 'Long Term' },
+    { value: 1440, label: '1D', category: 'Long Term' },
   ];
 
   const chartTypes: {
@@ -78,27 +78,27 @@ export default function ChartControls({
     description: string;
   }[] = [
     {
-      value: "Candlestick",
-      label: "Candlestick",
+      value: 'Candlestick',
+      label: 'Candlestick',
       icon: <HiChartBar className="w-4 h-4" />,
-      description: "OHLC data visualization",
+      description: 'OHLC data visualization',
     },
     {
-      value: "Line",
-      label: "Line Chart",
+      value: 'Line',
+      label: 'Line Chart',
       icon: <HiTrendingUp className="w-4 h-4" />,
-      description: "Price trend line",
+      description: 'Price trend line',
     },
   ];
 
   const shortTermTFs = timeframeOptions.filter(
-    (tf) => tf.category === "Short Term",
+    tf => tf.category === 'Short Term'
   );
   const mediumTermTFs = timeframeOptions.filter(
-    (tf) => tf.category === "Medium Term",
+    tf => tf.category === 'Medium Term'
   );
   const longTermTFs = timeframeOptions.filter(
-    (tf) => tf.category === "Long Term",
+    tf => tf.category === 'Long Term'
   );
 
   return (
@@ -138,15 +138,15 @@ export default function ChartControls({
               </Label>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
-              {shortTermTFs.map((tf) => (
+              {shortTermTFs.map(tf => (
                 <Button
                   key={tf.value}
                   size="sm"
-                  variant={timeframe === tf.value ? "default" : "outline"}
+                  variant={timeframe === tf.value ? 'default' : 'outline'}
                   className={`h-9 text-xs font-semibold transition-all duration-300 ${
                     timeframe === tf.value
-                      ? "shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground"
+                      ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
                   }`}
                   onClick={() => onTfChange(tf.value)}
                 >
@@ -165,15 +165,15 @@ export default function ChartControls({
               </Label>
             </div>
             <div className="grid grid-cols-2 gap-1.5">
-              {mediumTermTFs.map((tf) => (
+              {mediumTermTFs.map(tf => (
                 <Button
                   key={tf.value}
                   size="sm"
-                  variant={timeframe === tf.value ? "default" : "outline"}
+                  variant={timeframe === tf.value ? 'default' : 'outline'}
                   className={`h-9 text-xs font-semibold transition-all duration-300 ${
                     timeframe === tf.value
-                      ? "shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground"
+                      ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
                   }`}
                   onClick={() => onTfChange(tf.value)}
                 >
@@ -192,15 +192,15 @@ export default function ChartControls({
               </Label>
             </div>
             <div className="grid grid-cols-2 gap-1.5">
-              {longTermTFs.map((tf) => (
+              {longTermTFs.map(tf => (
                 <Button
                   key={tf.value}
                   size="sm"
-                  variant={timeframe === tf.value ? "default" : "outline"}
+                  variant={timeframe === tf.value ? 'default' : 'outline'}
                   className={`h-9 text-xs font-semibold transition-all duration-300 ${
                     timeframe === tf.value
-                      ? "shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground"
+                      ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
                   }`}
                   onClick={() => onTfChange(tf.value)}
                 >
@@ -240,13 +240,13 @@ export default function ChartControls({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {chartTypes.map((type) => (
+          {chartTypes.map(type => (
             <div
               key={type.value}
               className={`p-3 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
                 chartType === type.value
-                  ? "border-primary bg-primary/5 shadow-lg transform scale-[1.02]"
-                  : "border-border hover:border-primary/50 hover:bg-accent/50"
+                  ? 'border-primary bg-primary/5 shadow-lg transform scale-[1.02]'
+                  : 'border-border hover:border-primary/50 hover:bg-accent/50'
               }`}
               onClick={() => onChartTypeChange(type.value)}
             >
@@ -254,8 +254,8 @@ export default function ChartControls({
                 <div
                   className={`p-2 rounded-lg ${
                     chartType === type.value
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-muted text-muted-foreground"
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {type.icon}
@@ -264,8 +264,8 @@ export default function ChartControls({
                   <div
                     className={`font-semibold text-sm ${
                       chartType === type.value
-                        ? "text-foreground"
-                        : "text-card-foreground"
+                        ? 'text-foreground'
+                        : 'text-card-foreground'
                     }`}
                   >
                     {type.label}
@@ -304,16 +304,16 @@ export default function ChartControls({
           <div
             className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all duration-300 ${
               showVolume
-                ? "border-chart-2/30 bg-chart-2/5"
-                : "border-border bg-muted/50"
+                ? 'border-chart-2/30 bg-chart-2/5'
+                : 'border-border bg-muted/50'
             }`}
           >
             <div className="flex items-center gap-3">
               <div
                 className={`p-2 rounded-lg ${
                   showVolume
-                    ? "bg-chart-2/10 text-chart-2"
-                    : "bg-muted text-muted-foreground"
+                    ? 'bg-chart-2/10 text-chart-2'
+                    : 'bg-muted text-muted-foreground'
                 }`}
               >
                 <HiChartSquareBar className="w-3 h-3" />
@@ -346,8 +346,8 @@ export default function ChartControls({
             <div
               className={`p-2 rounded-lg transition-all duration-300 ${
                 autoRefresh
-                  ? "bg-chart-2/10 text-chart-2 animate-pulse border border-chart-2/20"
-                  : "bg-chart-4/10 text-chart-4 border border-chart-4/20"
+                  ? 'bg-chart-2/10 text-chart-2 animate-pulse border border-chart-2/20'
+                  : 'bg-chart-4/10 text-chart-4 border border-chart-4/20'
               }`}
             >
               {autoRefresh ? (
@@ -373,8 +373,8 @@ export default function ChartControls({
               </div>
               <span className="text-xs text-muted-foreground">
                 {autoRefresh
-                  ? "Data refreshes every second"
-                  : "Manual refresh mode"}
+                  ? 'Data refreshes every second'
+                  : 'Manual refresh mode'}
               </span>
             </div>
           </CardTitle>
@@ -383,16 +383,16 @@ export default function ChartControls({
           <div
             className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all duration-300 ${
               autoRefresh
-                ? "border-chart-2/30 bg-chart-2/5"
-                : "border-border bg-muted/50"
+                ? 'border-chart-2/30 bg-chart-2/5'
+                : 'border-border bg-muted/50'
             }`}
           >
             <div className="flex items-center gap-3">
               <div
                 className={`p-2 rounded-lg transition-all duration-300 ${
                   autoRefresh
-                    ? "bg-chart-2/10 text-chart-2 animate-pulse"
-                    : "bg-muted text-muted-foreground"
+                    ? 'bg-chart-2/10 text-chart-2 animate-pulse'
+                    : 'bg-muted text-muted-foreground'
                 }`}
               >
                 <HiLightningBolt className="w-3 h-3" />
@@ -406,8 +406,8 @@ export default function ChartControls({
                 </Label>
                 <div className="text-xs text-muted-foreground">
                   {autoRefresh
-                    ? "Real-time market data"
-                    : "Click to enable live data"}
+                    ? 'Real-time market data'
+                    : 'Click to enable live data'}
                 </div>
               </div>
             </div>
@@ -473,7 +473,7 @@ export default function ChartControls({
             </DialogTitle>
           </DialogHeader>
           <form
-            onSubmit={(e) => {
+            onSubmit={e => {
               e.preventDefault();
               handleCustomTimeframeSubmit();
             }}
@@ -490,7 +490,7 @@ export default function ChartControls({
                 type="number"
                 id="custom-timeframe"
                 value={customTimeframeInput}
-                onChange={(e) => setCustomTimeframeInput(e.target.value)}
+                onChange={e => setCustomTimeframeInput(e.target.value)}
                 placeholder="e.g., 45"
                 required
                 min={1}

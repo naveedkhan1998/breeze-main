@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   LockIcon,
   UserPlusIcon,
@@ -10,38 +10,38 @@ import {
   BarChart4,
   Clock,
   Smartphone,
-} from "lucide-react";
-import Login from "./components/Login";
-import Registration from "./components/Registration";
+} from 'lucide-react';
+import Login from './components/Login';
+import Registration from './components/Registration';
 
 const LoginRegPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("login");
+  const [activeTab, setActiveTab] = useState<string>('login');
 
   const features = [
     {
       icon: <LineChart className="w-5 h-5" />,
-      title: "Real-time Market Data",
-      description: "Access live market insights instantly",
+      title: 'Real-time Market Data',
+      description: 'Access live market insights instantly',
     },
     {
       icon: <Shield className="w-5 h-5" />,
-      title: "Secure Transactions",
-      description: "Bank-grade security for your peace of mind",
+      title: 'Secure Transactions',
+      description: 'Bank-grade security for your peace of mind',
     },
     {
       icon: <BarChart4 className="w-5 h-5" />,
-      title: "Advanced Analytics",
-      description: "Comprehensive portfolio analysis tools",
+      title: 'Advanced Analytics',
+      description: 'Comprehensive portfolio analysis tools',
     },
     {
       icon: <Clock className="w-5 h-5" />,
-      title: "24/7 Trading",
-      description: "Trade anytime, anywhere",
+      title: '24/7 Trading',
+      description: 'Trade anytime, anywhere',
     },
     {
       icon: <Smartphone className="w-5 h-5" />,
-      title: "Mobile Access",
-      description: "Seamless mobile trading experience",
+      title: 'Mobile Access',
+      description: 'Seamless mobile trading experience',
     },
   ];
 
@@ -54,12 +54,12 @@ const LoginRegPage: React.FC = () => {
             key={i}
             className="absolute rounded-full bg-white/5 animate-pulse"
             style={{
-              width: Math.random() * 300 + 50 + "px",
-              height: Math.random() * 300 + 50 + "px",
-              top: Math.random() * 100 + "%",
-              left: Math.random() * 100 + "%",
-              animationDuration: Math.random() * 3 + 2 + "s",
-              animationDelay: Math.random() * 2 + "s",
+              width: Math.random() * 300 + 50 + 'px',
+              height: Math.random() * 300 + 50 + 'px',
+              top: Math.random() * 100 + '%',
+              left: Math.random() * 100 + '%',
+              animationDuration: Math.random() * 3 + 2 + 's',
+              animationDelay: Math.random() * 2 + 's',
             }}
           />
         ))}
@@ -174,14 +174,14 @@ const LoginRegPage: React.FC = () => {
                 transition={{ delay: 0.5 }}
               >
                 <p className="text-sm">
-                  By using this service, you agree to our{" "}
+                  By using this service, you agree to our{' '}
                   <a
                     href="#"
                     className="text-indigo-600 hover:underline dark:text-indigo-400"
                   >
                     Terms of Service
-                  </a>{" "}
-                  and{" "}
+                  </a>{' '}
+                  and{' '}
                   <a
                     href="#"
                     className="text-indigo-600 hover:underline dark:text-indigo-400"

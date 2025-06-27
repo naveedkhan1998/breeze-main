@@ -1,49 +1,49 @@
-import { ChangeEvent, useEffect, useState, useCallback } from "react";
-import { RefreshCw, ExternalLink, AlertCircle, Loader2 } from "lucide-react";
-import { toast } from "react-toastify";
-import { motion } from "framer-motion";
+import { ChangeEvent, useEffect, useState, useCallback } from 'react';
+import { RefreshCw, ExternalLink, AlertCircle, Loader2 } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
 import {
   PageLayout,
   PageHeader,
   PageSubHeader,
   PageContent,
-} from "@/components/PageLayout";
+} from '@/components/PageLayout';
 import {
   useGetBreezeQuery,
   useUpdateBreezeMutation,
-} from "@/api/breezeServices";
-import type { BreezeAccount } from "@/types/common-types";
-import CreateBreezeForm from "@/components/CreateBreeze";
-import BreezeStatusCard from "../dashboard/components/BreezeStatusCard";
+} from '@/api/breezeServices';
+import type { BreezeAccount } from '@/types/common-types';
+import CreateBreezeForm from '@/components/CreateBreeze';
+import BreezeStatusCard from '../dashboard/components/BreezeStatusCard';
 
 const AccountsPage = () => {
-  const { data, isSuccess, refetch, isLoading } = useGetBreezeQuery("");
+  const { data, isSuccess, refetch, isLoading } = useGetBreezeQuery('');
   const [lastUpdatedHours, setLastUpdatedHours] = useState<number | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<BreezeAccount | null>(
-    null,
+    null
   );
-  const [sessionToken, setSessionToken] = useState("");
+  const [sessionToken, setSessionToken] = useState('');
 
   const [updateBreeze, { isLoading: isUpdating }] = useUpdateBreezeMutation();
 
@@ -54,7 +54,7 @@ const AccountsPage = () => {
   const handleOpenLink = useCallback((key: string) => {
     window.open(
       `https://api.icicidirect.com/apiuser/login?api_key=${key}`,
-      "_blank",
+      '_blank'
     );
   }, []);
 
@@ -66,12 +66,12 @@ const AccountsPage = () => {
       };
       try {
         await updateBreeze({ data: updatedAccount }).unwrap();
-        toast.success("Session token updated successfully");
+        toast.success('Session token updated successfully');
         refetch();
         setOpenModal(false);
-        setSessionToken("");
+        setSessionToken('');
       } catch {
-        toast.error("Failed to update session token");
+        toast.error('Failed to update session token');
       }
     }
   }, [selectedAccount, sessionToken, updateBreeze, refetch]);
@@ -138,10 +138,10 @@ const AccountsPage = () => {
                     <span>Account Details</span>
                     <Badge
                       variant={
-                        data.data[0].is_active ? "success" : "destructive"
+                        data.data[0].is_active ? 'success' : 'destructive'
                       }
                     >
-                      {data.data[0].is_active ? "Active" : "Inactive"}
+                      {data.data[0].is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
@@ -154,7 +154,7 @@ const AccountsPage = () => {
                     <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
                       <span className="font-medium">Session Token</span>
                       <span>
-                        {data.data[0].session_token ? "••••••" : "Not set"}
+                        {data.data[0].session_token ? '••••••' : 'Not set'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between p-4 rounded-lg bg-muted">
@@ -162,7 +162,7 @@ const AccountsPage = () => {
                       <span>
                         {lastUpdatedHours !== null
                           ? `${lastUpdatedHours.toFixed(1)} hours ago`
-                          : "N/A"}
+                          : 'N/A'}
                       </span>
                     </div>
                   </div>
@@ -243,7 +243,7 @@ const AccountsPage = () => {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => handleOpenLink(selectedAccount?.api_key || "")}
+                onClick={() => handleOpenLink(selectedAccount?.api_key || '')}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Open ICICI BREEZE
@@ -276,7 +276,7 @@ const AccountsPage = () => {
                     Updating...
                   </>
                 ) : (
-                  "Update Token"
+                  'Update Token'
                 )}
               </Button>
             </DialogFooter>

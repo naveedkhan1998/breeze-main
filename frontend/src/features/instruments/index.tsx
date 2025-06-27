@@ -1,16 +1,16 @@
-import React, { ChangeEvent, useState } from "react";
-import { Search } from "lucide-react";
+import React, { ChangeEvent, useState } from 'react';
+import { Search } from 'lucide-react';
 import {
   PageLayout,
   PageHeader,
   PageSubHeader,
   PageActions,
   PageContent,
-} from "@/components/PageLayout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Instrument from "./components/Instrument";
+} from '@/components/PageLayout';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Instrument from './components/Instrument';
 
 interface ExchangeTabProps {
   value: string;
@@ -51,12 +51,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange }) => (
 );
 
 const InstrumentsPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const exchanges: Exchange[] = [
-    { value: "NSE", label: "NSE", instrumentExchange: "NSE" },
-    { value: "BSE", label: "BSE", instrumentExchange: "BSE" },
-    { value: "NFO", label: "NFO", instrumentExchange: "FON" },
+    { value: 'NSE', label: 'NSE', instrumentExchange: 'NSE' },
+    { value: 'BSE', label: 'BSE', instrumentExchange: 'BSE' },
+    { value: 'NFO', label: 'NFO', instrumentExchange: 'FON' },
   ];
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +88,7 @@ const InstrumentsPage: React.FC = () => {
           <CardContent className="p-6">
             <Tabs defaultValue="NSE" className="w-full">
               <TabsList className="w-full mb-6 bg-muted/50">
-                {exchanges.map((exchange) => (
+                {exchanges.map(exchange => (
                   <ExchangeTab
                     key={exchange.value}
                     value={exchange.value}
@@ -97,7 +97,7 @@ const InstrumentsPage: React.FC = () => {
                 ))}
               </TabsList>
 
-              {exchanges.map((exchange) => (
+              {exchanges.map(exchange => (
                 <TabsContent key={exchange.value} value={exchange.value}>
                   <div className="border rounded-lg bg-card">
                     <Instrument

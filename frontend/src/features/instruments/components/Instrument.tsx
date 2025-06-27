@@ -1,23 +1,23 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { ChevronDown, Plus, AlertCircle } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "react-toastify";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useState, useCallback } from 'react';
+import { ChevronDown, Plus, AlertCircle } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Card } from "@/components/ui/card";
+} from '@/components/ui/dropdown-menu';
+import { Card } from '@/components/ui/card';
 
-import type { Instrument as InstrumentType } from "@/types/common-types";
-import { Spinner } from "@/components/ui/spinner";
+import type { Instrument as InstrumentType } from '@/types/common-types';
+import { Spinner } from '@/components/ui/spinner';
 import {
   useGetInstrumentsQuery,
   useGetSubscribedInstrumentsQuery,
   useSubscribeInstrumentMutation,
-} from "@/api/instrumentService";
+} from '@/api/instrumentService';
 
 // Types
 interface Props {
@@ -81,7 +81,7 @@ const DurationSelector: React.FC<{
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      {SUBSCRIPTION_DURATIONS.map((weeks) => (
+      {SUBSCRIPTION_DURATIONS.map(weeks => (
         <DropdownMenuItem key={weeks} onClick={() => onDurationChange(weeks)}>
           {weeks} weeks
         </DropdownMenuItem>
@@ -113,7 +113,7 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({
               label="Symbol"
               value={instrument.stock_token || instrument.token}
             />
-            {" | "}
+            {' | '}
             <InstrumentDetail label="Series" value={instrument.series} />
           </p>
           <p>
@@ -121,10 +121,10 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({
               label="Exchange"
               value={instrument.exchange_code}
             />
-            {" | "}
+            {' | '}
             <InstrumentDetail
               label="Expiry"
-              value={instrument.expiry || "N/A"}
+              value={instrument.expiry || 'N/A'}
             />
           </p>
           {instrument.strike_price !== null && instrument.option_type && (
@@ -133,7 +133,7 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({
                 label="Strike"
                 value={instrument.strike_price}
               />
-              {" | "}
+              {' | '}
               <InstrumentDetail label="Type" value={instrument.option_type} />
             </p>
           )}
@@ -174,7 +174,7 @@ const Instrument: React.FC<Props> = ({ exchange, searchTerm }) => {
   const [subscribingIds, setSubscribingIds] = useState<number[]>([]);
 
   const [subscribeInstrument] = useSubscribeInstrumentMutation();
-  const { refetch } = useGetSubscribedInstrumentsQuery("");
+  const { refetch } = useGetSubscribedInstrumentsQuery('');
 
   const { data, isLoading, isError } = useGetInstrumentsQuery(
     {
@@ -183,7 +183,7 @@ const Instrument: React.FC<Props> = ({ exchange, searchTerm }) => {
     },
     {
       skip: debouncedSearchTerm.length < 3,
-    },
+    }
   );
 
   useEffect(() => {
@@ -196,18 +196,18 @@ const Instrument: React.FC<Props> = ({ exchange, searchTerm }) => {
 
   const handleSubscribe = useCallback(
     async (id: number, duration: number) => {
-      setSubscribingIds((prev) => [...prev, id]);
+      setSubscribingIds(prev => [...prev, id]);
       try {
         await subscribeInstrument({ id, duration }).unwrap();
         await refetch();
-        toast.success("Instrument Subscribed");
+        toast.success('Instrument Subscribed');
       } catch {
-        toast.error("Failed to subscribe to instrument");
+        toast.error('Failed to subscribe to instrument');
       } finally {
-        setSubscribingIds((prev) => prev.filter((subId) => subId !== id));
+        setSubscribingIds(prev => prev.filter(subId => subId !== id));
       }
     },
-    [subscribeInstrument, refetch],
+    [subscribeInstrument, refetch]
   );
 
   if (isLoading) {

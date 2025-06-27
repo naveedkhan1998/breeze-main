@@ -1,14 +1,14 @@
-import { baseApi } from "./baseApi";
+import { baseApi } from './baseApi';
 
 export const breezeApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     getBreeze: builder.query({
       query: () => {
         return {
-          url: "core/breeze/",
-          method: "GET",
+          url: 'core/breeze/',
+          method: 'GET',
           headers: {
-            "Content-type": "application/json",
+            'Content-type': 'application/json',
           },
         };
       },
@@ -16,40 +16,40 @@ export const breezeApi = baseApi.injectEndpoints({
     checkBreezeStatus: builder.query({
       query: () => {
         return {
-          url: "core/breeze/breeze_status",
-          method: "GET",
+          url: 'core/breeze/breeze_status',
+          method: 'GET',
           headers: {
-            "Content-type": "application/json",
+            'Content-type': 'application/json',
           },
         };
       },
     }),
     createBreeze: builder.mutation({
-      query: (data) => ({
-        url: "core/breeze/",
-        method: "POST",
+      query: data => ({
+        url: 'core/breeze/',
+        method: 'POST',
         body: data,
         headers: {
-          "Content-type": "application/json",
+          'Content-type': 'application/json',
         },
       }),
     }),
     updateBreeze: builder.mutation({
       query: ({ data }) => ({
         url: `core/breeze/${data.id}/`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         headers: {
-          "Content-type": "application/json",
+          'Content-type': 'application/json',
         },
       }),
     }),
     startWebsocket: builder.mutation({
       query: () => ({
         url: `core/breeze/websocket_start/`,
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-type": "application/json",
+          'Content-type': 'application/json',
         },
       }),
     }),
