@@ -3,7 +3,7 @@
 import csv
 from datetime import datetime
 import logging
-import os
+from pathlib import Path
 import shutil
 import urllib.request
 import zipfile
@@ -72,12 +72,12 @@ class Command(BaseCommand):
             )
 
         url = "https://directlink.icicidirect.com/NewSecurityMaster/SecurityMaster.zip"
-        zip_path = os.path.join(settings.MEDIA_ROOT, "SecurityMaster.zip")
-        extracted_path = os.path.join(settings.MEDIA_ROOT, "extracted")
+        zip_path = Path(settings.MEDIA_ROOT) / "SecurityMaster.zip"
+        extracted_path = Path(settings.MEDIA_ROOT) / "extracted"
 
         try:
             # Remove extracted directory if it exists
-            if os.path.exists(extracted_path):
+            if extracted_path.exists():
                 shutil.rmtree(extracted_path)
                 self.stdout.write(
                     self.style.WARNING(f"Removed existing directory: {extracted_path}")
@@ -114,7 +114,7 @@ class Command(BaseCommand):
                         )
                         continue
 
-                    exchange_file_path = os.path.join(extracted_path, extracted_file)
+                    exchange_file_path = extracted_path / extracted_file
                     exchange_info = REQUIRED_EXCHANGES[exchange_title]
 
                     exchange_qs = Exchanges.objects.filter(title=exchange_title)
@@ -155,13 +155,13 @@ class Command(BaseCommand):
                     )
 
             # Clean up
-            os.remove(zip_path)
+            zip_path.unlink()
             self.stdout.write(self.style.SUCCESS(f"Removed zip file: {zip_path}"))
 
         except Exception as e:
             logger.error("Error processing exchanges", exc_info=True)
             self.stderr.write(self.style.ERROR(f"Error processing exchanges: {e}"))
-            raise CommandError(f"Error processing exchanges: {e}")
+            raise CommandError(f"Error processing exchanges: {e}") from e
 
     def process_instruments(self):
         """
@@ -197,7 +197,7 @@ class Command(BaseCommand):
 
                 file_path = ins.file.path
 
-                if not os.path.exists(file_path):
+                if not Path(file_path).exists():
                     self.stdout.write(
                         self.style.ERROR(
                             f"File does not exist: {file_path}. Skipping this exchange."
@@ -208,7 +208,7 @@ class Command(BaseCommand):
                 ins_list = []
                 line_count = 0
 
-                with open(file_path, encoding="utf-8") as f:
+                with Path(file_path).open(encoding="utf-8") as f:
                     reader = csv.reader(f)
                     next(reader, None)  # Skip header
 

@@ -2,7 +2,10 @@
 Production settings for main project.
 """
 
-from .base import *
+import os
+
+from .base import *  # noqa: F403, F401
+from .base import SIMPLE_JWT  # noqa: F401
 
 # Security settings
 SECRET_KEY = os.environ.get("SECRET_KEY")

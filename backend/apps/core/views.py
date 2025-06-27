@@ -1,6 +1,5 @@
 # views.py
 
-from functools import lru_cache
 import logging
 
 from django.core.cache import cache
@@ -338,11 +337,19 @@ class CandleViewSet(viewsets.ViewSet):
 
     permission_classes = [IsAuthenticated]
 
-    @lru_cache(maxsize=128)
     def get_cached_candles(self, instrument_id):
+        cache_key = f"candles_{instrument_id}"
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return cached_data
+
         instrument = get_object_or_404(SubscribedInstruments, id=instrument_id)
         qs = Candle.objects.filter(instrument=instrument).order_by("date")
-        return CandleSerializer(qs, many=True).data
+        data = CandleSerializer(qs, many=True).data
+
+        # Cache for 5 minutes
+        cache.set(cache_key, data, 300)
+        return data
 
     @action(detail=False, methods=["get"], url_path="get_candles")
     def get_candles(self, request):
@@ -355,7 +362,6 @@ class CandleViewSet(viewsets.ViewSet):
 
         instrument = get_object_or_404(SubscribedInstruments, id=instrument_id)
         qs = Candle.objects.filter(instrument=instrument).order_by("date")
-        CandleSerializer(qs, many=True).data
 
         candles = CandleSerializer(qs, many=True).data
 
