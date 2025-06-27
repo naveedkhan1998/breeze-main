@@ -88,7 +88,7 @@ jobs:
       - name: Run Tests
         working-directory: ./frontend
         run: |
-          npm run test:run -- --coverage --maxWorkers=20%
+          npm run test:coverage -- --maxWorkers=20%
 
       - name: Frontend Quality Summary
         if: always()
