@@ -137,3 +137,6 @@ dmypy.json
 
 # Data
 postgres/
+
+.cursor\rules\nx-rules.mdc
+.github\instructions\nx.instructions.md

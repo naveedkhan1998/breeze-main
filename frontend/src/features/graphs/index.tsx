@@ -5,27 +5,27 @@ import React, {
   useMemo,
   useCallback,
   useRef,
-} from "react";
-import { useLocation } from "react-router-dom";
+} from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
+} from '@/components/ui/resizable';
 
-import { SeriesOptionsMap, Time } from "lightweight-charts";
+import { SeriesOptionsMap, Time } from 'lightweight-charts';
 
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 import {
   HiArrowLeft,
@@ -42,21 +42,21 @@ import {
   HiViewGrid,
   HiTrendingUp,
   HiColorSwatch,
-} from "react-icons/hi";
+} from 'react-icons/hi';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useNavigate } from "react-router-dom";
-import type { Candle, Instrument } from "@/types/common-types";
-import { useTheme } from "@/components/ThemeProvider";
-import { useGetCandlesQuery } from "@/api/instrumentService";
-import { formatDate } from "@/lib/functions";
-import ChartControls from "./components/ChartControls";
-import MainChart from "./components/MainChart";
-import VolumeChart from "./components/VolumeChart";
+} from '@/components/ui/tooltip';
+import { useNavigate } from 'react-router-dom';
+import type { Candle, Instrument } from '@/types/common-types';
+import { useTheme } from '@/components/ThemeProvider';
+import { useGetCandlesQuery } from '@/api/instrumentService';
+import { formatDate } from '@/lib/functions';
+import ChartControls from './components/ChartControls';
+import MainChart from './components/MainChart';
+import VolumeChart from './components/VolumeChart';
 
 interface LocationState {
   obj: Instrument;
@@ -67,12 +67,12 @@ const GraphsPage: React.FC = () => {
   const navigate = useNavigate();
   const { obj } = (location.state as LocationState) || {};
   const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
+  const isDarkMode = theme === 'dark';
 
   // State variables
   const [timeframe, setTimeFrame] = useState<number>(15);
-  const [chartType, setChartType] = useState<"Candlestick" | "Line">(
-    "Candlestick",
+  const [chartType, setChartType] = useState<'Candlestick' | 'Line'>(
+    'Candlestick'
   );
   const [showVolume, setShowVolume] = useState<boolean>(true);
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
@@ -99,7 +99,7 @@ const GraphsPage: React.FC = () => {
         low,
         close,
         value: volume,
-      }),
+      })
     );
   }, [data]);
 
@@ -111,17 +111,17 @@ const GraphsPage: React.FC = () => {
         const color =
           close >= previousClose
             ? isDarkMode
-              ? "rgba(34, 197, 94, 0.8)"
-              : "rgba(22, 163, 74, 0.8)"
+              ? 'rgba(34, 197, 94, 0.8)'
+              : 'rgba(22, 163, 74, 0.8)'
             : isDarkMode
-              ? "rgba(239, 68, 68, 0.8)"
-              : "rgba(220, 38, 38, 0.8)";
+              ? 'rgba(239, 68, 68, 0.8)'
+              : 'rgba(220, 38, 38, 0.8)';
         return {
           time: formatDate(date) as Time,
           value: volume,
           color,
         };
-      },
+      }
     );
   }, [data, isDarkMode]);
 
@@ -152,12 +152,12 @@ const GraphsPage: React.FC = () => {
       const mainVisibleRange = mainChartRef.current?.getVisibleRange();
       if (!mainVisibleRange) return;
 
-      getChartsToSync().forEach((timeScale) => {
+      getChartsToSync().forEach(timeScale => {
         if (timeScale) {
           try {
             timeScale.setVisibleRange(mainVisibleRange);
           } catch (error) {
-            console.error("Error setting visible range:", error);
+            console.error('Error setting visible range:', error);
           }
         }
       });
@@ -165,7 +165,7 @@ const GraphsPage: React.FC = () => {
 
     const subscribeToMainChart = () => {
       mainChartRef.current?.subscribeVisibleTimeRangeChange(
-        handleVisibleTimeRangeChange,
+        handleVisibleTimeRangeChange
       );
     };
 
@@ -175,7 +175,7 @@ const GraphsPage: React.FC = () => {
     return () => {
       clearTimeout(timeoutId);
       mainChartRef.current?.unsubscribeVisibleTimeRangeChange(
-        handleVisibleTimeRangeChange,
+        handleVisibleTimeRangeChange
       );
     };
   }, [showVolume]);
@@ -195,16 +195,16 @@ const GraphsPage: React.FC = () => {
   };
 
   const handleDownload = () => {
-    const headers = "Date,Time,Open,High,Low,Close,Volume";
+    const headers = 'Date,Time,Open,High,Low,Close,Volume';
     const csvData = seriesData.map((row: any) => {
       const date = new Date(row.time * 1000);
       return `${date.toLocaleString()},${row.open},${row.high},${row.low},${row.close},${row.value}`;
     });
-    const csvContent = `data:text/csv;charset=utf-8,${headers}\n${csvData.join("\n")}`;
+    const csvContent = `data:text/csv;charset=utf-8,${headers}\n${csvData.join('\n')}`;
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${obj?.company_name}_${timeframe}_data.csv`);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `${obj?.company_name}_${timeframe}_data.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -215,10 +215,10 @@ const GraphsPage: React.FC = () => {
       chartSectionRef.current
         ?.requestFullscreen()
         .then(() => setIsFullscreen(true))
-        .catch((err) =>
+        .catch(err =>
           console.error(
-            `Error attempting to enable fullscreen mode: ${err.message}`,
-          ),
+            `Error attempting to enable fullscreen mode: ${err.message}`
+          )
         );
     } else {
       document.exitFullscreen().then(() => setIsFullscreen(false));
@@ -229,9 +229,9 @@ const GraphsPage: React.FC = () => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
@@ -245,8 +245,8 @@ const GraphsPage: React.FC = () => {
               <div
                 className="absolute inset-0 w-16 h-16 border-4 rounded-full border-chart-2/20 border-b-chart-2 animate-spin"
                 style={{
-                  animationDirection: "reverse",
-                  animationDuration: "1.5s",
+                  animationDirection: 'reverse',
+                  animationDuration: '1.5s',
                 }}
               ></div>
             </div>
@@ -261,11 +261,11 @@ const GraphsPage: React.FC = () => {
                 <div className="w-2 h-2 rounded-full bg-chart-1 animate-pulse"></div>
                 <div
                   className="w-2 h-2 rounded-full bg-chart-2 animate-pulse"
-                  style={{ animationDelay: "0.2s" }}
+                  style={{ animationDelay: '0.2s' }}
                 ></div>
                 <div
                   className="w-2 h-2 rounded-full bg-chart-3 animate-pulse"
-                  style={{ animationDelay: "0.4s" }}
+                  style={{ animationDelay: '0.4s' }}
                 ></div>
               </div>
             </div>
@@ -360,11 +360,11 @@ const GraphsPage: React.FC = () => {
             <div className="flex flex-col">
               <div className="flex items-center space-x-4">
                 <h1 className="text-3xl font-bold text-transparent bg-gradient-to-r from-sidebar-foreground via-sidebar-foreground to-sidebar-foreground/80 bg-clip-text">
-                  {obj?.company_name || "Chart"}
+                  {obj?.company_name || 'Chart'}
                 </h1>
                 <div className="flex items-center space-x-3">
                   <Badge className="status-badge px-3 py-1.5 text-xs font-semibold border-0 bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm">
-                    {obj?.exchange_code || "N/A"}
+                    {obj?.exchange_code || 'N/A'}
                   </Badge>
                   <Badge className="status-badge px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-muted to-muted/80 border-border/50 shadow-sm">
                     {timeframe}m timeframe
@@ -407,8 +407,8 @@ const GraphsPage: React.FC = () => {
                       onClick={() => setAutoRefresh(!autoRefresh)}
                       className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         autoRefresh
-                          ? "bg-gradient-to-r from-chart-2/20 to-chart-2/10 text-chart-2 shadow-sm hover:shadow-md"
-                          : "hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60"
+                          ? 'bg-gradient-to-r from-chart-2/20 to-chart-2/10 text-chart-2 shadow-sm hover:shadow-md'
+                          : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
                       }`}
                     >
                       {autoRefresh ? (
@@ -425,7 +425,7 @@ const GraphsPage: React.FC = () => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="border-0 glass-panel">
-                    {autoRefresh ? "Pause" : "Start"} live market updates
+                    {autoRefresh ? 'Pause' : 'Start'} live market updates
                   </TooltipContent>
                 </Tooltip>
 
@@ -437,8 +437,8 @@ const GraphsPage: React.FC = () => {
                       onClick={() => setShowVolume(!showVolume)}
                       className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         showVolume
-                          ? "bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm hover:shadow-md"
-                          : "hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60"
+                          ? 'bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm hover:shadow-md'
+                          : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
                       }`}
                     >
                       <HiChartBar className="w-4 h-4 mr-2" />
@@ -446,7 +446,7 @@ const GraphsPage: React.FC = () => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="border-0 glass-panel">
-                    {showVolume ? "Hide" : "Show"} volume analysis
+                    {showVolume ? 'Hide' : 'Show'} volume analysis
                   </TooltipContent>
                 </Tooltip>
 
@@ -458,8 +458,8 @@ const GraphsPage: React.FC = () => {
                       onClick={() => setShowControls(!showControls)}
                       className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         showControls
-                          ? "bg-gradient-to-r from-chart-5/20 to-chart-5/10 text-chart-5 shadow-sm hover:shadow-md"
-                          : "hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60"
+                          ? 'bg-gradient-to-r from-chart-5/20 to-chart-5/10 text-chart-5 shadow-sm hover:shadow-md'
+                          : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
                       }`}
                     >
                       <HiCog className="w-4 h-4 mr-2" />
@@ -530,8 +530,8 @@ const GraphsPage: React.FC = () => {
                   </TooltipTrigger>
                   <TooltipContent className="border-0 glass-panel">
                     {isFullscreen
-                      ? "Exit fullscreen mode"
-                      : "Enter fullscreen mode"}
+                      ? 'Exit fullscreen mode'
+                      : 'Enter fullscreen mode'}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -625,7 +625,7 @@ const GraphsPage: React.FC = () => {
                           autoRefresh={autoRefresh}
                           onTfChange={handleTfChange}
                           onChartTypeChange={(type: keyof SeriesOptionsMap) =>
-                            setChartType(type as "Candlestick" | "Line")
+                            setChartType(type as 'Candlestick' | 'Line')
                           }
                           onShowVolumeChange={setShowVolume}
                           onAutoRefreshChange={setAutoRefresh}

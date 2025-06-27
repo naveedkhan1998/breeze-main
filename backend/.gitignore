@@ -3,9 +3,11 @@ __pycache__
 media
 venv
 celerybeat-schedule
+celerybeat-schedule-*
 .env*
 static
 .flaskenv*
 !.env.project
 !.env.vault
 .ruff_cache
+logs

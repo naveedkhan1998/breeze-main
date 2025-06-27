@@ -1,34 +1,34 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import {
   PageLayout,
   PageHeader,
   PageSubHeader,
   PageContent,
-} from "@/components/PageLayout";
+} from '@/components/PageLayout';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
+    name: '',
+    email: '',
+    message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<null | "success" | "error">(
-    null,
+  const [submitStatus, setSubmitStatus] = useState<null | 'success' | 'error'>(
+    null
   );
 
   interface FormData {
@@ -58,11 +58,11 @@ const ContactPage = () => {
     setSubmitStatus(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setSubmitStatus("success");
-      setFormData({ name: "", email: "", message: "" });
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', message: '' });
     } catch {
-      setSubmitStatus("error");
+      setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +125,7 @@ const ContactPage = () => {
                 <ContactItem
                   icon={MapPin}
                   text="London, Ontario, Canada"
-                  href={"/"}
+                  href={'/'}
                 />
               </CardContent>
             </Card>
@@ -198,16 +198,16 @@ const ContactPage = () => {
 
           {submitStatus && (
             <Alert
-              variant={submitStatus === "success" ? "default" : "destructive"}
+              variant={submitStatus === 'success' ? 'default' : 'destructive'}
               className={cn(
-                "animate-in fade-in-0 slide-in-from-bottom-5",
-                submitStatus === "success" ? "bg-green-500/15" : undefined,
+                'animate-in fade-in-0 slide-in-from-bottom-5',
+                submitStatus === 'success' ? 'bg-green-500/15' : undefined
               )}
             >
               <AlertDescription>
-                {submitStatus === "success"
+                {submitStatus === 'success'
                   ? "Message sent successfully! We'll get back to you soon."
-                  : "Failed to send message. Please try again."}
+                  : 'Failed to send message. Please try again.'}
               </AlertDescription>
             </Alert>
           )}

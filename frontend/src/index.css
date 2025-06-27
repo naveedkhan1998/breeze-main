@@ -123,7 +123,7 @@
 
   .action-button::before {
     @apply absolute inset-0 transition-transform duration-700 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent;
-    content: "";
+    content: '';
   }
 
   .action-button:hover::before {
@@ -154,12 +154,12 @@
 
   .scroll-fade::before {
     @apply absolute top-0 left-0 right-0 z-10 h-6 pointer-events-none bg-gradient-to-b from-background to-transparent;
-    content: "";
+    content: '';
   }
 
   .scroll-fade::after {
     @apply absolute bottom-0 left-0 right-0 z-10 h-6 pointer-events-none bg-gradient-to-t from-background to-transparent;
-    content: "";
+    content: '';
   }
 
   /* Chart legend enhancements */
@@ -174,7 +174,7 @@
 
   .status-badge::before {
     @apply absolute inset-0 transition-transform duration-1000 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent;
-    content: "";
+    content: '';
   }
 
   .status-badge:hover::before {

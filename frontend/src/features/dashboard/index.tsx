@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { Line } from "react-chartjs-2";
-import { FaChartLine, FaUser, FaCog, FaBell } from "react-icons/fa";
-import "chart.js/auto";
+import { useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import { FaChartLine, FaUser, FaCog, FaBell } from 'react-icons/fa';
+import 'chart.js/auto';
 
 const DashBoardPage = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState('overview');
 
   const data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
       {
-        label: "Portfolio Value",
+        label: 'Portfolio Value',
         data: [10000, 12000, 14000, 13000, 15000, 16000, 17000],
-        borderColor: "rgba(75,192,192,1)",
-        backgroundColor: "rgba(75,192,192,0.2)",
+        borderColor: 'rgba(75,192,192,1)',
+        backgroundColor: 'rgba(75,192,192,0.2)',
       },
     ],
   };
@@ -24,44 +24,44 @@ const DashBoardPage = () => {
         <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "overview"
-                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+              activeTab === 'overview'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-600 dark:text-gray-400'
             } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab("overview")}
+            onClick={() => setActiveTab('overview')}
           >
             <FaChartLine className="mr-2" />
             <span>Overview</span>
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "profile"
-                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+              activeTab === 'profile'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-600 dark:text-gray-400'
             } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab("profile")}
+            onClick={() => setActiveTab('profile')}
           >
             <FaUser className="mr-2" />
             <span>Profile</span>
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "settings"
-                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+              activeTab === 'settings'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-600 dark:text-gray-400'
             } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab("settings")}
+            onClick={() => setActiveTab('settings')}
           >
             <FaCog className="mr-2" />
             <span>Settings</span>
           </button>
           <button
             className={`flex-1 p-4 text-center ${
-              activeTab === "notifications"
-                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+              activeTab === 'notifications'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-600 dark:text-gray-400'
             } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab("notifications")}
+            onClick={() => setActiveTab('notifications')}
           >
             <FaBell className="mr-2" />
             <span>Notifications</span>
@@ -69,7 +69,7 @@ const DashBoardPage = () => {
         </div>
 
         <div className="p-6">
-          {activeTab === "overview" && (
+          {activeTab === 'overview' && (
             <div>
               <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
                 Portfolio Overview
@@ -80,7 +80,7 @@ const DashBoardPage = () => {
             </div>
           )}
 
-          {activeTab === "profile" && (
+          {activeTab === 'profile' && (
             <div>
               <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
                 User Profile
@@ -92,7 +92,7 @@ const DashBoardPage = () => {
             </div>
           )}
 
-          {activeTab === "settings" && (
+          {activeTab === 'settings' && (
             <div>
               <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
                 Settings
@@ -104,7 +104,7 @@ const DashBoardPage = () => {
             </div>
           )}
 
-          {activeTab === "notifications" && (
+          {activeTab === 'notifications' && (
             <div>
               <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
                 Notifications

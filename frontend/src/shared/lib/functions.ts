@@ -1,5 +1,5 @@
-import { Candle } from "@/types/common-types";
-import { CandlestickData, LineData } from "lightweight-charts";
+import { Candle } from '@/types/common-types';
+import { CandlestickData, LineData } from 'lightweight-charts';
 
 export function formatDate(originalDate: string) {
   const parsedDate = Date.parse(originalDate);
@@ -12,7 +12,7 @@ export function formatDate(originalDate: string) {
 
 export const calculateMA = (
   data: CandlestickData[],
-  period: number,
+  period: number
 ): LineData[] => {
   const maData: LineData[] = [];
 
@@ -33,7 +33,7 @@ export const calculateMA = (
 export const calculateBollingerBands = (
   data: Candle[],
   period: number = 20,
-  stdDev: number = 2,
+  stdDev: number = 2
 ) => {
   if (data.length < period) return [];
 
@@ -111,7 +111,7 @@ export const calculateMACD = (
   data: Candle[],
   shortPeriod: number = 12,
   longPeriod: number = 26,
-  signalPeriod: number = 9,
+  signalPeriod: number = 9
 ) => {
   const ema = (data: Candle[], period: number) => {
     const k = 2 / (period + 1);
@@ -131,7 +131,7 @@ export const calculateMACD = (
   const signalLine = ema(
     //@ts-expect-error no shit 2
     macdLine.map((value, index) => ({ close: value, time: data[index].time })),
-    signalPeriod,
+    signalPeriod
   );
   const histogram = macdLine.map((value, index) => value - signalLine[index]);
 

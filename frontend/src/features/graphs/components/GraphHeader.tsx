@@ -1,14 +1,14 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { HiArrowLeft, HiXMark } from "react-icons/hi2";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { HiArrowLeft, HiXMark } from 'react-icons/hi2';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { HiArrowsExpand, HiDownload, HiRefresh } from "react-icons/hi";
+} from '@/components/ui/tooltip';
+import { HiArrowsExpand, HiDownload, HiRefresh } from 'react-icons/hi';
 
 interface GraphHeaderProps {
   title: string;
@@ -77,7 +77,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                   variant="outline"
                   onClick={onToggleFullscreen}
                   aria-label={
-                    isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
+                    isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'
                   }
                 >
                   {isFullscreen ? (
@@ -88,7 +88,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</p>
+                <p>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

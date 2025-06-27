@@ -1,9 +1,9 @@
-import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, WifiOff, Wifi, AlertCircle } from "lucide-react";
-import { useCheckBreezeStatusQuery } from "@/api/breezeServices";
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, WifiOff, Wifi, AlertCircle } from 'lucide-react';
+import { useCheckBreezeStatusQuery } from '@/api/breezeServices';
 
 type BreezeStatusData = {
   data: {
@@ -31,9 +31,9 @@ const BreezeStatusCard: React.FC = () => {
   // Derived state for error message
   const errorMessage = React.useMemo(() => {
     if (!error) return null;
-    return "data" in error
+    return 'data' in error
       ? error.data?.data
-      : "Unable to fetch status. Please try again later.";
+      : 'Unable to fetch status. Please try again later.';
   }, [error]);
 
   return (
@@ -116,23 +116,23 @@ const StatusItem: React.FC<StatusItemProps> = ({
   description,
 }) => {
   const bgColor = status
-    ? "bg-green-50 dark:bg-green-900/20"
-    : "bg-red-50 dark:bg-red-900/20";
+    ? 'bg-green-50 dark:bg-green-900/20'
+    : 'bg-red-50 dark:bg-red-900/20';
   const textColor = status
-    ? "text-green-700 dark:text-green-400"
-    : "text-red-700 dark:text-red-400";
+    ? 'text-green-700 dark:text-green-400'
+    : 'text-red-700 dark:text-red-400';
   const borderColor = status
-    ? "border-green-100 dark:border-green-800"
-    : "border-red-100 dark:border-red-800";
+    ? 'border-green-100 dark:border-green-800'
+    : 'border-red-100 dark:border-red-800';
 
   return (
     <div
       className={`p-6 rounded-lg border transition-all duration-200 ${bgColor} ${borderColor} ${
-        isLoading ? "opacity-50" : ""
+        isLoading ? 'opacity-50' : ''
       }`}
       role="status"
       aria-live="polite"
-      aria-label={`${title}: ${status ? "Connected" : "Disconnected"}`}
+      aria-label={`${title}: ${status ? 'Connected' : 'Disconnected'}`}
     >
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-medium text-foreground">{title}</h3>
@@ -142,15 +142,15 @@ const StatusItem: React.FC<StatusItemProps> = ({
       <div className="flex items-center space-x-2">
         <div
           className={`h-2 w-2 rounded-full ${
-            status ? "bg-green-500" : "bg-red-500"
-          } ${status ? "animate-pulse" : ""}`}
+            status ? 'bg-green-500' : 'bg-red-500'
+          } ${status ? 'animate-pulse' : ''}`}
           aria-hidden="true"
         />
         <Badge
-          variant={status ? "success" : "destructive"}
+          variant={status ? 'success' : 'destructive'}
           className="text-xs font-medium"
         >
-          {status ? "Connected" : "Disconnected"}
+          {status ? 'Connected' : 'Disconnected'}
         </Badge>
       </div>
     </div>

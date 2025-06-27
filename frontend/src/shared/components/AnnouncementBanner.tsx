@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
-import { MdAnnouncement } from "react-icons/md";
-import { HiX } from "react-icons/hi";
+import { MdAnnouncement } from 'react-icons/md';
+import { HiX } from 'react-icons/hi';
 
 export default function AnnouncementBanner() {
   const [isLocalhost, setIsLocalhost] = useState(false);
@@ -9,7 +9,7 @@ export default function AnnouncementBanner() {
 
   useEffect(() => {
     const hostname = window.location.hostname;
-    setIsLocalhost(hostname === "localhost" || hostname === "127.0.0.1");
+    setIsLocalhost(hostname === 'localhost' || hostname === '127.0.0.1');
   }, []);
 
   const handleClose = () => {

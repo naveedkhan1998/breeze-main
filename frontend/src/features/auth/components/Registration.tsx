@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 
-import { useNavigate } from "react-router-dom";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card } from "@/components/ui/card";
+import { useNavigate } from 'react-router-dom';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card } from '@/components/ui/card';
 import {
   AlertCircle,
   Lock,
@@ -20,13 +20,13 @@ import {
   CheckCircle2,
   XCircle,
   Info,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useAppDispatch } from "src/app/hooks";
-import { useRegisterUserMutation } from "@/api/userAuthService";
-import { setToken } from "@/api/auth";
-import { storeToken } from "@/api/localStorageService";
-import { setCredentials } from "../authSlice";
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAppDispatch } from 'src/app/hooks';
+import { useRegisterUserMutation } from '@/api/userAuthService';
+import { setToken } from '@/api/auth';
+import { storeToken } from '@/api/localStorageService';
+import { setCredentials } from '../authSlice';
 
 interface FormData {
   name: string;
@@ -54,10 +54,10 @@ const Registration: React.FC = () => {
   const [registerUser, { isLoading }] = useRegisterUserMutation();
 
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    password: "",
-    password2: "",
+    name: '',
+    email: '',
+    password: '',
+    password2: '',
     tc: false,
   });
 
@@ -92,7 +92,7 @@ const Registration: React.FC = () => {
   };
 
   const getPasswordStrength = (password: string) => {
-    if (!password) return { strength: 0, message: "" };
+    if (!password) return { strength: 0, message: '' };
 
     let strength = 0;
     if (password.length >= 8) strength++;
@@ -100,40 +100,40 @@ const Registration: React.FC = () => {
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
 
-    const messages = ["Weak", "Fair", "Good", "Strong"];
+    const messages = ['Weak', 'Fair', 'Good', 'Strong'];
     return {
       strength,
-      message: messages[strength - 1] || "",
+      message: messages[strength - 1] || '',
       color:
         strength <= 1
-          ? "red"
+          ? 'red'
           : strength === 2
-            ? "yellow"
+            ? 'yellow'
             : strength === 3
-              ? "blue"
-              : "green",
+              ? 'blue'
+              : 'green',
     };
   };
 
   // Real-time validation
   useEffect(() => {
     if (formData.name) {
-      setValidation((prev) => ({ ...prev, name: validateName(formData.name) }));
+      setValidation(prev => ({ ...prev, name: validateName(formData.name) }));
     }
     if (formData.email) {
-      setValidation((prev) => ({
+      setValidation(prev => ({
         ...prev,
         email: validateEmail(formData.email),
       }));
     }
     if (formData.password) {
-      setValidation((prev) => ({
+      setValidation(prev => ({
         ...prev,
         password: validatePassword(formData.password),
       }));
     }
     if (formData.password && formData.password2) {
-      setValidation((prev) => ({
+      setValidation(prev => ({
         ...prev,
         passwordMatch: formData.password === formData.password2,
       }));
@@ -142,9 +142,9 @@ const Registration: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [id]: type === "checkbox" ? checked : value,
+      [id]: type === 'checkbox' ? checked : value,
     }));
     setError(null);
   };
@@ -155,27 +155,27 @@ const Registration: React.FC = () => {
 
     // Validate all fields
     if (!validateName(formData.name)) {
-      setError("Please enter a valid full name");
+      setError('Please enter a valid full name');
       return;
     }
 
     if (!validateEmail(formData.email)) {
-      setError("Please enter a valid email address");
+      setError('Please enter a valid email address');
       return;
     }
 
     if (!validatePassword(formData.password)) {
-      setError("Password does not meet security requirements");
+      setError('Password does not meet security requirements');
       return;
     }
 
     if (formData.password !== formData.password2) {
-      setError("Passwords do not match");
+      setError('Passwords do not match');
       return;
     }
 
     if (!formData.tc) {
-      setError("Please accept the terms and conditions");
+      setError('Please accept the terms and conditions');
       return;
     }
 
@@ -185,16 +185,16 @@ const Registration: React.FC = () => {
       setToken(token.access);
       storeToken({ value: { access: token.access } });
       dispatch(setCredentials({ access: token.access }));
-      toast.success("Welcome! Your account has been created successfully");
-      navigate("/");
+      toast.success('Welcome! Your account has been created successfully');
+      navigate('/');
     } catch {
-      setError("Registration failed. Please try again.");
-      toast.error("Registration failed. Please try again.");
+      setError('Registration failed. Please try again.');
+      toast.error('Registration failed. Please try again.');
     }
   };
 
-  const togglePasswordVisibility = (field: "password" | "password2") => {
-    if (field === "password") {
+  const togglePasswordVisibility = (field: 'password' | 'password2') => {
+    if (field === 'password') {
       setShowPassword(!showPassword);
     } else {
       setShowConfirmPassword(!showConfirmPassword);
@@ -224,12 +224,12 @@ const Registration: React.FC = () => {
               onChange={handleChange}
               required
               className={cn(
-                "pl-10 pr-10 transition-all duration-200",
+                'pl-10 pr-10 transition-all duration-200',
                 error &&
                   validation.name === false &&
-                  "border-red-500 focus-visible:ring-red-500",
+                  'border-red-500 focus-visible:ring-red-500',
                 validation.name &&
-                  "border-green-500 focus-visible:ring-green-500",
+                  'border-green-500 focus-visible:ring-green-500'
               )}
             />
             <User className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
@@ -256,12 +256,12 @@ const Registration: React.FC = () => {
               onChange={handleChange}
               required
               className={cn(
-                "pl-10 pr-10 transition-all duration-200",
+                'pl-10 pr-10 transition-all duration-200',
                 error &&
                   validation.email === false &&
-                  "border-red-500 focus-visible:ring-red-500",
+                  'border-red-500 focus-visible:ring-red-500',
                 validation.email &&
-                  "border-green-500 focus-visible:ring-green-500",
+                  'border-green-500 focus-visible:ring-green-500'
               )}
             />
             <Mail className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
@@ -282,18 +282,18 @@ const Registration: React.FC = () => {
           <div className="relative">
             <Input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
               required
               className={cn(
-                "pl-10 pr-10 transition-all duration-200",
+                'pl-10 pr-10 transition-all duration-200',
                 error &&
                   validation.password === false &&
-                  "border-red-500 focus-visible:ring-red-500",
+                  'border-red-500 focus-visible:ring-red-500',
                 validation.password &&
-                  "border-green-500 focus-visible:ring-green-500",
+                  'border-green-500 focus-visible:ring-green-500'
               )}
             />
             <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
@@ -302,7 +302,7 @@ const Registration: React.FC = () => {
               variant="ghost"
               size="sm"
               className="absolute transform -translate-y-1/2 right-1 top-1/2"
-              onClick={() => togglePasswordVisibility("password")}
+              onClick={() => togglePasswordVisibility('password')}
             >
               {showPassword ? (
                 <EyeOff className="w-4 h-4" />
@@ -318,10 +318,10 @@ const Registration: React.FC = () => {
                   <div
                     key={index}
                     className={cn(
-                      "h-1 flex-1 rounded-full transition-all duration-300",
+                      'h-1 flex-1 rounded-full transition-all duration-300',
                       index < passwordStrength.strength
                         ? `bg-${passwordStrength.color}-500`
-                        : "bg-gray-200",
+                        : 'bg-gray-200'
                     )}
                   />
                 ))}
@@ -332,10 +332,10 @@ const Registration: React.FC = () => {
               <div className="space-y-1 text-xs text-gray-500">
                 <div
                   className={cn(
-                    "flex items-center gap-2",
+                    'flex items-center gap-2',
                     formData.password.length >= 8
-                      ? "text-green-500"
-                      : "text-gray-500",
+                      ? 'text-green-500'
+                      : 'text-gray-500'
                   )}
                 >
                   <CheckCircle2 className="w-3 h-3" />
@@ -343,10 +343,10 @@ const Registration: React.FC = () => {
                 </div>
                 <div
                   className={cn(
-                    "flex items-center gap-2",
+                    'flex items-center gap-2',
                     /[A-Z]/.test(formData.password)
-                      ? "text-green-500"
-                      : "text-gray-500",
+                      ? 'text-green-500'
+                      : 'text-gray-500'
                   )}
                 >
                   <CheckCircle2 className="w-3 h-3" />
@@ -354,10 +354,10 @@ const Registration: React.FC = () => {
                 </div>
                 <div
                   className={cn(
-                    "flex items-center gap-2",
+                    'flex items-center gap-2',
                     /[0-9]/.test(formData.password)
-                      ? "text-green-500"
-                      : "text-gray-500",
+                      ? 'text-green-500'
+                      : 'text-gray-500'
                   )}
                 >
                   <CheckCircle2 className="w-3 h-3" />
@@ -365,10 +365,10 @@ const Registration: React.FC = () => {
                 </div>
                 <div
                   className={cn(
-                    "flex items-center gap-2",
+                    'flex items-center gap-2',
                     /[^A-Za-z0-9]/.test(formData.password)
-                      ? "text-green-500"
-                      : "text-gray-500",
+                      ? 'text-green-500'
+                      : 'text-gray-500'
                   )}
                 >
                   <CheckCircle2 className="w-3 h-3" />
@@ -384,18 +384,18 @@ const Registration: React.FC = () => {
           <div className="relative">
             <Input
               id="password2"
-              type={showConfirmPassword ? "text" : "password"}
+              type={showConfirmPassword ? 'text' : 'password'}
               placeholder="••••••••"
               value={formData.password2}
               onChange={handleChange}
               required
               className={cn(
-                "pl-10 pr-10 transition-all duration-200",
+                'pl-10 pr-10 transition-all duration-200',
                 formData.password2 &&
                   !validation.passwordMatch &&
-                  "border-red-500 focus-visible:ring-red-500",
+                  'border-red-500 focus-visible:ring-red-500',
                 validation.passwordMatch &&
-                  "border-green-500 focus-visible:ring-green-500",
+                  'border-green-500 focus-visible:ring-green-500'
               )}
             />
             <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
@@ -404,7 +404,7 @@ const Registration: React.FC = () => {
               variant="ghost"
               size="sm"
               className="absolute transform -translate-y-1/2 right-1 top-1/2"
-              onClick={() => togglePasswordVisibility("password2")}
+              onClick={() => togglePasswordVisibility('password2')}
             >
               {showConfirmPassword ? (
                 <EyeOff className="w-4 h-4" />
@@ -423,18 +423,18 @@ const Registration: React.FC = () => {
             id="tc"
             checked={formData.tc}
             onCheckedChange={(checked: boolean) =>
-              setFormData((prev) => ({ ...prev, tc: checked }))
+              setFormData(prev => ({ ...prev, tc: checked }))
             }
           />
           <Label
             htmlFor="tc"
             className="text-sm text-gray-600 dark:text-gray-400"
           >
-            I agree with the{" "}
+            I agree with the{' '}
             <Button
               variant="link"
               className="h-auto p-0 text-blue-600 dark:text-blue-500"
-              onClick={() => navigate("/terms")}
+              onClick={() => navigate('/terms')}
             >
               terms and conditions
             </Button>
@@ -452,8 +452,8 @@ const Registration: React.FC = () => {
             !validation.passwordMatch
           }
           className={cn(
-            "w-full transition-all duration-300",
-            isLoading && "opacity-80",
+            'w-full transition-all duration-300',
+            isLoading && 'opacity-80'
           )}
         >
           {isLoading ? (
@@ -462,7 +462,7 @@ const Registration: React.FC = () => {
               Creating your account...
             </>
           ) : (
-            "Create account"
+            'Create account'
           )}
         </Button>
 
@@ -470,26 +470,26 @@ const Registration: React.FC = () => {
         <div className="grid grid-cols-4 gap-2 pt-4">
           <div
             className={cn(
-              "h-1 rounded-full transition-all duration-300",
-              validation.name ? "bg-green-500" : "bg-gray-200",
+              'h-1 rounded-full transition-all duration-300',
+              validation.name ? 'bg-green-500' : 'bg-gray-200'
             )}
           />
           <div
             className={cn(
-              "h-1 rounded-full transition-all duration-300",
-              validation.email ? "bg-green-500" : "bg-gray-200",
+              'h-1 rounded-full transition-all duration-300',
+              validation.email ? 'bg-green-500' : 'bg-gray-200'
             )}
           />
           <div
             className={cn(
-              "h-1 rounded-full transition-all duration-300",
-              validation.password ? "bg-green-500" : "bg-gray-200",
+              'h-1 rounded-full transition-all duration-300',
+              validation.password ? 'bg-green-500' : 'bg-gray-200'
             )}
           />
           <div
             className={cn(
-              "h-1 rounded-full transition-all duration-300",
-              validation.passwordMatch ? "bg-green-500" : "bg-gray-200",
+              'h-1 rounded-full transition-all duration-300',
+              validation.passwordMatch ? 'bg-green-500' : 'bg-gray-200'
             )}
           />
         </div>

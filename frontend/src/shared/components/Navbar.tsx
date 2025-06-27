@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import {
   FaSignOutAlt,
   FaUserCircle,
@@ -12,8 +12,8 @@ import {
   FaEnvelope,
   FaBars,
   FaTimes,
-} from "react-icons/fa";
-import { Button } from "@/components/ui/button";
+} from 'react-icons/fa';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,10 +21,10 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getCurrentToken, logOut } from "src/features/auth/authSlice";
-import { ModeToggle } from "./ModeToggle";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getCurrentToken, logOut } from 'src/features/auth/authSlice';
+import { ModeToggle } from './ModeToggle';
 
 const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -35,21 +35,21 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const signOut = () => {
     dispatch(logOut());
-    toast.success("Logged Out Successfully");
+    toast.success('Logged Out Successfully');
   };
 
   const navItems = [
-    { path: "/", label: "Home", icon: FaHome },
-    { path: "/instruments", label: "Instruments", icon: FaChartLine },
-    { path: "/accounts", label: "Accounts", icon: FaUserCircle },
-    { path: "/about", label: "About", icon: FaInfoCircle },
-    { path: "/contact", label: "Contact", icon: FaEnvelope },
+    { path: '/', label: 'Home', icon: FaHome },
+    { path: '/instruments', label: 'Instruments', icon: FaChartLine },
+    { path: '/accounts', label: 'Accounts', icon: FaUserCircle },
+    { path: '/about', label: 'About', icon: FaInfoCircle },
+    { path: '/contact', label: 'Contact', icon: FaEnvelope },
   ];
 
   if (!access_token) return null;
@@ -58,8 +58,8 @@ const Navbar: React.FC = () => {
     <nav
       className={`sticky top-0 z-30 w-full transition-all duration-300 ${
         isScrolled
-          ? "bg-background/95 shadow-md backdrop-blur supports-[backdrop-filter]:bg-background/60"
-          : "bg-background"
+          ? 'bg-background/95 shadow-md backdrop-blur supports-[backdrop-filter]:bg-background/60'
+          : 'bg-background'
       }`}
     >
       <div className="px-4 mx-auto sm:px-6 lg:px-8">
@@ -79,14 +79,14 @@ const Navbar: React.FC = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-6">
             <nav className="flex items-center space-x-4">
-              {navItems.map((item) => (
+              {navItems.map(item => (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`flex items-center px-3 py-2 text-sm font-medium transition-colors rounded-md ${
                     location.pathname === item.path
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
                   }`}
                 >
                   <item.icon className="w-4 h-4 mr-2" />
@@ -159,14 +159,14 @@ const Navbar: React.FC = () => {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="px-4 pt-2 pb-3 space-y-1 border-t md:hidden bg-background">
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <Link
               key={item.path}
               to={item.path}
               className={`flex items-center px-3 py-2 text-base font-medium rounded-md ${
                 location.pathname === item.path
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:text-primary hover:bg-primary/5'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >

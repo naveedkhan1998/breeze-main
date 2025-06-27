@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from 'react';
 import {
   createChart,
   IChartApi,
@@ -6,7 +6,7 @@ import {
   Time,
   HistogramData,
   ITimeScaleApi,
-} from "lightweight-charts";
+} from 'lightweight-charts';
 
 interface VolumeChartProps {
   volumeData: HistogramData<Time>[];
@@ -21,7 +21,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
 }) => {
   const volumeChartContainerRef = useRef<HTMLDivElement | null>(null);
   const volumeChartRef = useRef<IChartApi | null>(null);
-  const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
 
   // Create chart on mount
   useEffect(() => {
@@ -29,19 +29,19 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
 
     const chart = createChart(volumeChartContainerRef.current, {
       layout: {
-        textColor: mode ? "#E2E8F0" : "#475569",
-        background: { color: "transparent" },
+        textColor: mode ? '#E2E8F0' : '#475569',
+        background: { color: 'transparent' },
         fontSize: 11,
-        fontFamily: "Inter, -apple-system, sans-serif",
+        fontFamily: 'Inter, -apple-system, sans-serif',
       },
       timeScale: {
         visible: true,
         timeVisible: true,
         secondsVisible: false,
-        borderColor: mode ? "#334155" : "#CBD5E1",
+        borderColor: mode ? '#334155' : '#CBD5E1',
       },
       rightPriceScale: {
-        borderColor: mode ? "#334155" : "#CBD5E1",
+        borderColor: mode ? '#334155' : '#CBD5E1',
         scaleMargins: {
           top: 0.1,
           bottom: 0.1,
@@ -52,7 +52,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
           visible: false,
         },
         horzLines: {
-          color: mode ? "#1E293B" : "#F1F5F9",
+          color: mode ? '#1E293B' : '#F1F5F9',
           style: 1,
         },
       },
@@ -60,13 +60,13 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
         mode: 1,
         vertLine: {
           width: 1,
-          color: mode ? "#64748B" : "#94A3B8",
+          color: mode ? '#64748B' : '#94A3B8',
           style: 2,
         },
         horzLine: {
           visible: true,
           labelVisible: true,
-          color: mode ? "#64748B" : "#94A3B8",
+          color: mode ? '#64748B' : '#94A3B8',
           width: 1,
           style: 2,
         },
@@ -77,9 +77,9 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
 
     const volumeSeries = chart.addHistogramSeries({
       priceFormat: {
-        type: "volume",
+        type: 'volume',
       },
-      priceScaleId: "right",
+      priceScaleId: 'right',
       base: 0,
     });
 
@@ -89,7 +89,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
     setTimeScale(chart.timeScale());
 
     // Handle Resize
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(entries => {
       if (volumeChartContainerRef.current && volumeChartRef.current) {
         const { width, height } = entries[0].contentRect;
         volumeChartRef.current.applyOptions({ width, height });
@@ -111,26 +111,26 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
     if (volumeChartRef.current) {
       volumeChartRef.current.applyOptions({
         layout: {
-          textColor: mode ? "#E2E8F0" : "#475569",
-          background: { color: "transparent" },
+          textColor: mode ? '#E2E8F0' : '#475569',
+          background: { color: 'transparent' },
         },
         timeScale: {
-          borderColor: mode ? "#334155" : "#CBD5E1",
+          borderColor: mode ? '#334155' : '#CBD5E1',
         },
         rightPriceScale: {
-          borderColor: mode ? "#334155" : "#CBD5E1",
+          borderColor: mode ? '#334155' : '#CBD5E1',
         },
         grid: {
           horzLines: {
-            color: mode ? "#1E293B" : "#F1F5F9",
+            color: mode ? '#1E293B' : '#F1F5F9',
           },
         },
         crosshair: {
           vertLine: {
-            color: mode ? "#64748B" : "#94A3B8",
+            color: mode ? '#64748B' : '#94A3B8',
           },
           horzLine: {
-            color: mode ? "#64748B" : "#94A3B8",
+            color: mode ? '#64748B' : '#94A3B8',
           },
         },
       });
@@ -149,7 +149,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
       <div
         ref={volumeChartContainerRef}
         className="relative w-full h-full"
-        style={{ height: "calc(100% - 40px)" }}
+        style={{ height: 'calc(100% - 40px)' }}
       />
     </div>
   );

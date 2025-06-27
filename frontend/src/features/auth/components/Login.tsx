@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   Mail,
   Lock,
@@ -10,19 +10,19 @@ import {
   EyeOff,
   CheckCircle2,
   XCircle,
-} from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
-import { useAppDispatch } from "src/app/hooks";
-import { useLoginUserMutation } from "@/api/userAuthService";
-import { setToken } from "@/api/auth";
-import { storeToken } from "@/api/localStorageService";
-import { setCredentials } from "../authSlice";
+} from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
+import { useAppDispatch } from 'src/app/hooks';
+import { useLoginUserMutation } from '@/api/userAuthService';
+import { setToken } from '@/api/auth';
+import { storeToken } from '@/api/localStorageService';
+import { setCredentials } from '../authSlice';
 
 interface FormData {
   email: string;
@@ -40,8 +40,8 @@ const Login: React.FC = () => {
   const [loginUser, { isLoading }] = useLoginUserMutation();
 
   const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -61,9 +61,9 @@ const Login: React.FC = () => {
 
   // Password strength indicator
   const getPasswordStrength = (
-    password: string,
+    password: string
   ): { strength: number; message: string } => {
-    if (!password) return { strength: 0, message: "" };
+    if (!password) return { strength: 0, message: '' };
 
     let strength = 0;
     if (password.length >= 8) strength++;
@@ -71,14 +71,14 @@ const Login: React.FC = () => {
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
 
-    const messages = ["Weak", "Fair", "Good", "Strong"];
+    const messages = ['Weak', 'Fair', 'Good', 'Strong'];
 
-    return { strength, message: messages[strength - 1] || "" };
+    return { strength, message: messages[strength - 1] || '' };
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [id]: value }));
+    setFormData(prevData => ({ ...prevData, [id]: value }));
     setError(null);
   };
 
@@ -88,8 +88,8 @@ const Login: React.FC = () => {
 
     // Prevent brute force attempts
     if (attemptCount >= 5) {
-      setError("Too many failed attempts. Please try again later.");
-      toast.error("Account temporarily locked. Please try again later.");
+      setError('Too many failed attempts. Please try again later.');
+      toast.error('Account temporarily locked. Please try again later.');
       return;
     }
 
@@ -103,12 +103,12 @@ const Login: React.FC = () => {
       }
       dispatch(setCredentials({ access: token.access }));
 
-      toast.success("Welcome back!");
-      navigate("/");
+      toast.success('Welcome back!');
+      navigate('/');
     } catch {
-      setAttemptCount((prev) => prev + 1);
-      setError("Invalid credentials. Please try again.");
-      toast.error("Login failed. Please check your credentials.");
+      setAttemptCount(prev => prev + 1);
+      setError('Invalid credentials. Please try again.');
+      toast.error('Login failed. Please check your credentials.');
     }
   };
 
@@ -139,10 +139,10 @@ const Login: React.FC = () => {
               onChange={handleChange}
               required
               className={cn(
-                "pl-10 pr-10 transition-all duration-200",
-                error && "border-red-500 focus-visible:ring-red-500",
+                'pl-10 pr-10 transition-all duration-200',
+                error && 'border-red-500 focus-visible:ring-red-500',
                 validEmail === true &&
-                  "border-green-500 focus-visible:ring-green-500",
+                  'border-green-500 focus-visible:ring-green-500'
               )}
             />
             <Mail className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
@@ -163,14 +163,14 @@ const Login: React.FC = () => {
           <div className="relative">
             <Input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
               required
               className={cn(
-                "pl-10 pr-10 transition-all duration-200",
-                error && "border-red-500 focus-visible:ring-red-500",
+                'pl-10 pr-10 transition-all duration-200',
+                error && 'border-red-500 focus-visible:ring-red-500'
               )}
             />
             <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
@@ -187,7 +187,7 @@ const Login: React.FC = () => {
                 <Eye className="w-4 h-4" />
               )}
               <span className="sr-only">
-                {showPassword ? "Hide password" : "Show password"}
+                {showPassword ? 'Hide password' : 'Show password'}
               </span>
             </Button>
           </div>
@@ -197,14 +197,14 @@ const Login: React.FC = () => {
                 <div
                   key={index}
                   className={cn(
-                    "h-1 flex-1 rounded-full transition-all duration-300",
+                    'h-1 flex-1 rounded-full transition-all duration-300',
                     index < passwordStrength.strength
                       ? index < 2
-                        ? "bg-red-500"
+                        ? 'bg-red-500'
                         : index < 3
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
-                      : "bg-gray-200",
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
+                      : 'bg-gray-200'
                   )}
                 />
               ))}
@@ -220,7 +220,7 @@ const Login: React.FC = () => {
             <Checkbox
               id="remember-me"
               checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+              onCheckedChange={checked => setRememberMe(checked as boolean)}
             />
             <Label
               htmlFor="remember-me"
@@ -232,7 +232,7 @@ const Login: React.FC = () => {
           <Button
             variant="ghost"
             className="p-0 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-500"
-            onClick={() => navigate("/forgot-password")}
+            onClick={() => navigate('/forgot-password')}
           >
             Forgot password?
           </Button>
@@ -242,8 +242,8 @@ const Login: React.FC = () => {
           type="submit"
           disabled={isLoading || !validEmail}
           className={cn(
-            "w-full transition-all duration-300",
-            isLoading && "opacity-80",
+            'w-full transition-all duration-300',
+            isLoading && 'opacity-80'
           )}
         >
           {isLoading ? (
@@ -252,7 +252,7 @@ const Login: React.FC = () => {
               Logging in...
             </>
           ) : (
-            "Log in"
+            'Log in'
           )}
         </Button>
       </form>
