@@ -53,19 +53,19 @@ jobs:
     - name: Run Black (formatting check)
       working-directory: ./backend
       run: |
-        uv run black --check --diff .
+        uvx black --check --diff .
       continue-on-error: false
     
     - name: Run Ruff (linting)
       working-directory: ./backend
       run: |
-        uv run ruff check --output-format=github .
+        uvx ruff check --output-format=github .
       continue-on-error: false
     
     - name: Run Ruff (formatting check)
       working-directory: ./backend
       run: |
-        uv run ruff format --check --diff .
+        uvx ruff format --check --diff .
       continue-on-error: false
 
   frontend-checks:
