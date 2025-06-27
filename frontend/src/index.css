@@ -3,102 +3,181 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 0 0% 100%; /* White */
+    --foreground: 220 10% 10%; /* Dark Gray */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 220 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --popover-foreground: 220 10% 10%;
+    --primary: 210 90% 40%; /* Professional Blue */
+    --primary-foreground: 0 0% 98%; /* Off-white */
+    --secondary: 210 20% 95%; /* Light Gray-Blue */
+    --secondary-foreground: 210 10% 30%; /* Medium Gray-Blue */
+    --muted: 210 20% 95%;
+    --muted-foreground: 210 10% 50%;
+    --accent: 210 90% 50%; /* Brighter Blue */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 80% 50%; /* Red */
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --border: 210 10% 85%; /* Light Gray */
+    --input: 210 10% 85%;
+    --ring: 210 90% 40%;
+    --chart-1: 210 90% 40%;
+    --chart-2: 120 60% 40%; /* Green */
+    --chart-3: 40 90% 50%; /* Orange */
+    --chart-4: 280 70% 50%; /* Purple */
+    --chart-5: 10 80% 60%; /* Red-Orange */
+    --radius: 0.75rem;
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 220 10% 10%;
+    --sidebar-primary: 210 90% 40%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 210 20% 95%;
+    --sidebar-accent-foreground: 210 10% 30%;
+    --sidebar-border: 210 10% 85%;
+    --sidebar-ring: 210 90% 40%;
   }
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 220 10% 10%; /* Dark Gray */
+    --foreground: 210 20% 90%; /* Light Gray-Blue */
+    --card: 220 10% 15%; /* Slightly Lighter Dark Gray */
+    --card-foreground: 210 20% 90%;
+    --popover: 220 10% 15%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 210 90% 60%; /* Brighter Blue */
+    --primary-foreground: 220 10% 10%;
+    --secondary: 210 10% 20%; /* Darker Gray-Blue */
+    --secondary-foreground: 210 20% 90%;
+    --muted: 210 10% 20%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 210 90% 70%; /* Even Brighter Blue */
+    --accent-foreground: 210 20% 90%;
+    --destructive: 0 70% 40%; /* Darker Red */
+    --destructive-foreground: 210 20% 90%;
+    --border: 210 10% 25%; /* Dark Gray */
+    --input: 210 10% 25%;
+    --ring: 210 90% 60%;
+    --chart-1: 210 90% 60%;
+    --chart-2: 120 50% 50%;
+    --chart-3: 40 80% 60%;
+    --chart-4: 280 60% 60%;
+    --chart-5: 10 70% 70%;
+    --sidebar-background: 220 10% 12%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 210 90% 60%;
+    --sidebar-primary-foreground: 220 10% 10%;
+    --sidebar-accent: 210 10% 20%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 210 10% 25%;
+    --sidebar-ring: 210 90% 60%;
   }
-}
-@layer base {
-  * {
-    @apply border-border;
+  @layer base {
+    * {
+      @apply border-border;
+    }
+    body {
+      @apply bg-background text-foreground;
+    }
   }
-  body {
-    @apply bg-background text-foreground;
+
+  ::-webkit-scrollbar {
+    width: 5px;
   }
-}
 
-::-webkit-scrollbar {
-  width: 5px;
-}
+  ::-webkit-scrollbar-thumb {
+    background-color: #3a3737;
+    border-radius: 10px;
+    border: 3px solid #797878;
+  }
 
-::-webkit-scrollbar-thumb {
-  background-color: #3a3737;
-  border-radius: 10px;
-  border: 3px solid #797878;
-}
+  ::-webkit-scrollbar-track {
+    background-color: #2a2a2a;
+  }
 
-::-webkit-scrollbar-track {
-  background-color: #2a2a2a;
-}
+  .scrollbar-hidden::-webkit-scrollbar-thumb {
+    background-color: transparent;
+  }
 
-.scrollbar-hidden::-webkit-scrollbar-thumb {
-  background-color: transparent;
-}
+  .graphlegend {
+    @apply relative z-10 items-start p-4 -mt-16 border shadow-2xl rounded-2xl bg-white/80 dark:bg-black/80 dark:text-white top-16 backdrop-blur-xl border-white/20 dark:border-white/10;
+  }
 
-.graphlegend {
-  @apply relative z-10 items-start p-2 -mt-16 rounded shadow-xl bg-white/60 dark:bg-black/60 dark:text-white top-16;
+  /* Enhanced glass-morphism effects */
+  .glass-panel {
+    @apply border bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-white/20 dark:border-white/10;
+  }
+
+  .glass-card {
+    @apply border shadow-2xl bg-gradient-to-br from-white/80 to-white/60 dark:from-slate-900/80 dark:to-slate-800/60 backdrop-blur-xl border-white/30 dark:border-white/10;
+  }
+
+  /* Chart container enhancements */
+  .chart-container {
+    @apply relative overflow-hidden shadow-2xl rounded-2xl ring-1 ring-black/5 dark:ring-white/10;
+  }
+
+  /* Enhanced button styles */
+  .action-button {
+    @apply relative overflow-hidden transition-all duration-300 ease-out hover:scale-105 active:scale-95;
+  }
+
+  .action-button::before {
+    @apply absolute inset-0 transition-transform duration-700 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent;
+    content: "";
+  }
+
+  .action-button:hover::before {
+    @apply translate-x-full;
+  }
+
+  /* Live indicator pulse animation */
+  .live-pulse {
+    animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes live-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+
+  /* Enhanced scroll indicators */
+  .scroll-fade {
+    @apply relative;
+  }
+
+  .scroll-fade::before {
+    @apply absolute top-0 left-0 right-0 z-10 h-6 pointer-events-none bg-gradient-to-b from-background to-transparent;
+    content: "";
+  }
+
+  .scroll-fade::after {
+    @apply absolute bottom-0 left-0 right-0 z-10 h-6 pointer-events-none bg-gradient-to-t from-background to-transparent;
+    content: "";
+  }
+
+  /* Chart legend enhancements */
+  .price-item {
+    @apply relative overflow-hidden p-3 rounded-xl bg-gradient-to-r from-slate-50/80 to-slate-100/60 dark:from-slate-800/60 dark:to-slate-700/40 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/30 transition-all duration-200 hover:shadow-md hover:scale-[1.02];
+  }
+
+  /* Status badge enhancements */
+  .status-badge {
+    @apply relative overflow-hidden border shadow-sm backdrop-blur-sm;
+  }
+
+  .status-badge::before {
+    @apply absolute inset-0 transition-transform duration-1000 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent;
+    content: "";
+  }
+
+  .status-badge:hover::before {
+    @apply translate-x-full;
+  }
 }

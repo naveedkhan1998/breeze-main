@@ -1,28 +1,26 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { Flowbite } from "flowbite-react";
+
 import { useAppSelector } from "./app/hooks";
-import { getCurrentToken } from "./features/authSlice";
-import { useHealthCheckQuery } from "./services/baseApi";
-import Toast from "./components/ToastContainer";
-import LoadingScreen from "./components/LoadingScreen";
+import { getCurrentToken } from "./features/auth/authSlice";
+import { useHealthCheckQuery } from "./shared/api/baseApi";
+import Toast from "./shared/components/ToastContainer";
+import LoadingScreen from "./shared/components/LoadingScreen";
 
-import HomePage from "./pages/HomePage";
-import AboutPage from "./pages/AboutPage";
-import InstrumentsPage from "./pages/InstrumentsPage";
-import GraphsPage from "./pages/GraphsPage";
-import AccountsPage from "./pages/AccountsPage";
-import ContactPage from "./pages/ContactPage";
-import LoginRegPage from "./pages/LoginRegPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import AnnouncementBanner from "./components/AnnouncementBanner";
-import ProfilePage from "./pages/ProfilePage";
-import DashBoardPage from "./pages/DashBoardPage";
+import HomePage from "./features/home";
+import AboutPage from "./features/about";
+import InstrumentsPage from "./features/instruments";
+import GraphsPage from "./features/graphs";
+import AccountsPage from "./features/accounts";
+import ContactPage from "./features/contact";
+import LoginRegPage from "./features/auth";
+import NotFoundPage from "./features/notFound";
+import AnnouncementBanner from "./shared/components/AnnouncementBanner";
+import ProfilePage from "./features/profile";
+import DashBoardPage from "./features/dashboard";
 
-import { checkEnvironment } from "./utils/environment.ts";
-import { ThemeProvider } from "./components/theme-provider.tsx";
+import { checkEnvironment } from "./shared/lib/environment";
+import { ThemeProvider } from "./shared/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 
 const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
@@ -72,22 +70,18 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <Flowbite>
-          <AnnouncementBanner />
-          <Routes>
-            {routes.map(({ path, element, private: isPrivate }) => (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  isPrivate ? <PrivateRoute element={element} /> : element
-                }
-              />
-            ))}
-          </Routes>
-          <Toast />
-          <Toaster />
-        </Flowbite>
+        <AnnouncementBanner />
+        <Routes>
+          {routes.map(({ path, element, private: isPrivate }) => (
+            <Route
+              key={path}
+              path={path}
+              element={isPrivate ? <PrivateRoute element={element} /> : element}
+            />
+          ))}
+        </Routes>
+        <Toast />
+        <Toaster />
       </ThemeProvider>
     </BrowserRouter>
   );
