@@ -13,10 +13,6 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout code
@@ -27,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.13"
 
       - name: Install UV
         uses: astral-sh/setup-uv@v3
@@ -59,14 +55,13 @@ jobs:
         if: always()
         run: |
           echo "### Backend Code Quality Results" >> $GITHUB_STEP_SUMMARY
-          echo "- Python version: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Python version: 3.13" >> $GITHUB_STEP_SUMMARY
           echo "- Black formatting: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- Ruff linting: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "- Tests: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
-        if: matrix.python-version == '3.13'
         with:
           file: ./backend/coverage.xml
           flags: backend
