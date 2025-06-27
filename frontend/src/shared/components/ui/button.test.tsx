@@ -79,4 +79,14 @@ describe('Button Component', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/test');
   });
+
+  it('renders children correctly', () => {
+    render(
+      <Button>
+        <span>Child Span</span>
+      </Button>
+    );
+    const button = screen.getByRole('button');
+    expect(button).toContainHTML('<span>Child Span</span>');
+  });
 });
