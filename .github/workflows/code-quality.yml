@@ -100,3 +100,9 @@ jobs:
       run: |
         npm run lint
       continue-on-error: false
+    
+    - name: Run Tests
+      working-directory: ./frontend
+      run: |
+        npm run test:run
+      continue-on-error: false
