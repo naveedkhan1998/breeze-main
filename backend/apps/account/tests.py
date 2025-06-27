@@ -56,7 +56,7 @@ def test_create_superuser_mocked():
         # Create a MagicMock object that behaves like a User instance
         mock_user_instance = MagicMock()
         mock_user_instance.email = "admin@example.com"
-        mock_user_instance.name = "Admin User"
+        mock_user_instance.name = "Test User"
         mock_user_instance.tc = True
         mock_user_instance.is_active = True
         mock_user_instance.is_email_verify = True
@@ -73,7 +73,7 @@ def test_create_superuser_mocked():
         # Call the mocked create_superuser with the correct arguments
         user = User.objects.create_superuser(
             email="admin@example.com",
-            name="Admin User",
+            name="Test User",
             tc=True,
             password="password123",
         )
@@ -81,14 +81,14 @@ def test_create_superuser_mocked():
         # Assert that create_superuser was called with the correct arguments
         mock_create_superuser.assert_called_once_with(
             email="admin@example.com",
-            name="Admin User",
+            name="Test User",
             tc=True,
             password="password123",
         )
 
         # Assert properties of the returned user object (which is our mock_user_instance)
         assert user.email == "admin@example.com"
-        assert user.name == "Admin User"
+        assert user.name == "Test User"
         assert user.tc is True
         assert user.check_password("password123")
         assert user.is_active is True
