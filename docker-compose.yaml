@@ -3,7 +3,7 @@ services:
     image: postgres:16.0
     container_name: breeze-postgres
     env_file:
-      - ./.envs/env.dev
+      - ./.envs/.env.local
     volumes:
       - ./postgres:/var/lib/postgresql/data
     ports:
@@ -47,7 +47,7 @@ services:
     container_name: breeze-backend
     image: breeze-backend
     env_file:
-      - ./.envs/env.dev
+      - ./.envs/.env.local
     volumes:
       - ./backend/:/app/
     depends_on:
@@ -73,7 +73,7 @@ services:
     image: "breeze-backend"
     container_name: breeze-celery-beat
     env_file:
-      - ./.envs/env.dev
+      - ./.envs/.env.local
     depends_on:
       backend:
         condition: service_started
@@ -90,7 +90,7 @@ services:
     image: "breeze-backend"
     container_name: breeze-celery-worker
     env_file:
-      - ./.envs/env.dev
+      - ./.envs/.env.local
     environment:
       PYTHONWARNINGS: "ignore:DateTimeField .* received a naive datetime:RuntimeWarning:django.db.models.fields"
     depends_on:
@@ -111,7 +111,7 @@ services:
     volumes:
       - ./backend/:/app/
     env_file:
-      - ./.envs/env.dev
+      - ./.envs/.env.local
     ports:
       - "5555:5555"
     entrypoint: celery -A main flower --loglevel=INFO
