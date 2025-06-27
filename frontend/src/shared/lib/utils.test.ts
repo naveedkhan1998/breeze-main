@@ -15,13 +15,13 @@ describe('cn utility function', () => {
   it('handles conditional classes', () => {
     const isActive = true;
     const isDisabled = false;
-    
+
     const result = cn(
       'base-class',
       isActive && 'active-class',
       isDisabled && 'disabled-class'
     );
-    
+
     expect(result).toBe('base-class active-class');
   });
 
@@ -47,11 +47,11 @@ describe('cn utility function', () => {
 
   it('handles objects with boolean values', () => {
     const result = cn({
-      'active': true,
-      'disabled': false,
-      'loading': true
+      active: true,
+      disabled: false,
+      loading: true,
     });
-    
+
     expect(result).toContain('active');
     expect(result).toContain('loading');
     expect(result).not.toContain('disabled');

@@ -39,14 +39,20 @@ export const createMockStore = (initialState: Partial<MockState> = {}) => {
 // Custom render function that includes providers
 const customRender = (
   ui: React.ReactElement,
-  options: RenderOptions & { 
-    initialState?: Partial<MockState>; 
-    store?: Store; 
+  options: RenderOptions & {
+    initialState?: Partial<MockState>;
+    store?: Store;
   } = {}
 ) => {
-  const { initialState, store = createMockStore(initialState), ...renderOptions } = options;
+  const {
+    initialState,
+    store = createMockStore(initialState),
+    ...renderOptions
+  } = options;
 
-  const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) => (
     <Provider store={store}>
       <BrowserRouter>{children}</BrowserRouter>
     </Provider>
@@ -63,11 +69,11 @@ export const mockLocalStorage = () => {
     removeItem: vi.fn(),
     clear: vi.fn(),
   };
-  
+
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
   });
-  
+
   return localStorageMock;
 };
 
@@ -79,12 +85,12 @@ export const mockLocation = (href = 'http://localhost:3000/') => {
     replace: vi.fn(),
     reload: vi.fn(),
   };
-  
+
   Object.defineProperty(window, 'location', {
     value: locationMock,
     writable: true,
   });
-  
+
   return locationMock;
 };
 

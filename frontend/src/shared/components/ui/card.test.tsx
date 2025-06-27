@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from 'src/test/test-utils';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from './card';
 
 describe('Card Components', () => {
   describe('Card', () => {
@@ -8,17 +15,31 @@ describe('Card Components', () => {
       render(<Card data-testid="card">Card content</Card>);
       const card = screen.getByTestId('card');
       expect(card).toBeInTheDocument();
-      expect(card).toHaveClass('rounded-xl', 'border', 'bg-card', 'text-card-foreground', 'shadow');
+      expect(card).toHaveClass(
+        'rounded-xl',
+        'border',
+        'bg-card',
+        'text-card-foreground',
+        'shadow'
+      );
     });
 
     it('accepts custom className', () => {
-      render(<Card className="custom-class" data-testid="card">Content</Card>);
+      render(
+        <Card className="custom-class" data-testid="card">
+          Content
+        </Card>
+      );
       const card = screen.getByTestId('card');
       expect(card).toHaveClass('custom-class');
     });
 
     it('forwards props correctly', () => {
-      render(<Card data-testid="card" id="test-id">Content</Card>);
+      render(
+        <Card data-testid="card" id="test-id">
+          Content
+        </Card>
+      );
       const card = screen.getByTestId('card');
       expect(card).toHaveAttribute('id', 'test-id');
     });
@@ -38,13 +59,21 @@ describe('Card Components', () => {
       render(<CardTitle data-testid="title">Title content</CardTitle>);
       const title = screen.getByTestId('title');
       expect(title).toBeInTheDocument();
-      expect(title).toHaveClass('font-semibold', 'leading-none', 'tracking-tight');
+      expect(title).toHaveClass(
+        'font-semibold',
+        'leading-none',
+        'tracking-tight'
+      );
     });
   });
 
   describe('CardDescription', () => {
     it('renders with correct styling', () => {
-      render(<CardDescription data-testid="description">Description content</CardDescription>);
+      render(
+        <CardDescription data-testid="description">
+          Description content
+        </CardDescription>
+      );
       const description = screen.getByTestId('description');
       expect(description).toBeInTheDocument();
       expect(description).toHaveClass('text-sm', 'text-muted-foreground');
