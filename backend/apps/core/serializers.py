@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from core.models import (
+from apps.core.models import (
     BreezeAccount,
     Candle,
     Instrument,

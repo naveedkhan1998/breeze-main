@@ -49,6 +49,8 @@ SESSION_COOKIE_SECURE = True
 X_FRAME_OPTIONS = "DENY"
 
 # Update JWT settings with environment secret key
-SIMPLE_JWT.update({
-    "SIGNING_KEY": SECRET_KEY,
-})
+SIMPLE_JWT.update(
+    {
+        "SIGNING_KEY": SECRET_KEY,
+    }
+)

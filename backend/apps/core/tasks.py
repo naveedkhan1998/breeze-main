@@ -7,10 +7,10 @@ from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from pytz import timezone
 
-from account.models import User
-from core.breeze import BreezeConnect, breeze_session_manager
-from core.helper import date_parser
-from core.models import (
+from apps.account.models import User
+from apps.core.breeze import BreezeConnect, breeze_session_manager
+from apps.core.helper import date_parser
+from apps.core.models import (
     Candle,
     SubscribedInstruments,
     Tick,

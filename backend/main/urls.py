@@ -20,14 +20,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
-from backend.config.settings import settings
+from main.settings import base as settings
 
 urlpatterns = (
     [
         path("api/", TemplateView.as_view(template_name="index.html")),
         path("admin/", admin.site.urls),
-        path("api/account/", include("account.urls")),
-        path("api/core/", include("core.urls")),
+        path("api/account/", include("apps.account.urls")),
+        path("api/core/", include("apps.core.urls")),
     ]
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

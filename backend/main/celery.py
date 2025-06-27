@@ -3,11 +3,11 @@ import os
 from celery import Celery
 
 # Set the default Django settings module for the 'celery' program.
-from config.settings.base import INSTALLED_APPS
+from main.settings.base import INSTALLED_APPS
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "main.settings.local")
 
-app = Celery("config", include=[])
+app = Celery("main", include=[])
 
 app.conf.beat_schedule = {
     "candle_making_job": {"task": "candle_maker", "schedule": 1, "relative": True},

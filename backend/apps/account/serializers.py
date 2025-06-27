@@ -3,8 +3,8 @@ from django.utils.encoding import DjangoUnicodeDecodeError, force_bytes, smart_s
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import serializers
 
-from account.utils import Util
-from backend.config.settings.settings import BASE_DIR, MAIN_URL_2
+from apps.account.utils import Util
+from main.settings.local import BASE_DIR, MAIN_URL_2
 
 from .models import User
 

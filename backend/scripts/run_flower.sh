@@ -4,4 +4,4 @@ set -e
 echo "Starting Flower - Celery Monitoring Tool..."
 
 # Start Flower with proper configuration
-celery -A config flower
+celery -A main flower 
