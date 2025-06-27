@@ -39,3 +39,4 @@ SIMPLE_JWT.update(
         "SIGNING_KEY": SECRET_KEY,
     }
 )
+

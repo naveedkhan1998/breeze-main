@@ -76,3 +76,7 @@ To run the project, you would typically need to:
 4.  Start the Celery worker and Celery Beat for asynchronous tasks.
 
 The provided shell scripts in the `scripts/` directory can be used to automate these processes.
+
+## Testing
+
+Pytest has been setup, we can run tests by running uv run pytest
