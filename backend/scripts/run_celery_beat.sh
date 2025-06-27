@@ -12,7 +12,7 @@ rm -f /var/run/celery/beat.pid
 
 # Start Celery Beat scheduler
 echo "Starting Celery Beat with INFO logging..."
-celery -A main beat \
+celery -A config beat \
     --pidfile=/var/run/celery/beat.pid \
     --logfile=/var/log/celery/beat.log \
     --loglevel=INFO

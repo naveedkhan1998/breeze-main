@@ -3,11 +3,11 @@ import os
 from celery import Celery
 
 # Set the default Django settings module for the 'celery' program.
-from backend.config.settings import settings
+from config.settings.base import INSTALLED_APPS
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "main.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 
-app = Celery("main", include=[])
+app = Celery("config", include=[])
 
 app.conf.beat_schedule = {
     "candle_making_job": {"task": "candle_maker", "schedule": 1, "relative": True},
@@ -28,7 +28,7 @@ app.conf.broker_connection_retry_on_startup = True
 app.config_from_object("django.conf:settings")
 # CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq3:5672/'
 # Load task modules from all registered Django apps.
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+app.autodiscover_tasks(lambda: INSTALLED_APPS)
 BROKER_CONNECTION_RETRY = True
 BROKER_CONNECTION_MAX_RETRIES = 0
 BROKER_CONNECTION_TIMEOUT = 10120

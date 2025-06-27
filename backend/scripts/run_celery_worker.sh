@@ -15,7 +15,7 @@ rm -f /var/run/celery/beat.pid
 
 # Purge all existing tasks from the Celery queues
 echo "Purging existing Celery tasks..."
-celery -A main purge --force || true
+celery -A config purge --force || true
 
 # Start Celery worker with watchmedo for auto-restart
 echo "Starting Celery worker with watchmedo auto-restart..."
@@ -23,4 +23,4 @@ watchmedo auto-restart \
     --directory=/app \
     --pattern=*.py \
     --recursive \
-    -- celery -A main worker -l error
+    -- celery -A config worker -l error
