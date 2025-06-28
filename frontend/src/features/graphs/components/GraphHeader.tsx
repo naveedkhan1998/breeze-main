@@ -45,6 +45,7 @@ import {
 } from '../graphSlice';
 import { Instrument } from '@/types/common-types';
 import { Badge } from '@/components/ui/badge';
+import { ModeToggle } from '@/components/ModeToggle';
 
 interface GraphHeaderProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -269,6 +270,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            <ModeToggle />
           </div>
 
           {/* Enhanced More Options */}
