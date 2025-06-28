@@ -28,7 +28,6 @@ import {
   HiPlay,
   HiRefresh,
   HiTrendingUp,
-  HiViewGrid,
   HiX,
 } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
@@ -44,7 +43,6 @@ import {
   setShowVolume,
 } from '../graphSlice';
 import { Instrument } from '@/types/common-types';
-import { Badge } from '@/components/ui/badge';
 import { ModeToggle } from '@/components/ModeToggle';
 
 interface GraphHeaderProps {
@@ -71,250 +69,153 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
   const showControls = useAppSelector(selectShowControls);
   const isFullscreen = useAppSelector(selectIsFullscreen);
   return (
-    <header className="sticky top-0 z-50 border-b shadow-lg border-border/50 ">
+    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-sm">
       <Helmet>
-        <title>{obj?.company_name} - ICICI Breeze</title>
+        <title>{obj?.company_name} - Breeze</title>
       </Helmet>
-      <div className="flex items-center justify-between px-6 py-5">
+      <div className="flex items-center justify-between h-20 px-4 mx-auto sm:px-6 lg:px-8">
         {/* Left Section - Navigation & Title */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center gap-4">
           <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={() => navigate(-1)}
-                  className="p-0 transition-all duration-300 action-button w-11 h-11 rounded-xl hover:bg-gradient-to-r hover:from-accent/80 hover:to-accent/60 hover:shadow-lg"
+                  className="rounded-full"
                 >
                   <HiArrowLeft className="w-5 h-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="border-0 ">
-                Go back to instruments
-              </TooltipContent>
+              <TooltipContent side="bottom">Go back</TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
-          <div className="flex flex-col">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-3xl font-bold text-transparent bg-gradient-to-r from-sidebar-foreground via-sidebar-foreground to-sidebar-foreground/80 bg-clip-text">
-                {obj?.company_name || 'Chart'}
-              </h1>
-              <div className="flex items-center space-x-3">
-                <Badge variant="outline">{obj?.exchange_code || 'N/A'}</Badge>
-                <Badge variant="outline">{timeframe}m timeframe</Badge>
-              </div>
-            </div>
-            <div className="flex items-center mt-2 space-x-6">
+          <div>
+            <h1 className="text-lg font-semibold text-foreground">
+              {obj?.company_name || 'Chart'}
+            </h1>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{obj?.exchange_code || 'N/A'}</span>
+              <Separator orientation="vertical" className="h-3" />
+              <span>{timeframe}m</span>
+              <Separator orientation="vertical" className="h-3" />
+              <span>{data?.data?.length || 0} data points</span>
               {autoRefresh && (
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className="w-3 h-3 rounded-full bg-chart-2 live-pulse"></div>
-                    <div className="absolute inset-0 w-3 h-3 rounded-full bg-chart-2 animate-ping"></div>
+                <>
+                  <Separator orientation="vertical" className="h-3" />
+                  <div className="flex items-center gap-1.5 text-green-500">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Live</span>
                   </div>
-                  <Badge variant="outline">
-                    <HiPlay className="w-3 h-3 mr-1" />
-                    Live Updates
-                  </Badge>
-                </div>
+                </>
               )}
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <HiChartBar className="w-4 h-4" />
-                <span className="font-medium">
-                  {data?.data?.length || 0} data points loaded
-                </span>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Section - Enhanced Controls */}
-        <div className="flex items-center space-x-4">
-          {/* Quick Actions Panel */}
-          <div className="flex items-center p-1.5 space-x-1 rounded-xl  shadow-sm">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => dispatch(setAutoRefresh(!autoRefresh))}
-                    className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
-                      autoRefresh
-                        ? 'bg-gradient-to-r from-chart-2/20 to-chart-2/10 text-chart-2 shadow-sm hover:shadow-md'
-                        : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
-                    }`}
-                  >
-                    {autoRefresh ? (
-                      <>
-                        <HiPause className="w-4 h-4 mr-2" />
-                        <span className="text-xs font-medium">Pause</span>
-                      </>
-                    ) : (
-                      <>
-                        <HiPlay className="w-4 h-4 mr-2" />
-                        <span className="text-xs font-medium">Live</span>
-                      </>
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="border-0 ">
-                  {autoRefresh ? 'Pause' : 'Start'} live market updates
-                </TooltipContent>
-              </Tooltip>
+        {/* Right Section - Controls */}
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={autoRefresh ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={() => dispatch(setAutoRefresh(!autoRefresh))}
+                  className="rounded-full"
+                >
+                  {autoRefresh ? (
+                    <HiPause className="w-5 h-5" />
+                  ) : (
+                    <HiPlay className="w-5 h-5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {autoRefresh ? 'Pause Live Updates' : 'Enable Live Updates'}
+              </TooltipContent>
+            </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => dispatch(setShowVolume(!showVolume))}
-                    className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
-                      showVolume
-                        ? 'bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm hover:shadow-md'
-                        : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
-                    }`}
-                  >
-                    <HiChartBar className="w-4 h-4 mr-2" />
-                    <span className="text-xs font-medium">Volume</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="border-0 ">
-                  {showVolume ? 'Hide' : 'Show'} volume analysis
-                </TooltipContent>
-              </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={refetch}
+                  className="rounded-full"
+                >
+                  <HiRefresh className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Refresh Data</TooltipContent>
+            </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => dispatch(setShowControls(!showControls))}
-                    className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
-                      showControls
-                        ? 'bg-gradient-to-r from-chart-5/20 to-chart-5/10 text-chart-5 shadow-sm hover:shadow-md'
-                        : 'hover:bg-gradient-to-r hover:from-sidebar-accent/80 hover:to-sidebar-accent/60'
-                    }`}
-                  >
-                    <HiCog className="w-4 h-4 mr-2" />
-                    <span className="text-xs font-medium">Settings</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="border-0 ">
-                  Toggle chart settings panel
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={showControls ? 'secondary' : 'ghost'}
+                  size="icon"
+                  onClick={() => dispatch(setShowControls(!showControls))}
+                  className="rounded-full"
+                >
+                  <HiCog className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Toggle Controls</TooltipContent>
+            </Tooltip>
 
-          <Separator
-            orientation="vertical"
-            className="h-8 bg-gradient-to-b from-transparent via-border to-transparent"
-          />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleFullscreen}
+                  className="rounded-full"
+                >
+                  {isFullscreen ? (
+                    <HiX className="w-5 h-5" />
+                  ) : (
+                    <HiArrowsExpand className="w-5 h-5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={refetch}
-                    className="w-10 h-10 p-0 transition-all duration-300 action-button rounded-xl hover:bg-gradient-to-r hover:from-chart-3/20 hover:to-chart-3/10 hover:text-chart-3 hover:shadow-lg"
-                  >
-                    <HiRefresh className="w-5 h-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="border-0 ">
-                  Refresh market data
-                </TooltipContent>
-              </Tooltip>
+          <Separator orientation="vertical" className="h-6 mx-1" />
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDownload}
-                    className="w-10 h-10 p-0 transition-all duration-300 action-button rounded-xl hover:bg-gradient-to-r hover:from-chart-4/20 hover:to-chart-4/10 hover:text-chart-4 hover:shadow-lg"
-                  >
-                    <HiDownload className="w-5 h-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="border-0 ">
-                  Export data as CSV
-                </TooltipContent>
-              </Tooltip>
+          <ModeToggle />
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleFullscreen}
-                    className="w-10 h-10 p-0 transition-all duration-300 action-button rounded-xl hover:bg-gradient-to-r hover:from-primary/20 hover:to-primary/10 hover:text-primary hover:shadow-lg"
-                  >
-                    {isFullscreen ? (
-                      <HiX className="w-5 h-5" />
-                    ) : (
-                      <HiArrowsExpand className="w-5 h-5" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="border-0 ">
-                  {isFullscreen
-                    ? 'Exit fullscreen mode'
-                    : 'Enter fullscreen mode'}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <ModeToggle />
-          </div>
-
-          {/* Enhanced More Options */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 p-0 transition-all duration-300 action-button rounded-xl hover:bg-gradient-to-r hover:from-muted/80 hover:to-muted/60 hover:shadow-lg"
-              >
+              <Button variant="ghost" size="icon" className="rounded-full">
                 <HiDotsVertical className="w-5 h-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-56 border-0 shadow-2xl "
-            >
-              <DropdownMenuItem className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-chart-1/10 hover:to-chart-1/5">
-                <HiViewGrid className="w-5 h-5 mr-3 text-chart-1" />
-                <div>
-                  <div className="font-medium">Toggle Layout</div>
-                  <div className="text-xs text-muted-foreground">
-                    Switch chart arrangement
-                  </div>
-                </div>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem
+                onClick={() => dispatch(setShowVolume(!showVolume))}
+              >
+                <HiChartBar className="w-4 h-4 mr-2" />
+                <span>{showVolume ? 'Hide' : 'Show'} Volume</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-              <DropdownMenuItem className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-chart-2/10 hover:to-chart-2/5">
-                <HiTrendingUp className="w-5 h-5 mr-3 text-chart-2" />
-                <div>
-                  <div className="font-medium">Add Indicator</div>
-                  <div className="text-xs text-muted-foreground">
-                    Technical analysis tools
-                  </div>
-                </div>
+              <DropdownMenuItem onClick={handleDownload}>
+                <HiDownload className="w-4 h-4 mr-2" />
+                <span>Export as CSV</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-chart-3/10 hover:to-chart-3/5">
-                <HiColorSwatch className="w-5 h-5 mr-3 text-chart-3" />
-                <div>
-                  <div className="font-medium">Customize Theme</div>
-                  <div className="text-xs text-muted-foreground">
-                    Personalize appearance
-                  </div>
-                </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <HiTrendingUp className="w-4 h-4 mr-2" />
+                <span>Add Indicator</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <HiColorSwatch className="w-4 h-4 mr-2" />
+                <span>Customize Theme</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

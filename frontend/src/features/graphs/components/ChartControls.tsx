@@ -26,14 +26,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   HiClock,
   HiChartBar,
-  HiPlay,
-  HiPause,
-  HiEye,
   HiTrendingUp,
   HiCog,
   HiLightningBolt,
   HiViewGrid,
-  HiSparkles,
   HiChartSquareBar,
   HiAdjustments,
 } from 'react-icons/hi';
@@ -58,13 +54,12 @@ export default function ChartControls() {
   };
 
   const timeframeOptions = [
-    { value: 1, label: '1m', category: 'Short Term' },
-    { value: 5, label: '5m', category: 'Short Term' },
-    { value: 15, label: '15m', category: 'Short Term' },
-    { value: 30, label: '30m', category: 'Medium Term' },
-    { value: 60, label: '1h', category: 'Medium Term' },
-    { value: 240, label: '4h', category: 'Long Term' },
-    { value: 1440, label: '1D', category: 'Long Term' },
+    { value: 1, label: '1m' },
+    { value: 5, label: '5m' },
+    { value: 15, label: '15m' },
+    { value: 60, label: '1h' },
+    { value: 240, label: '4h' },
+    { value: 1440, label: '1D' },
   ];
 
   const chartTypes: {
@@ -87,23 +82,13 @@ export default function ChartControls() {
     },
   ];
 
-  const shortTermTFs = timeframeOptions.filter(
-    tf => tf.category === 'Short Term'
-  );
-  const mediumTermTFs = timeframeOptions.filter(
-    tf => tf.category === 'Medium Term'
-  );
-  const longTermTFs = timeframeOptions.filter(
-    tf => tf.category === 'Long Term'
-  );
-
   return (
-    <div className="space-y-6 scrollbar-hidden">
+    <div className="space-y-4 scrollbar-hidden">
       {/* Timeframe Section */}
       <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="p-2 border rounded-lg bg-chart-1/10 text-chart-1 border-chart-1/20">
+            <div className="p-2 border rounded-lg bg-primary/10 text-primary border-primary/20">
               <HiClock className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
@@ -117,103 +102,36 @@ export default function ChartControls() {
             {timeframe && (
               <Badge
                 variant="secondary"
-                className="ml-auto text-xs border bg-chart-1/10 text-chart-1 border-chart-1/20"
+                className="ml-auto text-xs border bg-primary/10 text-primary border-primary/20"
               >
-                {timeframe}m
+                {timeframeOptions.find(t => t.value === timeframe)?.label ||
+                  `${timeframe}m`}
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Short Term */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-chart-2"></div>
-              <Label className="text-xs font-semibold tracking-wider uppercase text-foreground">
-                Short Term
-              </Label>
-            </div>
-            <div className="grid grid-cols-3 gap-1.5">
-              {shortTermTFs.map(tf => (
-                <Button
-                  key={tf.value}
-                  size="sm"
-                  variant={timeframe === tf.value ? 'default' : 'outline'}
-                  className={`h-9 text-xs font-semibold transition-all duration-300 ${
-                    timeframe === tf.value
-                      ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
-                  }`}
-                  onClick={() => dispatch(setTimeframe(tf.value))}
-                >
-                  {tf.label}
-                </Button>
-              ))}
-            </div>
+        <CardContent className="flex flex-col gap-2">
+          <div className="grid grid-cols-3 gap-2">
+            {timeframeOptions.map(tf => (
+              <Button
+                key={tf.value}
+                size="sm"
+                variant={timeframe === tf.value ? 'default' : 'outline'}
+                className="transition-all duration-200"
+                onClick={() => dispatch(setTimeframe(tf.value))}
+              >
+                {tf.label}
+              </Button>
+            ))}
           </div>
-
-          {/* Medium Term */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-chart-3"></div>
-              <Label className="text-xs font-semibold tracking-wider uppercase text-foreground">
-                Medium Term
-              </Label>
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {mediumTermTFs.map(tf => (
-                <Button
-                  key={tf.value}
-                  size="sm"
-                  variant={timeframe === tf.value ? 'default' : 'outline'}
-                  className={`h-9 text-xs font-semibold transition-all duration-300 ${
-                    timeframe === tf.value
-                      ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
-                  }`}
-                  onClick={() => dispatch(setTimeframe(tf.value))}
-                >
-                  {tf.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Long Term */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-chart-4"></div>
-              <Label className="text-xs font-semibold tracking-wider uppercase text-foreground">
-                Long Term
-              </Label>
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {longTermTFs.map(tf => (
-                <Button
-                  key={tf.value}
-                  size="sm"
-                  variant={timeframe === tf.value ? 'default' : 'outline'}
-                  className={`h-9 text-xs font-semibold transition-all duration-300 ${
-                    timeframe === tf.value
-                      ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
-                      : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
-                  }`}
-                  onClick={() => dispatch(setTimeframe(tf.value))}
-                >
-                  {tf.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
           <Button
             size="sm"
             variant="ghost"
-            className="w-full h-10 text-xs font-medium transition-all duration-300 border-2 border-dashed border-border hover:bg-accent hover:text-accent-foreground"
+            className="w-full text-xs font-medium transition-all duration-300 border-2 border-dashed border-border hover:border-primary/50 hover:text-primary"
             onClick={() => setIsCustomTfDialogOpen(true)}
           >
-            <HiCog className="w-3 h-3 mr-2" />
-            Custom Timeframe
+            <HiCog className="w-4 h-4 mr-2" />
+            Custom
           </Button>
         </CardContent>
       </Card>
@@ -222,7 +140,7 @@ export default function ChartControls() {
       <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="p-2 border rounded-lg bg-chart-5/10 text-chart-5 border-chart-5/20">
+            <div className="p-2 border rounded-lg bg-primary/10 text-primary border-primary/20">
               <HiViewGrid className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
@@ -235,22 +153,22 @@ export default function ChartControls() {
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="grid grid-cols-2 gap-2">
           {chartTypes.map(type => (
             <div
               key={type.value}
-              className={`p-3 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
+              className={`p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
                 chartType === type.value
-                  ? 'border-primary bg-primary/5 shadow-lg transform scale-[1.02]'
+                  ? 'border-primary bg-primary/5'
                   : 'border-border hover:border-primary/50 hover:bg-accent/50'
               }`}
               onClick={() => dispatch(setChartType(type.value))}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center gap-2 text-center">
                 <div
                   className={`p-2 rounded-lg ${
                     chartType === type.value
-                      ? 'bg-primary text-primary-foreground shadow-md'
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >
@@ -258,155 +176,61 @@ export default function ChartControls() {
                 </div>
                 <div className="flex-1">
                   <div
-                    className={`font-semibold text-sm ${
+                    className={`font-semibold text-xs ${
                       chartType === type.value
-                        ? 'text-foreground'
+                        ? 'text-primary'
                         : 'text-card-foreground'
                     }`}
                   >
                     {type.label}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {type.description}
-                  </div>
                 </div>
-                {chartType === type.value && (
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                )}
               </div>
             </div>
           ))}
         </CardContent>
       </Card>
 
-      {/* Display Options */}
+      {/* Settings Section */}
       <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-3 text-base">
-            <div className="p-2 border rounded-lg bg-chart-2/10 text-chart-2 border-chart-2/20">
-              <HiEye className="w-4 h-4" />
+            <div className="p-2 border rounded-lg bg-primary/10 text-primary border-primary/20">
+              <HiAdjustments className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
               <span className="font-semibold text-card-foreground">
-                Display Options
+                Settings
               </span>
               <span className="text-xs text-muted-foreground">
-                Configure chart visibility
+                Tweak chart options
               </span>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div
-            className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all duration-300 ${
-              showVolume
-                ? 'border-chart-2/30 bg-chart-2/5'
-                : 'border-border bg-muted/50'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-2 rounded-lg ${
-                  showVolume
-                    ? 'bg-chart-2/10 text-chart-2'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                <HiChartSquareBar className="w-3 h-3" />
-              </div>
-              <div>
-                <Label
-                  htmlFor="show-volume"
-                  className="text-sm font-semibold cursor-pointer text-card-foreground"
-                >
-                  Volume Chart
-                </Label>
-                <div className="text-xs text-muted-foreground">
-                  Show trading volume data
-                </div>
-              </div>
-            </div>
+        <CardContent className="space-y-2">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-background/50">
+            <Label
+              htmlFor="show-volume"
+              className="flex items-center gap-2 text-sm font-medium cursor-pointer text-card-foreground"
+            >
+              <HiChartSquareBar className="w-4 h-4 text-muted-foreground" />
+              Show Volume
+            </Label>
             <Switch
               id="show-volume"
               checked={showVolume}
               onCheckedChange={(show: boolean) => dispatch(setShowVolume(show))}
             />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Auto-Refresh Section */}
-      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-3 text-base">
-            <div
-              className={`p-2 rounded-lg transition-all duration-300 ${
-                autoRefresh
-                  ? 'bg-chart-2/10 text-chart-2 animate-pulse border border-chart-2/20'
-                  : 'bg-chart-4/10 text-chart-4 border border-chart-4/20'
-              }`}
+          <div className="flex items-center justify-between p-2 rounded-lg bg-background/50">
+            <Label
+              htmlFor="auto-refresh"
+              className="flex items-center gap-2 text-sm font-medium cursor-pointer text-card-foreground"
             >
-              {autoRefresh ? (
-                <HiPause className="w-4 h-4" />
-              ) : (
-                <HiPlay className="w-4 h-4" />
-              )}
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-card-foreground">
-                  Live Updates
-                </span>
-                {autoRefresh && (
-                  <Badge
-                    variant="default"
-                    className="text-xs border bg-chart-2/10 text-chart-2 animate-pulse border-chart-2/20"
-                  >
-                    <div className="w-1.5 h-1.5 bg-chart-2 rounded-full mr-1"></div>
-                    Live
-                  </Badge>
-                )}
-              </div>
-              <span className="text-xs text-muted-foreground">
-                {autoRefresh
-                  ? 'Data refreshes every second'
-                  : 'Manual refresh mode'}
-              </span>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div
-            className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all duration-300 ${
-              autoRefresh
-                ? 'border-chart-2/30 bg-chart-2/5'
-                : 'border-border bg-muted/50'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-2 rounded-lg transition-all duration-300 ${
-                  autoRefresh
-                    ? 'bg-chart-2/10 text-chart-2 animate-pulse'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                <HiLightningBolt className="w-3 h-3" />
-              </div>
-              <div>
-                <Label
-                  htmlFor="auto-refresh"
-                  className="text-sm font-semibold cursor-pointer text-card-foreground"
-                >
-                  Auto-Refresh Data
-                </Label>
-                <div className="text-xs text-muted-foreground">
-                  {autoRefresh
-                    ? 'Real-time market data'
-                    : 'Click to enable live data'}
-                </div>
-              </div>
-            </div>
+              <HiLightningBolt className="w-4 h-4 text-muted-foreground" />
+              Live Data
+            </Label>
             <Switch
               id="auto-refresh"
               checked={autoRefresh}
@@ -415,44 +239,12 @@ export default function ChartControls() {
               }
             />
           </div>
-
           {autoRefresh && (
-            <div className="flex items-center gap-2 p-2 border rounded-lg bg-chart-2/5 border-chart-2/20">
-              <div className="w-2 h-2 rounded-full bg-chart-2 animate-ping"></div>
-              <span className="text-xs font-medium text-chart-2">
-                Connected • Real-time updates active
-              </span>
+            <div className="flex items-center gap-2 p-2 text-xs text-green-400 border rounded-lg bg-green-500/10 border-green-500/20">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
+              <span>Live updates enabled</span>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Advanced Settings */}
-      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-3 text-base">
-            <div className="p-2 rounded-lg bg-muted text-muted-foreground">
-              <HiAdjustments className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-card-foreground">
-                Advanced
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Additional settings
-              </span>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="py-4 text-center">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 rounded-full bg-muted">
-              <HiSparkles className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              More features coming soon
-            </p>
-          </div>
         </CardContent>
       </Card>
 
@@ -464,7 +256,7 @@ export default function ChartControls() {
         <DialogContent className="sm:max-w-[425px] bg-popover/95 backdrop-blur-md border border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-              <div className="p-2 rounded-lg bg-chart-1/10 text-chart-1">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary">
                 <HiClock className="w-4 h-4" />
               </div>
               Custom Timeframe
@@ -492,14 +284,11 @@ export default function ChartControls() {
                 placeholder="e.g., 45"
                 required
                 min={1}
-                className="text-lg font-semibold text-center transition-all duration-200 border-2 h-11 focus:border-ring"
+                className="text-lg font-semibold text-center transition-all duration-200 border-2 h-11 focus:border-primary"
               />
-              <div className="p-3 border rounded-lg bg-chart-1/5 border-chart-1/20">
-                <p className="text-xs font-medium text-chart-1">
-                  💡 Examples: 3, 7, 45, 120, 360, etc.
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Enter any positive number for minutes
+              <div className="p-3 border rounded-lg bg-background/50 border-border">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Examples: 3, 7, 45, 120, 360, etc.
                 </p>
               </div>
             </div>
@@ -507,18 +296,15 @@ export default function ChartControls() {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={() => setIsCustomTfDialogOpen(false)}
-                className="px-4 h-9"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                size="sm"
-                className="px-6 shadow-lg h-9 bg-primary text-primary-foreground hover:bg-primary/90"
+                className="shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                Apply Timeframe
+                Apply
               </Button>
             </div>
           </form>
