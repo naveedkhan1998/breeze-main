@@ -25,7 +25,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
 
   // Create chart on mount
   useEffect(() => {
-    if (!volumeChartContainerRef.current) return;
+    if (!volumeChartContainerRef.current || volumeChartRef.current) return;
 
     const chart = createChart(volumeChartContainerRef.current, {
       layout: {
@@ -83,7 +83,6 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
       base: 0,
     });
 
-    volumeSeries.setData(volumeData);
     volumeSeriesRef.current = volumeSeries;
     volumeChartRef.current = chart;
     setTimeScale(chart.timeScale());
@@ -104,7 +103,8 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
       chart.remove();
       volumeChartRef.current = null;
     };
-  }, [mode, setTimeScale, volumeData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Update chart options when mode changes
   useEffect(() => {

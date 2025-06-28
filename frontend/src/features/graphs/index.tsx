@@ -66,6 +66,14 @@ const GraphsPage: React.FC = () => {
   const volumeChartRef = useRef<any>(null);
   const chartSectionRef = useRef<HTMLDivElement>(null);
 
+  const setMainChartTimeScale = useCallback((timeScale: any) => {
+    mainChartRef.current = timeScale;
+  }, []);
+
+  const setVolumeChartTimeScale = useCallback((timeScale: any) => {
+    volumeChartRef.current = timeScale;
+  }, []);
+
   const seriesData = useMemo(() => {
     if (!data) return [];
     return data.data.map(
@@ -278,9 +286,7 @@ const GraphsPage: React.FC = () => {
                     seriesData={seriesData}
                     mode={isDarkMode}
                     obj={obj}
-                    setTimeScale={(timeScale: any) =>
-                      (mainChartRef.current = timeScale)
-                    }
+                    setTimeScale={setMainChartTimeScale}
                   />
                 </ResizablePanel>
 
@@ -312,9 +318,7 @@ const GraphsPage: React.FC = () => {
                       <VolumeChart
                         volumeData={volumeData}
                         mode={isDarkMode}
-                        setTimeScale={(timeScale: any) =>
-                          (volumeChartRef.current = timeScale)
-                        }
+                        setTimeScale={setVolumeChartTimeScale}
                       />
                     </ResizablePanel>
                   </>
