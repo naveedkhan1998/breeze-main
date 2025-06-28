@@ -8,6 +8,7 @@ import {
   Time,
   BarData,
   LineData,
+  HistogramData,
   MouseEventParams,
 } from 'lightweight-charts';
 
@@ -16,7 +17,7 @@ import { useAppSelector } from 'src/app/hooks';
 import { selectChartType, selectTimeframe } from '../graphSlice';
 
 interface MainChartProps {
-  seriesData: BarData[] | LineData[];
+  seriesData: (BarData | LineData | HistogramData)[];
   mode: boolean;
   obj: Instrument;
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
@@ -91,24 +92,60 @@ const MainChart: React.FC<MainChartProps> = ({
         handleScale: true,
       });
 
-      const mainSeries =
-        chartType === 'Candlestick'
-          ? chart.addCandlestickSeries({
-              upColor: mode ? '#10B981' : '#059669',
-              downColor: mode ? '#EF4444' : '#DC2626',
-              borderVisible: false,
-              wickUpColor: mode ? '#10B981' : '#059669',
-              wickDownColor: mode ? '#EF4444' : '#DC2626',
-            })
-          : chart.addLineSeries({
-              color: mode ? '#3B82F6' : '#2563EB',
-              lineWidth: 2,
-              crosshairMarkerVisible: true,
-              crosshairMarkerRadius: 4,
-              lastValueVisible: true,
-            });
+      let mainSeries: ISeriesApi<SeriesType>;
 
-      mainSeries.setData(seriesData);
+      switch (chartType) {
+        case 'Candlestick':
+          mainSeries = chart.addCandlestickSeries({
+            upColor: mode ? '#10B981' : '#059669',
+            downColor: mode ? '#EF4444' : '#DC2626',
+            borderVisible: false,
+            wickUpColor: mode ? '#10B981' : '#059669',
+            wickDownColor: mode ? '#EF4444' : '#DC2626',
+          });
+          break;
+        case 'Bar':
+          mainSeries = chart.addBarSeries({
+            upColor: mode ? '#10B981' : '#059669',
+            downColor: mode ? '#EF4444' : '#DC2626',
+          });
+          break;
+        case 'Area':
+          mainSeries = chart.addAreaSeries({
+            lineColor: mode ? '#3B82F6' : '#2563EB',
+            topColor: mode
+              ? 'rgba(59, 130, 246, 0.4)'
+              : 'rgba(37, 99, 235, 0.4)',
+            bottomColor: mode
+              ? 'rgba(59, 130, 246, 0)'
+              : 'rgba(37, 99, 235, 0)',
+            lineWidth: 2,
+          });
+          break;
+        case 'Baseline':
+          mainSeries = chart.addBaselineSeries({
+            baseValue: { type: 'price', price: seriesData[0]?.value },
+            topLineColor: mode ? '#10B981' : '#059669',
+            bottomLineColor: mode ? '#EF4444' : '#DC2626',
+            topFillColor1: 'rgba(38, 166, 154, 0.28)',
+            topFillColor2: 'rgba(38, 166, 154, 0.05)',
+            bottomFillColor1: 'rgba(239, 83, 80, 0.05)',
+            bottomFillColor2: 'rgba(239, 83, 80, 0.28)',
+          });
+          break;
+        case 'Line':
+        default:
+          mainSeries = chart.addLineSeries({
+            color: mode ? '#3B82F6' : '#2563EB',
+            lineWidth: 2,
+            crosshairMarkerVisible: true,
+            crosshairMarkerRadius: 4,
+            lastValueVisible: true,
+          });
+          break;
+      }
+
+      mainSeries.setData(seriesData as any);
       seriesRef.current = mainSeries;
       prevChartTypeRef.current = chartType;
 
@@ -148,16 +185,19 @@ const MainChart: React.FC<MainChartProps> = ({
       priceSection.className = 'flex items-center gap-3 text-xs';
       legendContainer.appendChild(priceSection);
 
-      const updateLegend = (data: BarData | LineData | null) => {
+      const updateLegend = (data: any | null) => {
         if (data) {
           priceSection.innerHTML = '';
-          if (chartType === 'Candlestick' && 'open' in data) {
+          if (
+            (chartType === 'Candlestick' || chartType === 'Bar') &&
+            'open' in data
+          ) {
             const { open, high, low, close } = data as BarData;
             const priceItems = [
-              { label: 'Open', value: open.toFixed(2) },
-              { label: 'High', value: high.toFixed(2) },
-              { label: 'Low', value: low.toFixed(2) },
-              { label: 'Close', value: close.toFixed(2) },
+              { label: 'O', value: open.toFixed(2) },
+              { label: 'H', value: high.toFixed(2) },
+              { label: 'L', value: low.toFixed(2) },
+              { label: 'C', value: close.toFixed(2) },
             ];
 
             priceItems.forEach(({ label, value }) => {
@@ -178,7 +218,7 @@ const MainChart: React.FC<MainChartProps> = ({
               item.appendChild(valueSpan);
               priceSection.appendChild(item);
             });
-          } else if (chartType === 'Line' && 'value' in data) {
+          } else if ('value' in data) {
             const { value } = data as LineData;
             const item = document.createElement('div');
             item.className = 'flex items-center';
@@ -191,7 +231,7 @@ const MainChart: React.FC<MainChartProps> = ({
             const valueSpan = document.createElement('span');
             valueSpan.className =
               'font-semibold text-slate-900 dark:text-slate-100';
-            valueSpan.textContent = value.toFixed(2);
+            valueSpan.textContent = (value as number).toFixed(2);
 
             item.appendChild(labelSpan);
             item.appendChild(valueSpan);
@@ -210,7 +250,7 @@ const MainChart: React.FC<MainChartProps> = ({
           const data = param.seriesData.get(seriesRef.current);
           // Check if data conforms to BarData or LineData
           if (data && ('open' in data || 'value' in data)) {
-            updateLegend(data as BarData | LineData);
+            updateLegend(data as any);
           } else {
             updateLegend(null);
           }
@@ -245,28 +285,64 @@ const MainChart: React.FC<MainChartProps> = ({
           mainChartRef.current.removeSeries(seriesRef.current);
         }
 
-        const mainSeries =
-          chartType === 'Candlestick'
-            ? mainChartRef.current.addCandlestickSeries({
-                upColor: mode ? '#10B981' : '#059669',
-                downColor: mode ? '#EF4444' : '#DC2626',
-                borderVisible: false,
-                wickUpColor: mode ? '#10B981' : '#059669',
-                wickDownColor: mode ? '#EF4444' : '#DC2626',
-              })
-            : mainChartRef.current.addLineSeries({
-                color: mode ? '#3B82F6' : '#2563EB',
-                lineWidth: 2,
-                crosshairMarkerVisible: true,
-                crosshairMarkerRadius: 4,
-                lastValueVisible: true,
-              });
+        let mainSeries: ISeriesApi<SeriesType>;
 
-        mainSeries.setData(seriesData);
+        switch (chartType) {
+          case 'Candlestick':
+            mainSeries = mainChartRef.current.addCandlestickSeries({
+              upColor: mode ? '#10B981' : '#059669',
+              downColor: mode ? '#EF4444' : '#DC2626',
+              borderVisible: false,
+              wickUpColor: mode ? '#10B981' : '#059669',
+              wickDownColor: mode ? '#EF4444' : '#DC2626',
+            });
+            break;
+          case 'Bar':
+            mainSeries = mainChartRef.current.addBarSeries({
+              upColor: mode ? '#10B981' : '#059669',
+              downColor: mode ? '#EF4444' : '#DC2626',
+            });
+            break;
+          case 'Area':
+            mainSeries = mainChartRef.current.addAreaSeries({
+              lineColor: mode ? '#3B82F6' : '#2563EB',
+              topColor: mode
+                ? 'rgba(59, 130, 246, 0.4)'
+                : 'rgba(37, 99, 235, 0.4)',
+              bottomColor: mode
+                ? 'rgba(59, 130, 246, 0)'
+                : 'rgba(37, 99, 235, 0)',
+              lineWidth: 2,
+            });
+            break;
+          case 'Baseline':
+            mainSeries = mainChartRef.current.addBaselineSeries({
+              baseValue: { type: 'price', price: seriesData[0]?.value },
+              topLineColor: mode ? '#10B981' : '#059669',
+              bottomLineColor: mode ? '#EF4444' : '#DC2626',
+              topFillColor1: 'rgba(38, 166, 154, 0.28)',
+              topFillColor2: 'rgba(38, 166, 154, 0.05)',
+              bottomFillColor1: 'rgba(239, 83, 80, 0.05)',
+              bottomFillColor2: 'rgba(239, 83, 80, 0.28)',
+            });
+            break;
+          case 'Line':
+          default:
+            mainSeries = mainChartRef.current.addLineSeries({
+              color: mode ? '#3B82F6' : '#2563EB',
+              lineWidth: 2,
+              crosshairMarkerVisible: true,
+              crosshairMarkerRadius: 4,
+              lastValueVisible: true,
+            });
+            break;
+        }
+
+        mainSeries.setData(seriesData as any);
         seriesRef.current = mainSeries;
         prevChartTypeRef.current = chartType;
       } else {
-        seriesRef.current?.setData(seriesData);
+        seriesRef.current?.setData(seriesData as any);
       }
 
       mainChartRef.current.applyOptions({

@@ -8,6 +8,7 @@ import {
   selectShowControls,
   setIsFullscreen,
   setShowControls,
+  selectSeriesType,
 } from './graphSlice';
 import React, { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -53,6 +54,7 @@ const GraphsPage: React.FC = () => {
   const timeframe = useAppSelector(selectTimeframe);
   const showVolume = useAppSelector(selectShowVolume);
   const autoRefresh = useAppSelector(selectAutoRefresh);
+  const seriesType = useAppSelector(selectSeriesType);
 
   const showControls = useAppSelector(selectShowControls);
 
@@ -76,15 +78,23 @@ const GraphsPage: React.FC = () => {
 
   const seriesData = useMemo(() => {
     if (!data) return [];
-    return data.data.map(({ date, open, high, low, close }: Candle) => ({
-      time: formatDate(date) as Time,
-      open,
-      high,
-      low,
-      close,
-      value: close,
-    }));
-  }, [data]);
+    if (seriesType === 'ohlc') {
+      return data.data.map(({ date, open, high, low, close }: Candle) => ({
+        time: formatDate(date) as Time,
+        open,
+        high,
+        low,
+        close,
+      }));
+    }
+    if (seriesType === 'price') {
+      return data.data.map(({ date, close }: Candle) => ({
+        time: formatDate(date) as Time,
+        value: close,
+      }));
+    }
+    return [];
+  }, [data, seriesType]);
 
   const volumeData = useMemo(() => {
     if (!data) return [];

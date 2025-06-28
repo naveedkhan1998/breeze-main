@@ -209,10 +209,19 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                 <span>Export as CSV</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <HiTrendingUp className="w-4 h-4 mr-2" />
-                <span>Add Indicator</span>
-              </DropdownMenuItem>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <HiTrendingUp className="w-4 h-4 mr-2" />
+                      <span>Add Indicator</span>
+                    </DropdownMenuItem>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>Coming soon!</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <DropdownMenuItem>
                 <HiColorSwatch className="w-4 h-4 mr-2" />
                 <span>Customize Theme</span>

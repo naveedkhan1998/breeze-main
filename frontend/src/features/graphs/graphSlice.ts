@@ -5,6 +5,7 @@ import { RootState } from 'src/app/store';
 interface GraphState {
   timeframe: number;
   chartType: SeriesType;
+  seriesType: 'ohlc' | 'price' | 'volume';
   showVolume: boolean;
   autoRefresh: boolean;
   showControls: boolean;
@@ -14,6 +15,7 @@ interface GraphState {
 const initialState: GraphState = {
   timeframe: 15,
   chartType: 'Candlestick',
+  seriesType: 'ohlc',
   showVolume: true,
   autoRefresh: false,
   showControls: true,
@@ -29,6 +31,11 @@ export const graphSlice = createSlice({
     },
     setChartType: (state, action: PayloadAction<SeriesType>) => {
       state.chartType = action.payload;
+      if (['Candlestick', 'Bar'].includes(action.payload)) {
+        state.seriesType = 'ohlc';
+      } else if (['Area', 'Baseline', 'Line'].includes(action.payload)) {
+        state.seriesType = 'price';
+      }
     },
     setShowVolume: (state, action: PayloadAction<boolean>) => {
       state.showVolume = action.payload;
@@ -56,6 +63,7 @@ export const {
 
 export const selectTimeframe = (state: RootState) => state.graph.timeframe;
 export const selectChartType = (state: RootState) => state.graph.chartType;
+export const selectSeriesType = (state: RootState) => state.graph.seriesType;
 export const selectShowVolume = (state: RootState) => state.graph.showVolume;
 export const selectAutoRefresh = (state: RootState) => state.graph.autoRefresh;
 export const selectShowControls = (state: RootState) =>

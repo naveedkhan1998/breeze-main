@@ -32,6 +32,8 @@ import {
   HiViewGrid,
   HiChartSquareBar,
   HiAdjustments,
+  HiBeaker,
+  HiPresentationChartLine,
 } from 'react-icons/hi';
 import { SeriesType } from 'lightweight-charts';
 
@@ -79,6 +81,24 @@ export default function ChartControls() {
       label: 'Line Chart',
       icon: <HiTrendingUp className="w-4 h-4" />,
       description: 'Price trend line',
+    },
+    {
+      value: 'Area',
+      label: 'Area',
+      icon: <HiPresentationChartLine className="w-4 h-4" />,
+      description: 'Filled line chart',
+    },
+    {
+      value: 'Bar',
+      label: 'Bar',
+      icon: <HiChartSquareBar className="w-4 h-4" />,
+      description: 'OHLC as bars',
+    },
+    {
+      value: 'Baseline',
+      label: 'Baseline',
+      icon: <HiBeaker className="w-4 h-4" />,
+      description: 'Price vs baseline',
     },
   ];
 
