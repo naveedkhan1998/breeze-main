@@ -19,10 +19,9 @@ import {
 
 import { Time } from 'lightweight-charts';
 
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-import { HiX, HiEyeOff, HiChartBar } from 'react-icons/hi';
+import { HiX, HiChartBar } from 'react-icons/hi';
 
 import type { Candle, Instrument } from '@/types/common-types';
 import { useTheme } from '@/components/ThemeProvider';
@@ -36,6 +35,7 @@ import LoadingScreen from './components/LoadingScreen';
 import ErrorScreen from './components/ErrorScreen';
 import NotFoundScreen from './components/NotFoundScreen';
 import GraphHeader from './components/GraphHeader';
+import { X } from 'lucide-react';
 
 interface LocationState {
   obj: Instrument;
@@ -241,35 +241,30 @@ const GraphsPage: React.FC = () => {
                 className="min-w-0"
               >
                 <div className="h-full p-4 bg-gradient-to-b from-sidebar-background/30 to-sidebar-background/10">
-                  <Card className="h-full border-0 shadow-2xl glass-card">
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-center justify-between p-5 border-b border-sidebar-border/30">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 rounded-full bg-gradient-to-r from-chart-1 to-chart-2"></div>
-                          <h3 className="font-bold text-sidebar-foreground">
-                            Chart Controls
-                          </h3>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => dispatch(setShowControls(false))}
-                          className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
-                        >
-                          <HiX className="w-4 h-4" />
-                        </Button>
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between p-5 border-b border-sidebar-border/30">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-chart-1 to-chart-2"></div>
+                        <h3 className="font-bold text-sidebar-foreground">
+                          Settings
+                        </h3>
                       </div>
-                      <div className="flex-1 p-5 overflow-y-auto scroll-fade scrollbar-hidden">
-                        <ChartControls />
-                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => dispatch(setShowControls(false))}
+                        className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                      >
+                        <HiX className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </Card>
+                    <div className="flex-1 p-5 overflow-y-auto scroll-fade scrollbar-hidden">
+                      <ChartControls />
+                    </div>
+                  </div>
                 </div>
               </ResizablePanel>
-              <ResizableHandle
-                withHandle
-                className="w-1.5 transition-all duration-300 hover:w-2 bg-gradient-to-b from-sidebar-border/50 via-sidebar-border to-sidebar-border/50 hover:bg-gradient-to-b hover:from-chart-1/50 hover:via-chart-2/50 hover:to-chart-3/50"
-              />
+              <ResizableHandle withHandle />
             </>
           )}
 
@@ -292,43 +287,35 @@ const GraphsPage: React.FC = () => {
                 {/* Enhanced Volume Chart */}
                 {showVolume && (
                   <>
-                    <ResizableHandle
-                      withHandle
-                      className="h-1.5 my-3 transition-all duration-300 hover:h-2 rounded-full bg-gradient-to-r from-border/50 via-border to-border/50 hover:bg-gradient-to-r hover:from-chart-1/50 hover:via-chart-2/50 hover:to-chart-3/50"
-                    />
+                    <ResizableHandle withHandle />
                     <ResizablePanel defaultSize={25} minSize={15}>
-                      <Card className="h-full border-0 shadow-2xl glass-card">
-                        <div className="flex items-center justify-between p-4 border-b border-border/30 glass-panel">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
-                              <HiChartBar className="w-4 h-4 text-chart-1" />
-                            </div>
-                            <div>
-                              <span className="font-bold text-card-foreground">
-                                Volume Analysis
-                              </span>
-                              <div className="text-xs text-muted-foreground">
-                                Trading volume patterns
-                              </div>
-                            </div>
+                      <div className="flex items-center justify-between p-4 border-b border-border/30 ">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                            <HiChartBar className="w-4 h-4 text-chart-1" />
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => dispatch(setShowVolume(false))}
-                            className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
-                          >
-                            <HiEyeOff className="w-4 h-4" />
-                          </Button>
+                          <div>
+                            <span className="font-bold text-card-foreground">
+                              Volume
+                            </span>
+                          </div>
                         </div>
-                        <VolumeChart
-                          volumeData={volumeData}
-                          mode={isDarkMode}
-                          setTimeScale={(timeScale: any) =>
-                            (volumeChartRef.current = timeScale)
-                          }
-                        />
-                      </Card>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => dispatch(setShowVolume(false))}
+                          className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <VolumeChart
+                        volumeData={volumeData}
+                        mode={isDarkMode}
+                        setTimeScale={(timeScale: any) =>
+                          (volumeChartRef.current = timeScale)
+                        }
+                      />
                     </ResizablePanel>
                   </>
                 )}

@@ -11,7 +11,6 @@ import {
   MouseEventParams,
 } from 'lightweight-charts';
 
-import { Card } from '@/components/ui/card';
 import type { Instrument } from '@/types/common-types';
 import { useAppSelector } from 'src/app/hooks';
 import { selectChartType, selectTimeframe } from '../graphSlice';
@@ -302,11 +301,9 @@ const MainChart: React.FC<MainChartProps> = ({
   }, [renderMainChart]);
 
   return (
-    <Card className="w-full h-full border-0 chart-container glass-card">
-      <div ref={mainChartContainerRef} className="relative w-full h-full">
-        {/* Chart will be rendered here */}
-      </div>
-    </Card>
+    <div ref={mainChartContainerRef} className="relative w-full h-full">
+      {/* Chart will be rendered here */}
+    </div>
   );
 };
 

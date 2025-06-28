@@ -70,7 +70,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
   const showControls = useAppSelector(selectShowControls);
   const isFullscreen = useAppSelector(selectIsFullscreen);
   return (
-    <header className="sticky top-0 z-50 border-b shadow-lg border-border/50 glass-panel">
+    <header className="sticky top-0 z-50 border-b shadow-lg border-border/50 ">
       <Helmet>
         <title>{obj?.company_name} - ICICI Breeze</title>
       </Helmet>
@@ -89,7 +89,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                   <HiArrowLeft className="w-5 h-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="border-0 glass-panel">
+              <TooltipContent side="bottom" className="border-0 ">
                 Go back to instruments
               </TooltipContent>
             </Tooltip>
@@ -101,12 +101,8 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                 {obj?.company_name || 'Chart'}
               </h1>
               <div className="flex items-center space-x-3">
-                <Badge className="status-badge px-3 py-1.5 text-xs font-semibold border-0 bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm">
-                  {obj?.exchange_code || 'N/A'}
-                </Badge>
-                <Badge className="status-badge px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-muted to-muted/80 border-border/50 shadow-sm">
-                  {timeframe}m timeframe
-                </Badge>
+                <Badge variant="outline">{obj?.exchange_code || 'N/A'}</Badge>
+                <Badge variant="outline">{timeframe}m timeframe</Badge>
               </div>
             </div>
             <div className="flex items-center mt-2 space-x-6">
@@ -116,7 +112,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                     <div className="w-3 h-3 rounded-full bg-chart-2 live-pulse"></div>
                     <div className="absolute inset-0 w-3 h-3 rounded-full bg-chart-2 animate-ping"></div>
                   </div>
-                  <Badge className="status-badge px-3 py-1.5 text-xs font-semibold border-0 bg-gradient-to-r from-chart-2/20 to-chart-2/10 text-chart-2 shadow-sm">
+                  <Badge variant="outline">
                     <HiPlay className="w-3 h-3 mr-1" />
                     Live Updates
                   </Badge>
@@ -135,7 +131,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
         {/* Right Section - Enhanced Controls */}
         <div className="flex items-center space-x-4">
           {/* Quick Actions Panel */}
-          <div className="flex items-center p-1.5 space-x-1 rounded-xl glass-panel shadow-sm">
+          <div className="flex items-center p-1.5 space-x-1 rounded-xl  shadow-sm">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -162,7 +158,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                     )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="border-0 glass-panel">
+                <TooltipContent className="border-0 ">
                   {autoRefresh ? 'Pause' : 'Start'} live market updates
                 </TooltipContent>
               </Tooltip>
@@ -183,7 +179,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                     <span className="text-xs font-medium">Volume</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="border-0 glass-panel">
+                <TooltipContent className="border-0 ">
                   {showVolume ? 'Hide' : 'Show'} volume analysis
                 </TooltipContent>
               </Tooltip>
@@ -204,7 +200,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                     <span className="text-xs font-medium">Settings</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="border-0 glass-panel">
+                <TooltipContent className="border-0 ">
                   Toggle chart settings panel
                 </TooltipContent>
               </Tooltip>
@@ -230,7 +226,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                     <HiRefresh className="w-5 h-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="border-0 glass-panel">
+                <TooltipContent className="border-0 ">
                   Refresh market data
                 </TooltipContent>
               </Tooltip>
@@ -246,7 +242,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                     <HiDownload className="w-5 h-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="border-0 glass-panel">
+                <TooltipContent className="border-0 ">
                   Export data as CSV
                 </TooltipContent>
               </Tooltip>
@@ -266,7 +262,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
                     )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="border-0 glass-panel">
+                <TooltipContent className="border-0 ">
                   {isFullscreen
                     ? 'Exit fullscreen mode'
                     : 'Enter fullscreen mode'}
@@ -288,7 +284,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-56 border-0 shadow-2xl glass-panel"
+              className="w-56 border-0 shadow-2xl "
             >
               <DropdownMenuItem className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-chart-1/10 hover:to-chart-1/5">
                 <HiViewGrid className="w-5 h-5 mr-3 text-chart-1" />
