@@ -4,17 +4,14 @@ import {
   setShowVolume,
   setAutoRefresh,
   selectTimeframe,
-  selectChartType,
   selectShowVolume,
   selectAutoRefresh,
+  selectIsFullscreen,
+  selectShowControls,
+  setIsFullscreen,
+  setShowControls,
 } from './graphSlice';
-import React, {
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   ResizableHandle,
@@ -67,6 +64,10 @@ import ChartControls from './components/ChartControls';
 import MainChart from './components/MainChart';
 import VolumeChart from './components/VolumeChart';
 import { useAppDispatch, useAppSelector } from 'src/app/hooks';
+import LoadingScreen from './components/LoadingScreen';
+import ErrorScreen from './components/ErrorScreen';
+import NotFoundScreen from './components/NotFoundScreen';
+import { Helmet } from 'react-helmet';
 
 interface LocationState {
   obj: Instrument;
@@ -82,11 +83,10 @@ const GraphsPage: React.FC = () => {
   // State variables
   const dispatch = useAppDispatch();
   const timeframe = useAppSelector(selectTimeframe);
-  const chartType = useAppSelector(selectChartType);
   const showVolume = useAppSelector(selectShowVolume);
   const autoRefresh = useAppSelector(selectAutoRefresh);
-  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [showControls, setShowControls] = useState<boolean>(true);
+  const isFullscreen = useAppSelector(selectIsFullscreen);
+  const showControls = useAppSelector(selectShowControls);
 
   const { data, refetch, isLoading, isError } = useGetCandlesQuery({
     id: obj?.id,
@@ -216,20 +216,20 @@ const GraphsPage: React.FC = () => {
     if (!document.fullscreenElement) {
       chartSectionRef.current
         ?.requestFullscreen()
-        .then(() => setIsFullscreen(true))
+        .then(() => dispatch(setIsFullscreen(true)))
         .catch(err =>
           console.error(
             `Error attempting to enable fullscreen mode: ${err.message}`
           )
         );
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false));
+      document.exitFullscreen().then(() => dispatch(setIsFullscreen(false)));
     }
   };
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      dispatch(setIsFullscreen(!!document.fullscreenElement));
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => {
@@ -238,111 +238,29 @@ const GraphsPage: React.FC = () => {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <Card className="max-w-md p-10 mx-auto border-0 shadow-2xl glass-card">
-          <div className="flex flex-col items-center space-y-6">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 rounded-full border-chart-1/20 border-t-chart-1 animate-spin"></div>
-              <div
-                className="absolute inset-0 w-16 h-16 border-4 rounded-full border-chart-2/20 border-b-chart-2 animate-spin"
-                style={{
-                  animationDirection: 'reverse',
-                  animationDuration: '1.5s',
-                }}
-              ></div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-transparent bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                Loading chart data...
-              </div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                Fetching the latest market data for analysis
-              </div>
-              <div className="flex items-center justify-center mt-4 space-x-2">
-                <div className="w-2 h-2 rounded-full bg-chart-1 animate-pulse"></div>
-                <div
-                  className="w-2 h-2 rounded-full bg-chart-2 animate-pulse"
-                  style={{ animationDelay: '0.2s' }}
-                ></div>
-                <div
-                  className="w-2 h-2 rounded-full bg-chart-3 animate-pulse"
-                  style={{ animationDelay: '0.4s' }}
-                ></div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-background via-background to-destructive/5">
-        <Card className="max-w-md p-10 mx-auto shadow-2xl glass-card border-destructive/20">
-          <div className="flex flex-col items-center space-y-6">
-            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-destructive/10 to-destructive/20">
-              <HiX className="w-10 h-10 text-destructive" />
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-destructive">
-                Connection Error
-              </div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                Unable to fetch chart data. Please check your connection.
-              </div>
-              <Button
-                onClick={() => window.location.reload()}
-                className="mt-4 action-button bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive/70"
-              >
-                <HiRefresh className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
+    return <ErrorScreen />;
   }
 
   if (!obj) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <Card className="max-w-md p-10 mx-auto border-0 shadow-2xl glass-card">
-          <div className="text-center">
-            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-chart-1/10 to-chart-1/20">
-              <HiChartBar className="w-10 h-10 text-chart-1" />
-            </div>
-            <div className="text-xl font-bold text-transparent bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-              No Data Available
-            </div>
-            <div className="mt-2 text-sm text-muted-foreground">
-              Please select an instrument to view detailed charts
-            </div>
-            <Button
-              onClick={() => navigate(-1)}
-              variant="outline"
-              className="mt-6 action-button"
-            >
-              <HiArrowLeft className="w-4 h-4 mr-2" />
-              Go Back
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
+    return <NotFoundScreen />;
   }
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-background via-background to-muted/10">
       {/* Enhanced Header */}
       <header className="sticky top-0 z-50 border-b shadow-lg border-border/50 glass-panel">
+        <Helmet>
+          <title>{obj?.company_name} - ICICI Breeze</title>
+        </Helmet>
         <div className="flex items-center justify-between px-6 py-5">
           {/* Left Section - Navigation & Title */}
           <div className="flex items-center space-x-6">
             <TooltipProvider>
-              <Tooltip>
+              <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
@@ -457,7 +375,7 @@ const GraphsPage: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowControls(!showControls)}
+                      onClick={() => dispatch(setShowControls(!showControls))}
                       className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         showControls
                           ? 'bg-gradient-to-r from-chart-5/20 to-chart-5/10 text-chart-5 shadow-sm hover:shadow-md'
@@ -613,7 +531,7 @@ const GraphsPage: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setShowControls(false)}
+                          onClick={() => dispatch(setShowControls(false))}
                           className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
                         >
                           <HiX className="w-4 h-4" />
@@ -641,10 +559,8 @@ const GraphsPage: React.FC = () => {
                 <ResizablePanel defaultSize={showVolume ? 75 : 100}>
                   <MainChart
                     seriesData={seriesData}
-                    chartType={chartType}
                     mode={isDarkMode}
                     obj={obj}
-                    timeframe={timeframe}
                     setTimeScale={(timeScale: any) =>
                       (mainChartRef.current = timeScale)
                     }
@@ -677,7 +593,7 @@ const GraphsPage: React.FC = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setShowVolume(false)}
+                            onClick={() => dispatch(setShowVolume(false))}
                             className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
                           >
                             <HiEyeOff className="w-4 h-4" />

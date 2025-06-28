@@ -13,24 +13,24 @@ import {
 
 import { Card } from '@/components/ui/card';
 import type { Instrument } from '@/types/common-types';
+import { useAppSelector } from 'src/app/hooks';
+import { selectChartType, selectTimeframe } from '../graphSlice';
 
 interface MainChartProps {
   seriesData: BarData[] | LineData[];
-  chartType: SeriesType;
   mode: boolean;
   obj: Instrument;
-  timeframe: number;
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
 }
 
 const MainChart: React.FC<MainChartProps> = ({
   seriesData,
-  chartType,
   mode,
   obj,
-  timeframe,
   setTimeScale,
 }) => {
+  const chartType = useAppSelector(selectChartType);
+  const timeframe = useAppSelector(selectTimeframe);
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);

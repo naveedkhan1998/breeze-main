@@ -7,6 +7,8 @@ interface GraphState {
   chartType: SeriesType;
   showVolume: boolean;
   autoRefresh: boolean;
+  showControls: boolean;
+  isFullscreen: boolean;
 }
 
 const initialState: GraphState = {
@@ -14,6 +16,8 @@ const initialState: GraphState = {
   chartType: 'Candlestick',
   showVolume: true,
   autoRefresh: false,
+  showControls: true,
+  isFullscreen: false,
 };
 
 export const graphSlice = createSlice({
@@ -32,6 +36,12 @@ export const graphSlice = createSlice({
     setAutoRefresh: (state, action: PayloadAction<boolean>) => {
       state.autoRefresh = action.payload;
     },
+    setShowControls: (state, action: PayloadAction<boolean>) => {
+      state.showControls = action.payload;
+    },
+    setIsFullscreen: (state, action: PayloadAction<boolean>) => {
+      state.isFullscreen = action.payload;
+    },
   },
 });
 
@@ -40,11 +50,17 @@ export const {
   setChartType,
   setShowVolume,
   setAutoRefresh,
+  setShowControls,
+  setIsFullscreen,
 } = graphSlice.actions;
 
 export const selectTimeframe = (state: RootState) => state.graph.timeframe;
 export const selectChartType = (state: RootState) => state.graph.chartType;
 export const selectShowVolume = (state: RootState) => state.graph.showVolume;
 export const selectAutoRefresh = (state: RootState) => state.graph.autoRefresh;
+export const selectShowControls = (state: RootState) =>
+  state.graph.showControls;
+export const selectIsFullscreen = (state: RootState) =>
+  state.graph.isFullscreen;
 
 export default graphSlice.reducer;
