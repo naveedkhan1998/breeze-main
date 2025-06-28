@@ -16,7 +16,7 @@ import type { Instrument } from '@/types/common-types';
 
 interface MainChartProps {
   seriesData: BarData[] | LineData[];
-  chartType: 'Candlestick' | 'Line';
+  chartType: SeriesType;
   mode: boolean;
   obj: Instrument;
   timeframe: number;
@@ -33,7 +33,7 @@ const MainChart: React.FC<MainChartProps> = ({
 }) => {
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<'Candlestick' | 'Line'> | null>(null);
+  const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);
   const prevChartTypeRef = useRef<SeriesType>(chartType);
 
   const renderMainChart = useCallback(() => {

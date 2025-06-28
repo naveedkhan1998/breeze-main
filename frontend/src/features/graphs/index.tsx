@@ -1,10 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import {
+  setShowVolume,
+  setAutoRefresh,
+  selectTimeframe,
+  selectChartType,
+  selectShowVolume,
+  selectAutoRefresh,
+} from './graphSlice';
 import React, {
-  useState,
   useEffect,
   useMemo,
   useCallback,
   useRef,
+  useState,
 } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
@@ -13,7 +22,7 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 
-import { SeriesOptionsMap, Time } from 'lightweight-charts';
+import { Time } from 'lightweight-charts';
 
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +66,7 @@ import { formatDate } from '@/lib/functions';
 import ChartControls from './components/ChartControls';
 import MainChart from './components/MainChart';
 import VolumeChart from './components/VolumeChart';
+import { useAppDispatch, useAppSelector } from 'src/app/hooks';
 
 interface LocationState {
   obj: Instrument;
@@ -70,12 +80,11 @@ const GraphsPage: React.FC = () => {
   const isDarkMode = theme === 'dark';
 
   // State variables
-  const [timeframe, setTimeFrame] = useState<number>(15);
-  const [chartType, setChartType] = useState<'Candlestick' | 'Line'>(
-    'Candlestick'
-  );
-  const [showVolume, setShowVolume] = useState<boolean>(true);
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  const timeframe = useAppSelector(selectTimeframe);
+  const chartType = useAppSelector(selectChartType);
+  const showVolume = useAppSelector(selectShowVolume);
+  const autoRefresh = useAppSelector(selectAutoRefresh);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [showControls, setShowControls] = useState<boolean>(true);
 
@@ -186,13 +195,6 @@ const GraphsPage: React.FC = () => {
       if (cleanup) cleanup();
     };
   }, [syncCharts, seriesData, showVolume]);
-
-  const handleTfChange = (tf: number) => {
-    setTimeFrame(tf);
-    if (timeframe === tf) {
-      refetch();
-    }
-  };
 
   const handleDownload = () => {
     const headers = 'Date,Time,Open,High,Low,Close,Volume';
@@ -404,7 +406,7 @@ const GraphsPage: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setAutoRefresh(!autoRefresh)}
+                      onClick={() => dispatch(setAutoRefresh(!autoRefresh))}
                       className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         autoRefresh
                           ? 'bg-gradient-to-r from-chart-2/20 to-chart-2/10 text-chart-2 shadow-sm hover:shadow-md'
@@ -434,7 +436,7 @@ const GraphsPage: React.FC = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowVolume(!showVolume)}
+                      onClick={() => dispatch(setShowVolume(!showVolume))}
                       className={`action-button h-9 px-4 rounded-lg transition-all duration-300 ${
                         showVolume
                           ? 'bg-gradient-to-r from-chart-1/20 to-chart-1/10 text-chart-1 shadow-sm hover:shadow-md'
@@ -618,18 +620,7 @@ const GraphsPage: React.FC = () => {
                         </Button>
                       </div>
                       <div className="flex-1 p-5 overflow-y-auto scroll-fade scrollbar-hidden">
-                        <ChartControls
-                          timeframe={timeframe}
-                          chartType={chartType}
-                          showVolume={showVolume}
-                          autoRefresh={autoRefresh}
-                          onTfChange={handleTfChange}
-                          onChartTypeChange={(type: keyof SeriesOptionsMap) =>
-                            setChartType(type as 'Candlestick' | 'Line')
-                          }
-                          onShowVolumeChange={setShowVolume}
-                          onAutoRefreshChange={setAutoRefresh}
-                        />
+                        <ChartControls />
                       </div>
                     </div>
                   </Card>

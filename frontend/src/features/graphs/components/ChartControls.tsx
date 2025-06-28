@@ -1,4 +1,15 @@
 import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from 'src/app/hooks';
+import {
+  setTimeframe,
+  setChartType,
+  setShowVolume,
+  setAutoRefresh,
+  selectTimeframe,
+  selectChartType,
+  selectShowVolume,
+  selectAutoRefresh,
+} from '../graphSlice';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,34 +39,19 @@ import {
 } from 'react-icons/hi';
 import { SeriesType } from 'lightweight-charts';
 
-interface ChartControlsProps {
-  timeframe: number;
-  chartType: SeriesType;
-  showVolume: boolean;
-  autoRefresh: boolean;
-  onTfChange: (tf: number) => void;
-  onChartTypeChange: (type: SeriesType) => void;
-  onShowVolumeChange: (show: boolean) => void;
-  onAutoRefreshChange: (auto: boolean) => void;
-}
-
-export default function ChartControls({
-  timeframe,
-  chartType,
-  showVolume,
-  autoRefresh,
-  onTfChange,
-  onChartTypeChange,
-  onShowVolumeChange,
-  onAutoRefreshChange,
-}: ChartControlsProps) {
+export default function ChartControls() {
+  const dispatch = useAppDispatch();
+  const timeframe = useAppSelector(selectTimeframe);
+  const chartType = useAppSelector(selectChartType);
+  const showVolume = useAppSelector(selectShowVolume);
+  const autoRefresh = useAppSelector(selectAutoRefresh);
   const [isCustomTfDialogOpen, setIsCustomTfDialogOpen] = useState(false);
   const [customTimeframeInput, setCustomTimeframeInput] = useState('');
 
   const handleCustomTimeframeSubmit = () => {
     const parsedTimeframe = parseInt(customTimeframeInput, 10);
     if (!isNaN(parsedTimeframe) && parsedTimeframe > 0) {
-      onTfChange(parsedTimeframe);
+      dispatch(setTimeframe(parsedTimeframe));
       setIsCustomTfDialogOpen(false);
       setCustomTimeframeInput('');
     }
@@ -148,7 +144,7 @@ export default function ChartControls({
                       ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
                   }`}
-                  onClick={() => onTfChange(tf.value)}
+                  onClick={() => dispatch(setTimeframe(tf.value))}
                 >
                   {tf.label}
                 </Button>
@@ -175,7 +171,7 @@ export default function ChartControls({
                       ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
                   }`}
-                  onClick={() => onTfChange(tf.value)}
+                  onClick={() => dispatch(setTimeframe(tf.value))}
                 >
                   {tf.label}
                 </Button>
@@ -202,7 +198,7 @@ export default function ChartControls({
                       ? 'shadow-lg scale-105 bg-primary text-primary-foreground hover:bg-primary/90'
                       : 'hover:scale-105 hover:shadow-md border-border hover:bg-accent hover:text-accent-foreground'
                   }`}
-                  onClick={() => onTfChange(tf.value)}
+                  onClick={() => dispatch(setTimeframe(tf.value))}
                 >
                   {tf.label}
                 </Button>
@@ -248,7 +244,7 @@ export default function ChartControls({
                   ? 'border-primary bg-primary/5 shadow-lg transform scale-[1.02]'
                   : 'border-border hover:border-primary/50 hover:bg-accent/50'
               }`}
-              onClick={() => onChartTypeChange(type.value)}
+              onClick={() => dispatch(setChartType(type.value))}
             >
               <div className="flex items-center gap-3">
                 <div
@@ -333,7 +329,7 @@ export default function ChartControls({
             <Switch
               id="show-volume"
               checked={showVolume}
-              onCheckedChange={onShowVolumeChange}
+              onCheckedChange={(show: boolean) => dispatch(setShowVolume(show))}
             />
           </div>
         </CardContent>
@@ -414,7 +410,9 @@ export default function ChartControls({
             <Switch
               id="auto-refresh"
               checked={autoRefresh}
-              onCheckedChange={onAutoRefreshChange}
+              onCheckedChange={(auto: boolean) =>
+                dispatch(setAutoRefresh(auto))
+              }
             />
           </div>
 

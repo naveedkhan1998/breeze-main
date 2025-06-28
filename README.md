@@ -1,303 +1,187 @@
 # Breeze API Wrapper
 
-**Breeze API Wrapper** is a comprehensive Django-based application that serves as a wrapper around the ICICI Breeze API. It allows users to seamlessly integrate their Breeze API credentials to perform various financial data operations, including session generation, instrument data loading, OHLC (Open, High, Low, Close) graph visualization with analysis, and real-time data subscription with tick updates.
+**Breeze API Wrapper** is a Django‑based boilerplate that sits on top of the free **ICICI Breeze API**. Plug in your Breeze credentials to get secure session generation, instrument master downloads, OHLC visualisations and real‑time tick streaming—all wrapped in a Docker‑first developer experience.
 
-## Live Demo
+Use it as a starting point for **back‑testing engines, live‑trading bots, research notebooks or data pipelines**.
 
-Experience the Breeze API Wrapper in action! Visit our live demo at: [https://breeze.mnaveedk.com/](https://breeze.mnaveedk.com/)
+---
 
 ## Table of Contents
 
 - [Breeze API Wrapper](#breeze-api-wrapper)
-  - [Live Demo](#live-demo)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
-  - [Technology Stack](#technology-stack)
+  - [Tech Stack](#techstack)
+  - [Architecture](#architecture)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-    - [1. Clone the Repository](#1-clone-the-repository)
-    - [2. Set Up Environment Variables](#2-set-up-environment-variables)
-      - [`.envs/env.dev`](#envsenvdev)
-    - [3. Build and Run Docker Containers](#3-build-and-run-docker-containers)
   - [Running the Application](#running-the-application)
-  - [Development](#development)
-    - [Setting Up a Development Environment](#setting-up-a-development-environment)
-    - [Making Changes](#making-changes)
-    - [Running Tests](#running-tests)
-    - [Monitoring and Accessing Celery Logs](#monitoring-and-accessing-celery-logs)
-      - [Using `tail` to Follow Logs](#using-tail-to-follow-logs)
-      - [Using `multitail` for Split-Screen Log Monitoring](#using-multitail-for-split-screen-log-monitoring)
-      - [Combining Logs into a Single File (Optional)](#combining-logs-into-a-single-file-optional)
-      - [Tips](#tips)
+  - [Development Workflow](#developmentworkflow)
+  - [Testing \& Monitoring](#testingmonitoring)
+    - [Follow Celery logs](#follow-celery-logs)
+    - [Multitail (optional)](#multitail-optional)
+    - [Flower dashboard](#flower-dashboard)
   - [Contributing](#contributing)
   - [License](#license)
-  - [Acknowledgments](#acknowledgments)
+  - [Acknowledgements](#acknowledgements)
   - [Contact](#contact)
+
+---
 
 ## Features
 
-- **Session Management:** Generate and manage sessions using your Breeze API key and secret.
-- **Instrument Data Loading:** Fetch and display detailed information about various financial instruments.
-- **OHLC Graphs with Analysis:** Visualize Open, High, Low, Close data through interactive graphs, complete with analytical tools.
-- **Real-Time Data Subscription:** Subscribe to instruments to receive live tick data updates.
-- **User-Friendly Frontend:** Intuitive interface for seamless interaction with Breeze API functionalities.
-- **Robust Backend:** Powered by Django, Django REST Framework, Celery, and Redis for efficient task management and data handling.
-- **Secure Data Storage:** PostgreSQL database ensures secure and reliable storage of your session and instrument data.
+| Category               | What you get                                                 |
+| ---------------------- | ------------------------------------------------------------ |
+| **Session management** | Create / refresh sessions with your API key & secret         |
+| **Instrument master**  | Download & cache symbol metadata                             |
+| **Charts**             | Interactive OHLC candles with TA overlays                    |
+| **Live ticks**         | Subscribe to any instrument and stream ticks over WebSockets |
+| **Task orchestration** | Celery + Redis for async jobs & scheduling                   |
+| **Dockerised stack**   | `docker-compose up --build` and you’re done                  |
 
-## Technology Stack
+---
 
-- **Backend:** Django, Django REST Framework
-- **Frontend:** React.js
-- **Database:** PostgreSQL
-- **Task Queue:** Celery with Redis
-- **Real-Time Communication:** WebSockets via Django Channels
-- **Containerization:** Docker, Docker Compose
-- **Others:** Nginx for reverse proxy, ASGI server for asynchronous capabilities
+## Tech Stack
+
+| Layer                 | Tech                                                                                    |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| **Backend**           | Django · Django REST Framework                                                          |
+| **Async / broker**    | Celery · Redis                                                                          |
+| **Realtime**          | Django Channels (WebSockets)                                                            |
+| **Frontend**          | React  ·  Vite                                                                          |
+| **Database**          | PostgreSQL                                                                              |
+| **Container / infra** | Docker · Docker Compose · Nginx (reverse proxy)                                         |
+| **Dev tooling**       | `uv` (deps) · `black` (format) · `ruff` (lint) · `pytest` (tests) · `vitest` (FE tests) |
+
+---
+
+## Architecture
+
+```
+                   ┌──────────┐
+                   │  React   │
+                   │  Vite    │
+                   └────┬─────┘
+                        │  HTTP / WS
+┌────────────┐   ┌──────▼───────┐    ┌──────────┐
+│  Nginx     │──▶│  Django API  │───▶│ PostgreSQL│
+│ reverse‑px │   │  (ASGI)      │    └──────────┘
+└────────────┘   │  Channels    │
+                 │  Celery      │───▶ Redis
+                 └──────────────┘
+```
+
+> All services (backend, frontend, db, cache, broker, workers, beat, Flower & Nginx) are defined in **`docker-compose.yml`**.
+
+---
 
 ## Prerequisites
 
-Before you begin, ensure you have met the following requirements:
+- **Docker** & **Docker Compose** installed
+- An **ICICI Breeze API** key & secret
 
-- **Docker:** [Install Docker](https://docs.docker.com/get-docker/)
-- **Docker Compose:** [Install Docker Compose](https://docs.docker.com/compose/install/)
-- **Breeze API Credentials:** Obtain your Breeze API Key and Secret from [ICICI Direct](https://www.icicidirect.com/)
+---
 
 ## Installation
-
-### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/breeze-api-wrapper.git
 cd breeze-api-wrapper
-```
 
-### 2. Set Up Environment Variables
-
-Create a `.envs` directory in the root of the project and add an `env.dev` file with the necessary environment variables for development.
-
-```bash
-mkdir .envs
-```
-
-#### `.envs/env.dev`
-
-Create a file named `env.dev` inside the `.envs` directory and add the following content:
-
-```dotenv
-# PostgreSQL Configuration
-POSTGRES_DB=breeze
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-
-# Redis Configuration
-REDIS_CACHE_URL=redis://redis:6379/0
-REDIS_URL=redis://redis:6379/0
-
-# Celery Configuration
-CELERY_BROKER_URL=redis://redis:6379/0
-CELERY_RESULT_BACKEND=redis://redis:6379/0
-
-```
-
-### 3. Build and Run Docker Containers
-
-Ensure Docker is running on your machine. Then, execute the following command to build and start the containers:
-
-```bash
+# first‑time build & launch
 docker-compose up --build
 ```
 
-This command will:
+Compose will:
 
-- Build Docker images for the backend, frontend, and Nginx services.
-- Start PostgreSQL and Redis containers.
-- Set up the entire application stack.
+1. Build the backend, frontend and Nginx images
+2. Pull official images for Postgres & Redis
+3. Spin up Celery workers, beat scheduler and Flower dashboard
+
+---
 
 ## Running the Application
 
-Once all containers are up and running, you can access the entire application by visiting:
+Once the stack is up Nginx exposes everything on **[http://localhost:8000](http://localhost:8000)**:
 
-- **Application:** [http://localhost:8000](http://localhost:8000)
+- `/` — React SPA
+- `/api/…` — Django REST endpoints
+- `/ws/…` — WebSocket stream
+- `/flower` — Celery dashboard
 
-**Note:** Nginx handles the routing for both the frontend and backend, so there's no need to access them separately. Nginx will serve the frontend and proxy API requests to the backend.
+---
 
-## Development
+## Development Workflow
 
-### Setting Up a Development Environment
-
-1. **Clone the Repository:**
-
-   ```bash
-   git clone https://github.com/your-username/breeze-api-wrapper.git
-   cd breeze-api-wrapper
-   ```
-
-2. **Set Up Environment Variables:**
-
-   Follow the [Installation](#installation) section to set up your `.envs/env.dev` file.
-
-3. **Run Docker Containers:**
-
-   ```bash
-   docker-compose up --build
-   ```
-
-4. **Access the Application:**
-
-   Navigate to [http://localhost:8000](http://localhost:8000) to start interacting with the application.
-
-### Making Changes
-
-- **Backend:**
-
-  The backend code is mounted as a volume (`./backend/:/app/`), allowing you to make changes locally and see them reflected in real-time without rebuilding the Docker container.
-
-- **Frontend:**
-
-  Similarly, the frontend code is mounted as a volume, enabling live updates during development.
-
-### Running Tests
-
-Implement and run your test suites to ensure the application's integrity.
+Both backend and frontend code are mounted as volumes, so changes hot‑reload instantly.
 
 ```bash
-docker-compose exec backend python manage.py test
+# backend tests
+docker-compose exec backend pytest
+
+# FE dev server (if you prefer Vite's dev mode)
+docker-compose exec frontend pnpm dev
 ```
 
-### Monitoring and Accessing Celery Logs
+---
 
-To monitor the Celery worker logs in real-time, you can use the following methods:
+## Testing & Monitoring
 
-#### Using `tail` to Follow Logs
-
-If you have multiple Celery workers (e.g., `w1`, `w2`, `w3`) and want to monitor their logs in real-time, use the `tail` command:
+### Follow Celery logs
 
 ```bash
-docker-compose exec -it breeze-backend sh tail -f /var/log/celery/w1.log /var/log/celery/w2.log /var/log/celery/w3.log
-```
-
-Or use a wildcard to follow all worker logs:
-
-```bash
+# all workers
 docker-compose exec backend tail -f /var/log/celery/w*.log
 ```
 
-**Explanation:**
-
-- **`tail -f`**: Follows the content of files in real-time.
-- **Multiple Files**: By specifying multiple files, `tail` will interleave the output, prefixing each line with the file name.
-
-#### Using `multitail` for Split-Screen Log Monitoring
-
-For a more organized view, you can use `multitail` to monitor multiple log files in a split-screen terminal window.
-
-**Install `multitail` (if not already installed):**
-
-- **Ubuntu/Debian:**
-
-  ```bash
-  sudo apt-get install multitail
-  ```
-
-- **CentOS/RHEL:**
-
-  ```bash
-  sudo yum install multitail
-  ```
-
-**Usage:**
+### Multitail (optional)
 
 ```bash
-docker-compose exec backend multitail /var/log/celery/w1.log /var/log/celery/w2.log /var/log/celery/w3.log
+# install once on the host
+sudo apt-get install multitail  # or yum install multitail
+
+# split‑screen log view
+docker-compose exec backend multitail /var/log/celery/w1.log /var/log/celery/w2.log
 ```
 
-**Features:**
+### Flower dashboard
 
-- Displays each log file in its own window within the terminal.
-- Provides color highlighting and filtering options.
+Open **[http://localhost:8000/flower](http://localhost:8000/flower)** in your browser for task‑level visibility.
 
-#### Combining Logs into a Single File (Optional)
-
-If you prefer to have all worker logs in one file, you can modify your Celery command:
-
-```bash
-celery multi restart w1 w2 w3 -A main \
---pidfile=/var/run/celery/%n.pid \
---logfile=/var/log/celery/all_workers.log \
---loglevel=INFO --time-limit=300
-```
-
-**Monitoring the Combined Log:**
-
-```bash
-docker-compose exec backend tail -f /var/log/celery/all_workers.log
-```
-
-**Considerations:**
-
-- **Interleaved Logs**: Logs from all workers will be mixed together, which might make it harder to distinguish between them.
-- **Log Rotation**: Ensure proper log rotation to prevent the log file from growing indefinitely.
-
-#### Tips
-
-- **Permissions**: Ensure you have the necessary permissions to read the log files.
-- **Log Rotation**: Implement log rotation mechanisms to prevent log files from consuming excessive disk space.
-- **Inside Docker Containers**: The `docker-compose exec` command runs the `tail` command inside the running container.
+> **Tip:** Configure log‑rotation (`logrotate`) inside the container—or mount `/var/log/celery` to your host—to keep log sizes under control.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please follow these steps to contribute:
+1. Fork the repo
+2. `git checkout -b feature/<slug>`
+3. Commit & push
+4. Open a pull request—PR template included :)
 
-1. **Fork the Repository**
-
-2. **Create a Feature Branch**
-
-   ```bash
-   git checkout -b feature/YourFeature
-   ```
-
-3. **Commit Your Changes**
-
-   ```bash
-   git commit -m "Add some feature"
-   ```
-
-4. **Push to the Branch**
-
-   ```bash
-   git push origin feature/YourFeature
-   ```
-
-5. **Open a Pull Request**
+---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for full text.
 
 ---
 
-**Disclaimer:** This project is a wrapper around the ICICI Breeze API and is intended for educational and personal use. Ensure compliance with ICICI's terms of service when using their API.
+## Acknowledgements
 
-## Acknowledgments
+- [ICICI Direct – Breeze API](https://www.icicidirect.com/)
+- [Django](https://www.djangoproject.com/) · [DRF](https://www.django-rest-framework.org/)
+- [Celery](https://docs.celeryproject.org/) · [Redis](https://redis.io/)
+- [Docker](https://www.docker.com/) · [Nginx](https://www.nginx.com/)
 
-- [ICICI Direct](https://www.icicidirect.com/) for the Breeze API.
-- [Django](https://www.djangoproject.com/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
-- [Celery](https://docs.celeryproject.org/)
-- [Redis](https://redis.io/)
-- [Docker](https://www.docker.com/)
-- [Nginx](https://www.nginx.com/)
+> **Disclaimer:** This project is unaffiliated with ICICI Direct. Use at your own risk and ensure compliance with ICICI’s terms of service.
+
+---
 
 ## Contact
 
-For any inquiries or support, please contact [nkhan364@uwo.ca](mailto:nkhan364@uwo.ca).
+Questions? Bugs? Reach out at **[nkhan364@uwo.ca](mailto:nkhan364@uwo.ca)**.
 
 ---
 
-_Happy Coding! 🚀_
-
----
+_Happy hacking & good trades! 🚀_
