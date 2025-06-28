@@ -111,99 +111,90 @@ const MainChart: React.FC<MainChartProps> = ({
 
         const legendContainer = document.createElement('div');
         legendContainer.className =
-          'absolute top-6 left-6 p-5 rounded-2xl glass-card min-w-[320px] max-w-[400px] shadow-2xl z-[10] transition-all duration-300 hover:shadow-3xl';
+          'absolute top-2 left-2 right-2 p-2 rounded-lg glass-card shadow-md z-[10] flex items-center justify-between';
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
-        const headerRow = document.createElement('div');
-        headerRow.className = 'flex items-center justify-between mb-4';
+        // Left section: Company name and exchange
+        const infoSection = document.createElement('div');
+        infoSection.className = 'flex items-center gap-2';
 
         const companyName = document.createElement('span');
         companyName.className =
-          'text-xl font-bold text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 bg-clip-text';
+          'text-sm font-bold text-slate-900 dark:text-slate-100';
         companyName.textContent = obj?.company_name || '';
-
-        const badgeContainer = document.createElement('div');
-        badgeContainer.className = 'flex items-center gap-3';
 
         const exchangeBadge = document.createElement('span');
         exchangeBadge.className =
-          'status-badge px-3 py-1.5 text-xs font-semibold text-blue-700 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg dark:from-blue-900/40 dark:to-blue-800/30 dark:text-blue-300 border-blue-200/50 dark:border-blue-700/30';
+          'text-xs px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded';
         exchangeBadge.textContent = obj?.exchange_code || '';
 
         const timeframeBadge = document.createElement('span');
         timeframeBadge.className =
-          'status-badge px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-slate-100 to-slate-50 text-slate-700 dark:from-slate-800/60 dark:to-slate-700/40 dark:text-slate-300 border-slate-200/50 dark:border-slate-600/30';
+          'text-xs px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 rounded ml-1';
         timeframeBadge.textContent = `${timeframe}m`;
 
-        badgeContainer.appendChild(exchangeBadge);
-        badgeContainer.appendChild(timeframeBadge);
+        infoSection.appendChild(companyName);
+        infoSection.appendChild(exchangeBadge);
+        infoSection.appendChild(timeframeBadge);
+        legendContainer.appendChild(infoSection);
 
-        headerRow.appendChild(companyName);
-        headerRow.appendChild(badgeContainer);
-
-        const separator = document.createElement('div');
-        separator.className =
-          'h-px my-4 bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-600 to-transparent';
-
-        const priceRow = document.createElement('div');
-        priceRow.className = 'grid grid-cols-2 gap-3 text-sm';
-
-        legendContainer.appendChild(headerRow);
-        legendContainer.appendChild(separator);
-        legendContainer.appendChild(priceRow);
+        // Right section: OHLC values
+        const priceSection = document.createElement('div');
+        priceSection.className = 'flex items-center gap-3 text-xs';
+        legendContainer.appendChild(priceSection);
 
         chart.subscribeCrosshairMove((param: MouseEventParams<Time>) => {
           if (param.time && seriesRef.current) {
             const data = param.seriesData.get(seriesRef.current);
 
             if (data) {
-              priceRow.innerHTML = '';
+              priceSection.innerHTML = '';
               if (chartType === 'Candlestick' && 'open' in data) {
                 const { open, high, low, close } = data as BarData;
                 const priceItems = [
-                  { label: 'Open', value: open.toFixed(2) },
-                  { label: 'High', value: high.toFixed(2) },
-                  { label: 'Low', value: low.toFixed(2) },
-                  { label: 'Close', value: close.toFixed(2) },
+                  { label: 'O', value: open.toFixed(2) },
+                  { label: 'H', value: high.toFixed(2) },
+                  { label: 'L', value: low.toFixed(2) },
+                  { label: 'C', value: close.toFixed(2) },
                 ];
 
                 priceItems.forEach(({ label, value }) => {
                   const item = document.createElement('div');
-                  item.className = 'price-item';
+                  item.className = 'flex items-center';
 
                   const labelSpan = document.createElement('span');
                   labelSpan.className =
-                    'block mb-1 text-xs font-medium text-slate-500 dark:text-slate-400';
-                  labelSpan.textContent = label;
+                    'mr-1 font-medium text-slate-500 dark:text-slate-400';
+                  labelSpan.textContent = label + ':';
 
                   const valueSpan = document.createElement('span');
                   valueSpan.className =
-                    'block text-base font-bold text-slate-900 dark:text-slate-100';
+                    'font-semibold text-slate-900 dark:text-slate-100';
                   valueSpan.textContent = value;
 
                   item.appendChild(labelSpan);
                   item.appendChild(valueSpan);
-                  priceRow.appendChild(item);
+                  priceSection.appendChild(item);
                 });
               } else if (chartType === 'Line' && 'value' in data) {
                 const { value } = data as LineData;
                 const item = document.createElement('div');
-                item.className = 'col-span-2 price-item';
+                item.className = 'flex items-center';
 
                 const labelSpan = document.createElement('span');
                 labelSpan.className =
-                  'block mb-1 text-xs font-medium text-slate-500 dark:text-slate-400';
-                labelSpan.textContent = 'Price';
+                  'mr-1 font-medium text-slate-500 dark:text-slate-400';
+                labelSpan.textContent = 'Price:';
 
                 const valueSpan = document.createElement('span');
                 valueSpan.className =
-                  'block text-lg font-bold text-slate-900 dark:text-slate-100';
+                  'font-semibold text-slate-900 dark:text-slate-100';
                 valueSpan.textContent = value.toFixed(2);
 
                 item.appendChild(labelSpan);
                 item.appendChild(valueSpan);
-                priceRow.appendChild(item);
+                priceSection.appendChild(item);
               }
             }
           }
@@ -306,5 +297,4 @@ const MainChart: React.FC<MainChartProps> = ({
     </div>
   );
 };
-
 export default MainChart;
