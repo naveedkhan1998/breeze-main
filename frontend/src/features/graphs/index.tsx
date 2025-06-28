@@ -76,16 +76,14 @@ const GraphsPage: React.FC = () => {
 
   const seriesData = useMemo(() => {
     if (!data) return [];
-    return data.data.map(
-      ({ date, open, high, low, close, volume = 0 }: Candle) => ({
-        time: formatDate(date) as Time,
-        open,
-        high,
-        low,
-        close,
-        value: volume,
-      })
-    );
+    return data.data.map(({ date, open, high, low, close }: Candle) => ({
+      time: formatDate(date) as Time,
+      open,
+      high,
+      low,
+      close,
+      value: close,
+    }));
   }, [data]);
 
   const volumeData = useMemo(() => {
