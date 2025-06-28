@@ -34,6 +34,7 @@ const MainChart: React.FC<MainChartProps> = ({
   const mainChartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);
   const prevChartTypeRef = useRef<SeriesType>(chartType);
+  const timeframeBadgeRef = useRef<HTMLSpanElement | null>(null);
 
   const renderMainChart = useCallback(() => {
     if (mainChartContainerRef.current && seriesData.length) {
@@ -111,7 +112,7 @@ const MainChart: React.FC<MainChartProps> = ({
 
         const legendContainer = document.createElement('div');
         legendContainer.className =
-          'absolute top-2 left-2 right-2 p-2 rounded-lg glass-card shadow-md z-[10] flex items-center justify-between';
+          'absolute top-2 left-2 p-2 rounded-lg glass-card shadow-md z-[10] flex items-center flex-wrap gap-x-4 gap-y-1';
 
         mainChartContainerRef.current.appendChild(legendContainer);
 
@@ -133,6 +134,7 @@ const MainChart: React.FC<MainChartProps> = ({
         timeframeBadge.className =
           'text-xs px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 rounded ml-1';
         timeframeBadge.textContent = `${timeframe}m`;
+        timeframeBadgeRef.current = timeframeBadge;
 
         infoSection.appendChild(companyName);
         infoSection.appendChild(exchangeBadge);
@@ -144,58 +146,76 @@ const MainChart: React.FC<MainChartProps> = ({
         priceSection.className = 'flex items-center gap-3 text-xs';
         legendContainer.appendChild(priceSection);
 
-        chart.subscribeCrosshairMove((param: MouseEventParams<Time>) => {
-          if (param.time && seriesRef.current) {
-            const data = param.seriesData.get(seriesRef.current);
+        const updateLegend = (data: BarData | LineData | null) => {
+          if (data) {
+            priceSection.innerHTML = '';
+            if (chartType === 'Candlestick' && 'open' in data) {
+              const { open, high, low, close } = data as BarData;
+              const priceItems = [
+                { label: 'Open', value: open.toFixed(2) },
+                { label: 'High', value: high.toFixed(2) },
+                { label: 'Low', value: low.toFixed(2) },
+                { label: 'Close', value: close.toFixed(2) },
+              ];
 
-            if (data) {
-              priceSection.innerHTML = '';
-              if (chartType === 'Candlestick' && 'open' in data) {
-                const { open, high, low, close } = data as BarData;
-                const priceItems = [
-                  { label: 'O', value: open.toFixed(2) },
-                  { label: 'H', value: high.toFixed(2) },
-                  { label: 'L', value: low.toFixed(2) },
-                  { label: 'C', value: close.toFixed(2) },
-                ];
-
-                priceItems.forEach(({ label, value }) => {
-                  const item = document.createElement('div');
-                  item.className = 'flex items-center';
-
-                  const labelSpan = document.createElement('span');
-                  labelSpan.className =
-                    'mr-1 font-medium text-slate-500 dark:text-slate-400';
-                  labelSpan.textContent = label + ':';
-
-                  const valueSpan = document.createElement('span');
-                  valueSpan.className =
-                    'font-semibold text-slate-900 dark:text-slate-100';
-                  valueSpan.textContent = value;
-
-                  item.appendChild(labelSpan);
-                  item.appendChild(valueSpan);
-                  priceSection.appendChild(item);
-                });
-              } else if (chartType === 'Line' && 'value' in data) {
-                const { value } = data as LineData;
+              priceItems.forEach(({ label, value }) => {
                 const item = document.createElement('div');
                 item.className = 'flex items-center';
 
                 const labelSpan = document.createElement('span');
                 labelSpan.className =
                   'mr-1 font-medium text-slate-500 dark:text-slate-400';
-                labelSpan.textContent = 'Price:';
+                labelSpan.textContent = label;
 
                 const valueSpan = document.createElement('span');
                 valueSpan.className =
                   'font-semibold text-slate-900 dark:text-slate-100';
-                valueSpan.textContent = value.toFixed(2);
+                valueSpan.textContent = value;
 
                 item.appendChild(labelSpan);
                 item.appendChild(valueSpan);
                 priceSection.appendChild(item);
-              }
+              });
+            } else if (chartType === 'Line' && 'value' in data) {
+              const { value } = data as LineData;
+              const item = document.createElement('div');
+              item.className = 'flex items-center';
+
+              const labelSpan = document.createElement('span');
+              labelSpan.className =
+                'mr-1 font-medium text-slate-500 dark:text-slate-400';
+              labelSpan.textContent = 'Price';
+
+              const valueSpan = document.createElement('span');
+              valueSpan.className =
+                'font-semibold text-slate-900 dark:text-slate-100';
+              valueSpan.textContent = value.toFixed(2);
+
+              item.appendChild(labelSpan);
+              item.appendChild(valueSpan);
+              priceSection.appendChild(item);
+            }
+          }
+        };
+
+        // Set initial legend with the last data point
+        if (seriesData.length > 0) {
+          updateLegend(seriesData[seriesData.length - 1]);
+        }
+
+        chart.subscribeCrosshairMove((param: MouseEventParams<Time>) => {
+          if (param.time && seriesRef.current) {
+            const data = param.seriesData.get(seriesRef.current);
+            // Check if data conforms to BarData or LineData
+            if (data && ('open' in data || 'value' in data)) {
+              updateLegend(data as BarData | LineData);
+            } else {
+              updateLegend(null);
+            }
+          } else {
+            // When crosshair is off the chart, show the last value
+            if (seriesData.length > 0) {
+              updateLegend(seriesData[seriesData.length - 1]);
             }
           }
         });
@@ -290,6 +310,12 @@ const MainChart: React.FC<MainChartProps> = ({
   useEffect(() => {
     renderMainChart();
   }, [renderMainChart]);
+
+  useEffect(() => {
+    if (timeframeBadgeRef.current) {
+      timeframeBadgeRef.current.textContent = `${timeframe}m`;
+    }
+  }, [timeframe]);
 
   return (
     <div ref={mainChartContainerRef} className="relative w-full h-full">
