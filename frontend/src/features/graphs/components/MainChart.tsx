@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef, useCallback } from 'react';
 import {
   createChart,
@@ -124,7 +125,15 @@ const MainChart: React.FC<MainChartProps> = ({
           break;
         case 'Baseline':
           mainSeries = chart.addBaselineSeries({
-            baseValue: { type: 'price', price: seriesData[0]?.value },
+            baseValue: {
+              type: 'price',
+              price:
+                'close' in seriesData[0]
+                  ? (seriesData[0] as BarData).close
+                  : 'value' in seriesData[0]
+                    ? (seriesData[0] as LineData).value
+                    : 0,
+            },
             topLineColor: mode ? '#10B981' : '#059669',
             bottomLineColor: mode ? '#EF4444' : '#DC2626',
             topFillColor1: 'rgba(38, 166, 154, 0.28)',
@@ -317,7 +326,15 @@ const MainChart: React.FC<MainChartProps> = ({
             break;
           case 'Baseline':
             mainSeries = mainChartRef.current.addBaselineSeries({
-              baseValue: { type: 'price', price: seriesData[0]?.value },
+              baseValue: {
+                type: 'price',
+                price:
+                  'close' in seriesData[0]
+                    ? (seriesData[0] as BarData).close
+                    : 'value' in seriesData[0]
+                      ? (seriesData[0] as LineData).value
+                      : 0,
+              },
               topLineColor: mode ? '#10B981' : '#059669',
               bottomLineColor: mode ? '#EF4444' : '#DC2626',
               topFillColor1: 'rgba(38, 166, 154, 0.28)',
