@@ -1,5 +1,5 @@
 import json
-import unittest
+import pytest
 from unittest.mock import MagicMock, patch
 
 from django.test import RequestFactory
@@ -8,18 +8,12 @@ from rest_framework import status
 from apps.core.views import BreezeAccountViewSet, InstrumentViewSet
 
 
-class TestInstrumentViewSet(unittest.TestCase):
+class TestInstrumentViewSet:
 
     def setUp(self):
         self.factory = RequestFactory()
         self.view = InstrumentViewSet.as_view({"get": "list"})
 
-    @patch("apps.core.views.Instrument.objects")
-    @patch("apps.core.views.Exchanges.objects")
-    @patch("apps.core.views.InstrumentViewSet.get_serializer")  # Patch get_serializer
-    @patch(
-        "apps.core.views.InstrumentViewSet.permission_classes", new=[]
-    )  # Patch permission_classes
     def test_list_instruments_success(
         self, MockGetSerializer, MockExchangesObjects, MockInstrumentObjects
     ):
@@ -144,7 +138,7 @@ class TestInstrumentViewSet(unittest.TestCase):
         MockGetSerializer.assert_not_called()  # Serializer should not be called if no instruments found
 
 
-class TestBreezeAccountViewSet(unittest.TestCase):
+class TestBreezeAccountViewSet:
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -255,13 +249,6 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         mock_serializer_instance.is_valid.assert_called_once_with()
         mock_serializer_instance.save.assert_not_called()
 
-    @patch(
-        "apps.core.views.BreezeAccount.objects"
-    )  # Patch BreezeAccount.objects directly
-    @patch("apps.core.views.get_object_or_404")
-    @patch("apps.core.views.BreezeAccountViewSet.get_serializer")
-    @patch("apps.core.views.breeze_session_manager")
-    @patch("apps.core.views.BreezeAccountViewSet.permission_classes", new=[])
     def test_update_breeze_account_success(
         self,
         MockBreezeSessionManager,
@@ -449,6 +436,7 @@ class TestBreezeAccountViewSet(unittest.TestCase):
     @patch(
         "apps.core.views.BreezeAccount.DoesNotExist"
     )  # Patch the actual exception class
+    @pytest.mark.django_db
     def test_refresh_session_failed(
         self, MockDoesNotExist, MockBreezeSessionManager, MockBreezeAccountObjects
     ):

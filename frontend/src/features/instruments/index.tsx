@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, CalendarIcon } from 'lucide-react';
 import {
   PageLayout,
   PageHeader,
@@ -10,6 +10,21 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import Instrument from './components/Instrument';
 
 interface ExchangeTabProps {
@@ -52,6 +67,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange }) => (
 
 const InstrumentsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [optionType, setOptionType] = useState<string>('');
+  const [strikePrice, setStrikePrice] = useState<number | null>(null);
+  const [expiryAfter, setExpiryAfter] = useState<Date | undefined>(undefined);
+  const [expiryBefore, setExpiryBefore] = useState<Date | undefined>(undefined);
 
   const exchanges: Exchange[] = [
     { value: 'NSE', label: 'NSE', instrumentExchange: 'NSE' },
@@ -80,6 +99,77 @@ const InstrumentsPage: React.FC = () => {
       actions={
         <PageActions>
           <SearchBar value={searchTerm} onChange={handleSearchChange} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">{optionType || 'Option Type'}</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setOptionType('')}>
+                All
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOptionType('CE')}>
+                CE
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOptionType('PE')}>
+                PE
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Input
+            type="number"
+            placeholder="Strike Price"
+            value={strikePrice === null ? '' : strikePrice}
+            onChange={e =>
+              setStrikePrice(
+                e.target.value === '' ? null : Number(e.target.value)
+              )
+            }
+            className="w-full max-w-[150px]"
+          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'w-[180px] justify-start text-left font-normal',
+                  !expiryAfter && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="w-4 h-4 mr-2" />
+                {expiryAfter ? format(expiryAfter, 'PPP') : 'Expiry After'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={expiryAfter}
+                onSelect={setExpiryAfter}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'w-[180px] justify-start text-left font-normal',
+                  !expiryBefore && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="w-4 h-4 mr-2" />
+                {expiryBefore ? format(expiryBefore, 'PPP') : 'Expiry Before'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={expiryBefore}
+                onSelect={setExpiryBefore}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </PageActions>
       }
     >
@@ -103,6 +193,14 @@ const InstrumentsPage: React.FC = () => {
                     <Instrument
                       exchange={exchange.instrumentExchange}
                       searchTerm={searchTerm}
+                      optionType={optionType}
+                      strikePrice={strikePrice}
+                      expiryAfter={
+                        expiryAfter ? format(expiryAfter, 'yyyy-MM-dd') : ''
+                      }
+                      expiryBefore={
+                        expiryBefore ? format(expiryBefore, 'yyyy-MM-dd') : ''
+                      }
                     />
                   </div>
                 </TabsContent>

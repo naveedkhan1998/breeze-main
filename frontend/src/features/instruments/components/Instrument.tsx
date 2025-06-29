@@ -23,6 +23,10 @@ import {
 interface Props {
   exchange: string;
   searchTerm: string;
+  optionType: string;
+  strikePrice: number | null;
+  expiryAfter: string;
+  expiryBefore: string;
 }
 
 interface InstrumentItemProps {
@@ -169,8 +173,19 @@ const InstrumentItem: React.FC<InstrumentItemProps> = ({
 };
 
 // Main Instrument component
-const Instrument: React.FC<Props> = ({ exchange, searchTerm }) => {
+const Instrument: React.FC<Props> = ({
+  exchange,
+  searchTerm,
+  optionType,
+  strikePrice,
+  expiryAfter,
+  expiryBefore,
+}) => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [debouncedOptionType, setDebouncedOptionType] = useState(optionType);
+  const [debouncedStrikePrice, setDebouncedStrikePrice] = useState(strikePrice);
+  const [debouncedExpiryAfter, setDebouncedExpiryAfter] = useState(expiryAfter);
+  const [debouncedExpiryBefore, setDebouncedExpiryBefore] = useState(expiryBefore);
   const [subscribingIds, setSubscribingIds] = useState<number[]>([]);
 
   const [subscribeInstrument] = useSubscribeInstrumentMutation();
@@ -180,19 +195,27 @@ const Instrument: React.FC<Props> = ({ exchange, searchTerm }) => {
     {
       exchange,
       search: debouncedSearchTerm,
+      optionType: debouncedOptionType,
+      strikePrice: debouncedStrikePrice,
+      expiryAfter: debouncedExpiryAfter,
+      expiryBefore: debouncedExpiryBefore,
     },
     {
-      skip: debouncedSearchTerm.length < 3,
+      skip: debouncedSearchTerm.length < 3 && !debouncedOptionType && !debouncedStrikePrice && !debouncedExpiryAfter && !debouncedExpiryBefore,
     }
   );
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
+      setDebouncedOptionType(optionType);
+      setDebouncedStrikePrice(strikePrice);
+      setDebouncedExpiryAfter(expiryAfter);
+      setDebouncedExpiryBefore(expiryBefore);
     }, SEARCH_DEBOUNCE_DELAY);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, optionType, strikePrice, expiryAfter, expiryBefore, setDebouncedSearchTerm, setDebouncedOptionType, setDebouncedStrikePrice, setDebouncedExpiryAfter, setDebouncedExpiryBefore]);
 
   const handleSubscribe = useCallback(
     async (id: number, duration: number) => {

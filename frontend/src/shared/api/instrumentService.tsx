@@ -55,9 +55,17 @@ export const instrumentApi = baseApi.injectEndpoints({
       }),
     }),
     getInstruments: builder.query({
-      query: ({ exchange, search }) => {
+      query: ({ exchange, search, optionType, strikePrice, expiryAfter, expiryBefore }) => {
+        const params = new URLSearchParams();
+        if (exchange) params.append('exchange', exchange);
+        if (search) params.append('search', search);
+        if (optionType) params.append('option_type', optionType);
+        if (strikePrice) params.append('strike_price', strikePrice);
+        if (expiryAfter) params.append('expiry_after', expiryAfter);
+        if (expiryBefore) params.append('expiry_before', expiryBefore);
+
         return {
-          url: `core/instruments/?exchange=${exchange}&search=${search}`,
+          url: `core/instruments/?${params.toString()}`,
           method: 'GET',
           headers: {
             'Content-type': 'application/json',
