@@ -38,11 +38,70 @@ const MainChart: React.FC<MainChartProps> = ({
   const prevChartTypeRef = useRef<SeriesType>(chartType);
   const timeframeBadgeRef = useRef<HTMLSpanElement | null>(null);
 
+  const createSeries = useCallback(
+    (chart: IChartApi, type: SeriesType): ISeriesApi<SeriesType> => {
+      switch (type) {
+        case 'Candlestick':
+          return chart.addCandlestickSeries({
+            upColor: mode ? '#10B981' : '#059669',
+            downColor: mode ? '#EF4444' : '#DC2626',
+            borderVisible: false,
+            wickUpColor: mode ? '#10B981' : '#059669',
+            wickDownColor: mode ? '#EF4444' : '#DC2626',
+          });
+        case 'Bar':
+          return chart.addBarSeries({
+            upColor: mode ? '#10B981' : '#059669',
+            downColor: mode ? '#EF4444' : '#DC2626',
+          });
+        case 'Area':
+          return chart.addAreaSeries({
+            lineColor: mode ? '#3B82F6' : '#2563EB',
+            topColor: mode
+              ? 'rgba(59, 130, 246, 0.4)'
+              : 'rgba(37, 99, 235, 0.4)',
+            bottomColor: mode
+              ? 'rgba(59, 130, 246, 0)'
+              : 'rgba(37, 99, 235, 0)',
+            lineWidth: 2,
+          });
+        case 'Baseline':
+          return chart.addBaselineSeries({
+            baseValue: {
+              type: 'price',
+              price:
+                'close' in seriesData[0]
+                  ? (seriesData[0] as BarData).close
+                  : 'value' in seriesData[0]
+                    ? (seriesData[0] as LineData).value
+                    : 0,
+            },
+            topLineColor: mode ? '#10B981' : '#059669',
+            bottomLineColor: mode ? '#EF4444' : '#DC2626',
+            topFillColor1: 'rgba(38, 166, 154, 0.28)',
+            topFillColor2: 'rgba(38, 166, 154, 0.05)',
+            bottomFillColor1: 'rgba(239, 83, 80, 0.05)',
+            bottomFillColor2: 'rgba(239, 83, 80, 0.28)',
+          });
+        case 'Line':
+        default:
+          return chart.addLineSeries({
+            color: mode ? '#3B82F6' : '#2563EB',
+            lineWidth: 2,
+            crosshairMarkerVisible: true,
+            crosshairMarkerRadius: 4,
+            lastValueVisible: true,
+          });
+      }
+    },
+    [mode, seriesData]
+  );
+
   const renderMainChart = useCallback(() => {
-    if (!mainChartContainerRef.current) return;
+    if (!mainChartContainerRef.current) return () => {};
 
     if (!mainChartRef.current) {
-      if (!seriesData.length) return;
+      if (!seriesData.length) return () => {};
       mainChartContainerRef.current.innerHTML = '';
 
       const chart = createChart(mainChartContainerRef.current, {
@@ -93,66 +152,7 @@ const MainChart: React.FC<MainChartProps> = ({
         handleScale: true,
       });
 
-      let mainSeries: ISeriesApi<SeriesType>;
-
-      switch (chartType) {
-        case 'Candlestick':
-          mainSeries = chart.addCandlestickSeries({
-            upColor: mode ? '#10B981' : '#059669',
-            downColor: mode ? '#EF4444' : '#DC2626',
-            borderVisible: false,
-            wickUpColor: mode ? '#10B981' : '#059669',
-            wickDownColor: mode ? '#EF4444' : '#DC2626',
-          });
-          break;
-        case 'Bar':
-          mainSeries = chart.addBarSeries({
-            upColor: mode ? '#10B981' : '#059669',
-            downColor: mode ? '#EF4444' : '#DC2626',
-          });
-          break;
-        case 'Area':
-          mainSeries = chart.addAreaSeries({
-            lineColor: mode ? '#3B82F6' : '#2563EB',
-            topColor: mode
-              ? 'rgba(59, 130, 246, 0.4)'
-              : 'rgba(37, 99, 235, 0.4)',
-            bottomColor: mode
-              ? 'rgba(59, 130, 246, 0)'
-              : 'rgba(37, 99, 235, 0)',
-            lineWidth: 2,
-          });
-          break;
-        case 'Baseline':
-          mainSeries = chart.addBaselineSeries({
-            baseValue: {
-              type: 'price',
-              price:
-                'close' in seriesData[0]
-                  ? (seriesData[0] as BarData).close
-                  : 'value' in seriesData[0]
-                    ? (seriesData[0] as LineData).value
-                    : 0,
-            },
-            topLineColor: mode ? '#10B981' : '#059669',
-            bottomLineColor: mode ? '#EF4444' : '#DC2626',
-            topFillColor1: 'rgba(38, 166, 154, 0.28)',
-            topFillColor2: 'rgba(38, 166, 154, 0.05)',
-            bottomFillColor1: 'rgba(239, 83, 80, 0.05)',
-            bottomFillColor2: 'rgba(239, 83, 80, 0.28)',
-          });
-          break;
-        case 'Line':
-        default:
-          mainSeries = chart.addLineSeries({
-            color: mode ? '#3B82F6' : '#2563EB',
-            lineWidth: 2,
-            crosshairMarkerVisible: true,
-            crosshairMarkerRadius: 4,
-            lastValueVisible: true,
-          });
-          break;
-      }
+      const mainSeries = createSeries(chart, chartType);
 
       mainSeries.setData(seriesData as any);
       seriesRef.current = mainSeries;
@@ -294,66 +294,7 @@ const MainChart: React.FC<MainChartProps> = ({
           mainChartRef.current.removeSeries(seriesRef.current);
         }
 
-        let mainSeries: ISeriesApi<SeriesType>;
-
-        switch (chartType) {
-          case 'Candlestick':
-            mainSeries = mainChartRef.current.addCandlestickSeries({
-              upColor: mode ? '#10B981' : '#059669',
-              downColor: mode ? '#EF4444' : '#DC2626',
-              borderVisible: false,
-              wickUpColor: mode ? '#10B981' : '#059669',
-              wickDownColor: mode ? '#EF4444' : '#DC2626',
-            });
-            break;
-          case 'Bar':
-            mainSeries = mainChartRef.current.addBarSeries({
-              upColor: mode ? '#10B981' : '#059669',
-              downColor: mode ? '#EF4444' : '#DC2626',
-            });
-            break;
-          case 'Area':
-            mainSeries = mainChartRef.current.addAreaSeries({
-              lineColor: mode ? '#3B82F6' : '#2563EB',
-              topColor: mode
-                ? 'rgba(59, 130, 246, 0.4)'
-                : 'rgba(37, 99, 235, 0.4)',
-              bottomColor: mode
-                ? 'rgba(59, 130, 246, 0)'
-                : 'rgba(37, 99, 235, 0)',
-              lineWidth: 2,
-            });
-            break;
-          case 'Baseline':
-            mainSeries = mainChartRef.current.addBaselineSeries({
-              baseValue: {
-                type: 'price',
-                price:
-                  'close' in seriesData[0]
-                    ? (seriesData[0] as BarData).close
-                    : 'value' in seriesData[0]
-                      ? (seriesData[0] as LineData).value
-                      : 0,
-              },
-              topLineColor: mode ? '#10B981' : '#059669',
-              bottomLineColor: mode ? '#EF4444' : '#DC2626',
-              topFillColor1: 'rgba(38, 166, 154, 0.28)',
-              topFillColor2: 'rgba(38, 166, 154, 0.05)',
-              bottomFillColor1: 'rgba(239, 83, 80, 0.05)',
-              bottomFillColor2: 'rgba(239, 83, 80, 0.28)',
-            });
-            break;
-          case 'Line':
-          default:
-            mainSeries = mainChartRef.current.addLineSeries({
-              color: mode ? '#3B82F6' : '#2563EB',
-              lineWidth: 2,
-              crosshairMarkerVisible: true,
-              crosshairMarkerRadius: 4,
-              lastValueVisible: true,
-            });
-            break;
-        }
+        const mainSeries = createSeries(mainChartRef.current, chartType);
 
         mainSeries.setData(seriesData as any);
         seriesRef.current = mainSeries;
@@ -391,6 +332,12 @@ const MainChart: React.FC<MainChartProps> = ({
         },
       });
     }
+
+    // Always return a cleanup function
+    return () => {
+      // Cleanup will be handled by the main useEffect cleanup
+      // This ensures consistent return type from renderMainChart
+    };
   }, [
     seriesData,
     mode,
@@ -399,16 +346,23 @@ const MainChart: React.FC<MainChartProps> = ({
     timeframe,
     chartType,
     setTimeScale,
+    createSeries,
   ]);
 
   useEffect(() => {
     const cleanup = renderMainChart();
+    return cleanup;
+  }, [renderMainChart]);
+
+  // Cleanup effect for component unmount
+  useEffect(() => {
     return () => {
-      if (cleanup) {
-        cleanup();
+      if (mainChartRef.current) {
+        mainChartRef.current.remove();
+        mainChartRef.current = null;
       }
     };
-  }, [renderMainChart]);
+  }, []);
 
   useEffect(() => {
     if (timeframeBadgeRef.current) {

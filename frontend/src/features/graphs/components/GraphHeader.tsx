@@ -212,7 +212,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <DropdownMenuItem onSelect={e => e.preventDefault()}>
                       <HiTrendingUp className="w-4 h-4 mr-2" />
                       <span>Add Indicator</span>
                     </DropdownMenuItem>
