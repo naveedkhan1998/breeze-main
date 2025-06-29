@@ -22,6 +22,8 @@ class InstrumentFilter(django_filters.FilterSet):
         fields = ["exchange", "option_type", "strike_price", "expiry"]
 
     def filter_by_search_term(self, queryset, name, value):
+        if not value:
+            return queryset.none()
         return queryset.filter(
             Q(short_name__icontains=value)
             | Q(company_name__icontains=value)

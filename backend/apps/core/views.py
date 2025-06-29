@@ -229,6 +229,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.core.filters import InstrumentFilter
 
+
 class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     A ViewSet for viewing Instrument instances.
@@ -241,11 +242,33 @@ class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = InstrumentFilter
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        # Apply the 50-item limit for "FON" exchange if it's part of the filtered queryset
+        # Validate required parameters
         exchange_param = request.query_params.get("exchange")
-        if exchange_param and Exchanges.objects.filter(title=exchange_param).last() and exchange_param == "FON":
+        search_param = request.query_params.get("search")
+        
+        # Check if exchange is provided
+        if not exchange_param:
+            return Response(
+                {"msg": "Exchange is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if search term is at least 2 characters
+        if search_param and len(search_param) < 2:
+            return Response(
+                {"msg": "Search term must be at least 2 characters long"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate exchange exists
+        if not Exchanges.objects.filter(title=exchange_param).last():
+            return Response(
+                {"msg": "Invalid Exchange"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Apply the 50-item limit for "FON" exchange if it's part of the filtered queryset
+        if exchange_param and exchange_param.upper() == "FON":
             queryset = queryset[:50]
 
         if queryset.exists():
