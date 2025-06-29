@@ -48,6 +48,7 @@ dependencies = [
     "hyperlink>=21.0.0",
     "idna>=3.10",
     "incremental>=24.7.2",
+    "ipython>=9.3.0",
     "jinja2>=3.1.6",
     "kombu>=5.5.4",
     "markdown-it-py>=3.0.0",

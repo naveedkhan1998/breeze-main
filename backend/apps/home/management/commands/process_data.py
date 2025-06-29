@@ -1,7 +1,7 @@
 # data_manager/management/commands/process_data.py
 
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from pathlib import Path
 import shutil
@@ -9,8 +9,10 @@ import urllib.request
 import zipfile
 
 from django.conf import settings
+from django.core.files import File
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 
 from apps.core.models import Exchanges, Instrument, Percentage
 
@@ -46,29 +48,58 @@ class Command(BaseCommand):
             logger.error("An error occurred during data processing", exc_info=True)
             self.stderr.write(self.style.ERROR(f"An error occurred: {e}"))
 
+    def needs_reprocessing(self, exchange):
+        """
+        Check if an exchange needs reprocessing based on date criteria.
+        Returns True if:
+        - created_at is None
+        - updated_at is None
+        - updated_at is more than 7 days old
+        """
+        if exchange.created_at is None or exchange.updated_at is None:
+            return True
+
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        return exchange.updated_at < seven_days_ago
+
     def process_exchanges(self):
         """
-        Downloads and processes the master data if required exchanges are missing.
+        Downloads and processes the master data if required exchanges are missing or outdated.
         """
-        existing_exchanges = set(
-            Exchanges.objects.filter(title__in=REQUIRED_EXCHANGES.keys()).values_list(
-                "title", flat=True
-            )
-        )
-        missing_exchanges = set(REQUIRED_EXCHANGES.keys()) - existing_exchanges
+        existing_exchanges = Exchanges.objects.filter(title__in=REQUIRED_EXCHANGES.keys())
+        existing_exchange_titles = set(existing_exchanges.values_list("title", flat=True))
+        missing_exchanges = set(REQUIRED_EXCHANGES.keys()) - existing_exchange_titles
 
-        if not missing_exchanges:
+        # Check for exchanges that need reprocessing due to date criteria
+        outdated_exchanges = []
+        for exchange in existing_exchanges:
+            if self.needs_reprocessing(exchange):
+                outdated_exchanges.append(exchange.title)
+
+        exchanges_to_process = missing_exchanges.union(set(outdated_exchanges))
+
+        if not exchanges_to_process:
             self.stdout.write(
                 self.style.SUCCESS(
-                    "All required exchanges already exist. Skipping download and extraction."
+                    "All required exchanges are up to date. Skipping download and extraction."
                 )
             )
             return
         else:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"Missing exchanges: {', '.join(missing_exchanges)}. Proceeding to download and process."
+            if missing_exchanges:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Missing exchanges: {', '.join(missing_exchanges)}"
+                    )
                 )
+            if outdated_exchanges:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Outdated exchanges (>7 days or None dates): {', '.join(outdated_exchanges)}"
+                    )
+                )
+            self.stdout.write(
+                self.style.NOTICE("Proceeding to download and process.")
             )
 
         url = "https://directlink.icicidirect.com/NewSecurityMaster/SecurityMaster.zip"
@@ -76,6 +107,13 @@ class Command(BaseCommand):
         extracted_path = Path(settings.MEDIA_ROOT) / "extracted"
 
         try:
+            # Ensure media directory exists
+            media_root = Path(settings.MEDIA_ROOT)
+            media_root.mkdir(parents=True, exist_ok=True)
+            self.stdout.write(
+                self.style.NOTICE(f"Ensured media directory exists: {media_root}")
+            )
+
             # Remove extracted directory if it exists
             if extracted_path.exists():
                 shutil.rmtree(extracted_path)
@@ -108,9 +146,9 @@ class Command(BaseCommand):
                         )
                         continue
 
-                    if exchange_title not in missing_exchanges:
+                    if exchange_title not in exchanges_to_process:
                         logger.info(
-                            f"Exchange '{exchange_title}' already exists. Skipping update."
+                            f"Exchange '{exchange_title}' is up to date. Skipping update."
                         )
                         continue
 
@@ -122,32 +160,44 @@ class Command(BaseCommand):
                     if exchange_qs.exists():
                         # Prepare for bulk update
                         exchange = exchange_qs.first()
-                        exchange.file = exchange_file_path
+                        # Convert Path to Django File object
+                        with open(exchange_file_path, 'rb') as f:
+                            django_file = File(f, name=extracted_file)
+                            exchange.file.save(extracted_file, django_file, save=False)
+                        # Clear existing instruments for this exchange since we're reprocessing
+                        Instrument.objects.filter(exchange=exchange).delete()
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"Cleared existing instruments for exchange: {exchange_title}"
+                            )
+                        )
                         exchanges_to_update.append(exchange)
                     else:
-                        # Prepare for bulk create
+                        # Create new exchange and save file properly
                         new_exchange = Exchanges(
                             title=exchange_title,
-                            file=exchange_file_path,
                             code=exchange_info["code"],
                             exchange=exchange_info["exchange"],
                             is_option=exchange_info.get("is_option", False),
                         )
-                        exchanges_to_create.append(new_exchange)
-
-                # Bulk create new exchanges
-                if exchanges_to_create:
-                    Exchanges.objects.bulk_create(exchanges_to_create)
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Created {len(exchanges_to_create)} new Exchange entries."
+                        # Save the exchange first to get an ID
+                        new_exchange.save()
+                        # Then save the file
+                        with open(exchange_file_path, 'rb') as f:
+                            django_file = File(f, name=extracted_file)
+                            new_exchange.file.save(extracted_file, django_file, save=True)
+                        
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f"Created new Exchange entry for: {exchange_title}"
+                            )
                         )
-                    )
 
-                # Bulk update existing exchanges
+                # Bulk update existing exchanges (save them after file operations)
                 if exchanges_to_update:
                     with transaction.atomic():
-                        Exchanges.objects.bulk_update(exchanges_to_update, ["file"])
+                        for exchange in exchanges_to_update:
+                            exchange.save()
                     self.stdout.write(
                         self.style.SUCCESS(
                             f"Updated {len(exchanges_to_update)} existing Exchange entries."
@@ -165,7 +215,8 @@ class Command(BaseCommand):
 
     def process_instruments(self):
         """
-        Loads instrument data for each exchange if no instruments exist for that exchange.
+        Loads instrument data for each exchange if no instruments exist for that exchange
+        or if the exchange was recently updated.
         """
         exchanges = Exchanges.objects.filter(title__in=REQUIRED_EXCHANGES.keys())
 
@@ -176,11 +227,11 @@ class Command(BaseCommand):
                 )
             )
 
-            # Check if Instruments already exist for this exchange
-            if Instrument.objects.filter(exchange=ins).exists():
+            # Check if Instruments already exist for this exchange and exchange is not recently updated
+            if Instrument.objects.filter(exchange=ins).exists() and not self.needs_reprocessing(ins):
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Instruments for Exchange '{ins.title}' already exist. Skipping data loading."
+                        f"Instruments for Exchange '{ins.title}' already exist and are up to date. Skipping data loading."
                     )
                 )
                 continue

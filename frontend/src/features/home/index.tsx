@@ -238,7 +238,8 @@ const HomePage: React.FC = () => {
           >
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="equity">Equity</TabsTrigger>
+              <TabsTrigger value="0">Index</TabsTrigger>
+              <TabsTrigger value="EQ">Equity</TabsTrigger>
               <TabsTrigger value="future">Future</TabsTrigger>
               <TabsTrigger value="option">Option</TabsTrigger>
             </TabsList>

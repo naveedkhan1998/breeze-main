@@ -8,6 +8,7 @@ import {
   BuildingIcon,
   CurrencyIcon,
   TrendingUpIcon,
+  BarChart3Icon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,17 +43,23 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({
         gradient: 'from-amber-500 to-orange-500',
         icon: CalendarIcon,
       },
-      EQUITY: {
+      EQ: {
         colors:
           'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
         gradient: 'from-emerald-500 to-teal-500',
         icon: CurrencyIcon,
       },
+      "0": {
+        colors:
+          'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+        gradient: 'from-blue-500 to-indigo-500',
+        icon: BarChart3Icon,
+      },
     };
-    return configs[series as keyof typeof configs] || configs.EQUITY;
+    return configs[series as keyof typeof configs] || configs.EQ;
   };
 
-  const config = getTypeConfig(instrument.series || 'EQUITY');
+  const config = getTypeConfig(instrument.series || 'EQ');
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
@@ -87,7 +94,9 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({
                   ? `${instrument.option_type} Option`
                   : instrument.series === 'FUTURE'
                     ? 'Future'
-                    : 'Equity'}
+                    : instrument.series === '0'
+                      ? 'Index'
+                      : 'Equity'}
               </Badge>
               <h3 className="text-2xl font-bold text-foreground">
                 {instrument.exchange_code}
