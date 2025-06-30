@@ -24,7 +24,8 @@ const AboutPage = () => {
       }
       subheader={
         <PageSubHeader>
-          Full-stack Developer with a passion for building great software
+          Full-stack Developer | Django, Svelte, React | Building end-to-end
+          systems
         </PageSubHeader>
       }
     >
@@ -45,26 +46,27 @@ const AboutPage = () => {
                 <div className="text-center sm:text-left">
                   <h1 className="text-3xl font-bold">Naveed Khan</h1>
                   <p className="text-lg text-muted-foreground">
-                    Full-stack Developer
+                    Full-stack Software Developer
                   </p>
                   <div className="flex flex-wrap justify-center gap-2 mt-4 sm:justify-start">
                     <Badge
                       variant="secondary"
                       className="flex items-center gap-1"
                     >
-                      <HiMap className="w-4 h-4" /> London, ON
+                      <HiMap className="w-4 h-4" /> Srinagar, Kashmir / London,
+                      ON
                     </Badge>
                     <Badge
                       variant="secondary"
                       className="flex items-center gap-1"
                     >
-                      <HiPhone className="w-4 h-4" /> +1(226) 236-7245
+                      <HiPhone className="w-4 h-4" /> [Phone Redacted]
                     </Badge>
                     <Badge
                       variant="secondary"
                       className="flex items-center gap-1"
                     >
-                      <HiMail className="w-4 h-4" /> nkhan364@uwo.ca
+                      <HiMail className="w-4 h-4" /> [Email Redacted]
                     </Badge>
                     <Badge
                       variant="secondary"
@@ -104,14 +106,15 @@ const AboutPage = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                As a Full-stack Developer with extensive experience in back-end
-                engineering and a strong foundation in front-end technologies, I
-                excel in tasks ranging from requirements analysis and project
-                evaluation to implementation and debugging. I collaborate
-                closely with fellow engineers to build robust applications,
-                optimize performance, and enhance user engagement. I prioritize
-                enhancing my communication and collaboration skills, recognizing
-                their pivotal role in achieving success.
+                I’m a Full-stack Developer with experience across backend,
+                frontend, and infrastructure. My career started with
+                backend-heavy work in Django, but over time I’ve grown into
+                full-stack roles spanning React, Svelte, and cloud-native
+                tooling. I enjoy building structured, scalable systems with an
+                eye for performance and developer experience. Currently wrapping
+                up my MEng at Western University, I’m working part-time at
+                Cypienta leading major features end-to-end in both their Django
+                and Svelte stacks.
               </p>
             </CardContent>
           </Card>
@@ -125,26 +128,26 @@ const AboutPage = () => {
                 <div>
                   <h3 className="mb-2 font-semibold">Languages</h3>
                   <p className="text-muted-foreground">
-                    C, C++, Java, Python, JavaScript/TypeScript
+                    Python, JavaScript/TypeScript, SQL, Bash, C++, Java
                   </p>
                 </div>
                 <div>
                   <h3 className="mb-2 font-semibold">Frameworks</h3>
                   <p className="text-muted-foreground">
-                    Django, Fast API, Flask, Spring, Express, React, Next.js,
-                    Angular, Vue
+                    Django, DRF, FastAPI, React, Next.js, SvelteKit
                   </p>
                 </div>
                 <div>
                   <h3 className="mb-2 font-semibold">Databases</h3>
                   <p className="text-muted-foreground">
-                    MySQL, PostgreSQL, MongoDB, Redis
+                    PostgreSQL, Redis, SQLite, MySQL
                   </p>
                 </div>
                 <div>
-                  <h3 className="mb-2 font-semibold">Other Skills</h3>
+                  <h3 className="mb-2 font-semibold">Dev & Infra</h3>
                   <p className="text-muted-foreground">
-                    Git, Docker, Docker Compose, GitHub Actions, AWS, GCP
+                    Docker, Kubernetes, Celery, GitHub Actions, AWS CDK, Helm,
+                    GCP
                   </p>
                 </div>
               </div>
@@ -159,55 +162,41 @@ const AboutPage = () => {
               <div>
                 <h3 className="text-lg font-semibold">Full-stack Developer</h3>
                 <p className="mb-2 text-sm text-muted-foreground">
-                  RiskTec Systems, Toronto, ON | Apr 2024 - Present
+                  Cypienta | Jan 2025 - Present
                 </p>
                 <ul className="pl-5 space-y-1 list-disc text-muted-foreground">
                   <li>
-                    Facilitated meetings with stakeholders to discuss the data
-                    model, ensuring the application's database strictly adhered
-                    to it.
+                    Own full-stack development across Django and Svelte
+                    codebases
                   </li>
                   <li>
-                    Developed backend APIs following best RESTful practices, and
-                    during PRs, ensured all developers adhered to these best
-                    practices.
+                    Led architecture refactors: Vite migration, Celery queues,
+                    UI audits
                   </li>
                   <li>
-                    Implemented trade logic to ensure all relevant tables are
-                    correctly updated upon the execution of a ticket.
+                    Handled Kubernetes-based deployments on AWS and Minikube
                   </li>
                   <li>
-                    Led the implementation of a comprehensive and dynamic
-                    mandate check logic for pre-trade tickets.
+                    Implemented analytics, AG-Event mapping, and LLM-based
+                    integrations
                   </li>
                 </ul>
               </div>
               <Separator />
               <div>
-                <h3 className="text-lg font-semibold">Back-end Engineer</h3>
+                <h3 className="text-lg font-semibold">Backend Engineer</h3>
                 <p className="mb-2 text-sm text-muted-foreground">
-                  GenioBITS Technologies, Pune, MH | Jun 2022 - Mar 2023
+                  GenioBITS Technologies | Jun 2022 - Mar 2023
                 </p>
                 <ul className="pl-5 space-y-1 list-disc text-muted-foreground">
                   <li>
-                    Enhanced the backtesting module by adding a feature to
-                    dynamically link different parameters using AND/OR grouping,
-                    making backtesting more comprehensive.
+                    Built scalable modules for trading strategy backtesting
                   </li>
                   <li>
-                    Led the development of a strategy optimization module,
-                    allowing users to input ranges and options, generating all
-                    possible strategy combinations, and running backtests on
-                    them.
+                    Integrated Celery workers and optimized task performance
                   </li>
                   <li>
-                    Set up Celery and Celery Beat for running asynchronous tasks
-                    and scheduled cron jobs.
-                  </li>
-                  <li>
-                    Identified and resolved blocking queries in the backtesting
-                    process, creating a custom caching solution that reduced
-                    backtesting time by 85%.
+                    Reduced compute time by 85% through query tuning and caching
                   </li>
                 </ul>
               </div>
@@ -221,24 +210,22 @@ const AboutPage = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Striving to deliver cutting-edge web solutions that not only
-                  meet but exceed my clients' expectations. We're not just
-                  building websites; we're crafting digital experiences that
-                  leave a lasting impact.
+                  To become a Principal Engineer and build systems that balance
+                  performance, simplicity, and innovation — all while staying
+                  deeply hands-on with code.
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Why Choose Us?</CardTitle>
+                <CardTitle>Why Me?</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  We stand out through a perfect blend of creativity and
-                  collaboration. Your ideas are not just heard; they are
-                  transformed into reality with precision and care, ensuring a
-                  seamless and memorable digital journey.
+                  I bring strong end-to-end ownership, production experience,
+                  and the hunger to improve every day. From database performance
+                  to frontend polish — I care about quality across the stack.
                 </p>
               </CardContent>
             </Card>

@@ -1,5 +1,5 @@
 import json
-import unittest
+import pytest
 from unittest.mock import MagicMock, patch
 
 from django.test import RequestFactory
@@ -8,20 +8,20 @@ from rest_framework import status
 from apps.core.views import BreezeAccountViewSet, InstrumentViewSet
 
 
-class TestInstrumentViewSet(unittest.TestCase):
+class TestInstrumentViewSet:
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.factory = RequestFactory()
         self.view = InstrumentViewSet.as_view({"get": "list"})
 
-    @patch("apps.core.views.Instrument.objects")
+    @patch("apps.core.views.InstrumentViewSet.filter_queryset")
     @patch("apps.core.views.Exchanges.objects")
-    @patch("apps.core.views.InstrumentViewSet.get_serializer")  # Patch get_serializer
-    @patch(
-        "apps.core.views.InstrumentViewSet.permission_classes", new=[]
-    )  # Patch permission_classes
+    @patch("apps.core.views.Instrument.objects")
+    @patch("apps.core.views.InstrumentViewSet.get_serializer")
+    @patch("apps.core.views.InstrumentViewSet.permission_classes", new=[])
     def test_list_instruments_success(
-        self, MockGetSerializer, MockExchangesObjects, MockInstrumentObjects
+        self, MockGetSerializer, MockExchangesObjects, MockInstrumentObjects, MockFilterQueryset
     ):
         # Create a mock request
         request = self.factory.get(
@@ -35,10 +35,10 @@ class TestInstrumentViewSet(unittest.TestCase):
         mock_exchange.title = "NSE"
         MockExchangesObjects.filter.return_value.last.return_value = mock_exchange
 
-        # Mock Instrument.objects.filter()
-        mock_instrument_queryset = MagicMock()
-        mock_instrument_queryset.exists.return_value = True
-        MockInstrumentObjects.filter.return_value = mock_instrument_queryset
+        # Mock the view's filter_queryset method to avoid database calls
+        mock_queryset = MagicMock()
+        mock_queryset.exists.return_value = True
+        MockFilterQueryset.return_value = mock_queryset
 
         # Mock the serializer instance returned by get_serializer
         mock_serializer_instance = MagicMock()
@@ -51,41 +51,40 @@ class TestInstrumentViewSet(unittest.TestCase):
         response_data = json.loads(response.content)  # Parse content as JSON
 
         # Assertions
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data["msg"], "Ok")
-        self.assertEqual(response_data["data"], [{"id": 1, "name": "Test Instrument"}])
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["msg"] == "Ok"
+        assert response_data["data"] == [{"id": 1, "name": "Test Instrument"}]
 
-        MockExchangesObjects.filter.assert_called_once_with(title="NSE")
-        MockInstrumentObjects.filter.assert_called_once()
-        MockGetSerializer.assert_called_once_with(mock_instrument_queryset, many=True)
+        MockGetSerializer.assert_called_once_with(mock_queryset, many=True)
 
-    @patch(
-        "apps.core.views.InstrumentViewSet.permission_classes", new=[]
-    )  # Patch permission_classes
-    def test_list_instruments_missing_exchange(self):
+    @patch("apps.core.views.InstrumentViewSet.permission_classes", new=[])
+    @patch("apps.core.views.Exchanges.objects")
+    def test_list_instruments_missing_exchange(self, MockExchangesObjects):
         request = self.factory.get("/instruments/", {"search": "test"})
         request.user = MagicMock()
-        request.user.is_authenticated = True  # Set is_authenticated to True
+        request.user.is_authenticated = True
         response = self.view(request)
         response.render()
         response_data = json.loads(response.content)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data["msg"], "Exchange is required")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response_data["msg"] == "Exchange is required"
 
-    @patch(
-        "apps.core.views.InstrumentViewSet.permission_classes", new=[]
-    )  # Patch permission_classes
-    def test_list_instruments_short_search_term(self):
+    @patch("apps.core.views.InstrumentViewSet.permission_classes", new=[])
+    @patch("apps.core.views.Exchanges.objects")
+    def test_list_instruments_short_search_term(self, MockExchangesObjects):
+        # Mock the exchange lookup to return a valid exchange
+        mock_exchange = MagicMock()
+        mock_exchange.title = "NSE"
+        MockExchangesObjects.filter.return_value.last.return_value = mock_exchange
+
         request = self.factory.get("/instruments/", {"exchange": "NSE", "search": "t"})
         request.user = MagicMock()
         request.user.is_authenticated = True  # Set is_authenticated to True
         response = self.view(request)
         response.render()
         response_data = json.loads(response.content)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response_data["msg"], "Search term must be at least 2 characters long"
-        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response_data["msg"] == "Search term must be at least 2 characters long"
 
     @patch("apps.core.views.Exchanges.objects")
     @patch("apps.core.views.Instrument.objects")
@@ -105,48 +104,47 @@ class TestInstrumentViewSet(unittest.TestCase):
         response = self.view(request)
         response.render()
         response_data = json.loads(response.content)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data["msg"], "Invalid Exchange")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response_data["msg"] == "Invalid Exchange"
         MockExchangesObjects.filter.assert_called_once_with(title="INVALID")
-        MockInstrumentObjects.filter.assert_not_called()
 
+    @patch("apps.core.views.InstrumentViewSet.filter_queryset")
     @patch("apps.core.views.Exchanges.objects")
     @patch("apps.core.views.Instrument.objects")
-    @patch("apps.core.views.InstrumentViewSet.get_serializer")  # Patch get_serializer
-    @patch(
-        "apps.core.views.InstrumentViewSet.permission_classes", new=[]
-    )  # Patch permission_classes
+    @patch("apps.core.views.InstrumentViewSet.get_serializer")
+    @patch("apps.core.views.InstrumentViewSet.permission_classes", new=[])
     def test_list_instruments_no_instruments_found(
-        self, MockGetSerializer, MockInstrumentObjects, MockExchangesObjects
+        self, MockGetSerializer, MockInstrumentObjects, MockExchangesObjects, MockFilterQueryset
     ):
         request = self.factory.get(
             "/instruments/", {"exchange": "NSE", "search": "nomatch"}
         )
         request.user = MagicMock()
-        request.user.is_authenticated = True  # Set is_authenticated to True
+        request.user.is_authenticated = True
 
         mock_exchange = MagicMock()
         mock_exchange.title = "NSE"
         MockExchangesObjects.filter.return_value.last.return_value = mock_exchange
 
-        mock_instrument_queryset = MagicMock()
-        mock_instrument_queryset.exists.return_value = False
-        MockInstrumentObjects.filter.return_value = mock_instrument_queryset
+        # Mock the view's filter_queryset method to return empty queryset
+        mock_queryset = MagicMock()
+        mock_queryset.exists.return_value = False
+        MockFilterQueryset.return_value = mock_queryset
 
         response = self.view(request)
         response.render()
         response_data = json.loads(response.content)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response_data["msg"], "No instruments found")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response_data["msg"] == "No instruments found"
 
         MockExchangesObjects.filter.assert_called_once_with(title="NSE")
-        MockInstrumentObjects.filter.assert_called_once()
         MockGetSerializer.assert_not_called()  # Serializer should not be called if no instruments found
 
 
-class TestBreezeAccountViewSet(unittest.TestCase):
+class TestBreezeAccountViewSet:
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.factory = RequestFactory()
         self.view_list = BreezeAccountViewSet.as_view({"get": "list"})
         self.view_create = BreezeAccountViewSet.as_view({"post": "create"})
@@ -183,9 +181,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data["msg"], "Okay")
-        self.assertEqual(response_data["data"], [{"id": 1, "api_key": "test_key"}])
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["msg"] == "Okay"
+        assert response_data["data"] == [{"id": 1, "api_key": "test_key"}]
         MockBreezeAccountObjects.filter.assert_called_once_with(user=request.user)
         MockGetSerializer.assert_called_once_with(mock_queryset, many=True)
 
@@ -204,8 +202,8 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response_data["msg"], "No accounts found")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response_data["msg"] == "No accounts found"
         MockBreezeAccountObjects.filter.assert_called_once_with(user=request.user)
 
     @patch("apps.core.views.BreezeAccountViewSet.get_serializer")
@@ -226,9 +224,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response_data["msg"], "Account created successfully")
-        self.assertEqual(response_data["data"], {"id": 2, "api_key": "new_key"})
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response_data["msg"] == "Account created successfully"
+        assert response_data["data"] == {"id": 2, "api_key": "new_key"}
         mock_serializer_instance.is_valid.assert_called_once_with()
         mock_serializer_instance.save.assert_called_once_with(user=request.user)
 
@@ -250,14 +248,12 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data, {"api_key": ["This field may not be blank."]})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response_data == {"api_key": ["This field may not be blank."]}
         mock_serializer_instance.is_valid.assert_called_once_with()
         mock_serializer_instance.save.assert_not_called()
 
-    @patch(
-        "apps.core.views.BreezeAccount.objects"
-    )  # Patch BreezeAccount.objects directly
+    @patch("apps.core.views.BreezeAccount.objects")
     @patch("apps.core.views.get_object_or_404")
     @patch("apps.core.views.BreezeAccountViewSet.get_serializer")
     @patch("apps.core.views.breeze_session_manager")
@@ -295,9 +291,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data["msg"], "Account updated successfully")
-        self.assertEqual(response_data["data"], {"id": 1, "api_key": "updated_key"})
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["msg"] == "Account updated successfully"
+        assert response_data["data"] == {"id": 1, "api_key": "updated_key"}
         MockGetObjectOr404.assert_called_once()
         mock_serializer_instance.is_valid.assert_called_once_with()
         mock_serializer_instance.save.assert_called_once_with()
@@ -343,9 +339,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data["msg"], "Account updated successfully")
-        self.assertEqual(response_data["data"], {"id": 1, "some_other_field": "value"})
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["msg"] == "Account updated successfully"
+        assert response_data["data"] == {"id": 1, "some_other_field": "value"}
         MockGetObjectOr404.assert_called_once()
         mock_serializer_instance.is_valid.assert_called_once_with()
         mock_serializer_instance.save.assert_called_once_with()
@@ -378,11 +374,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data["msg"], "done")
-        self.assertEqual(
-            response_data["data"], {"session_status": True, "websocket_status": True}
-        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["msg"] == "done"
+        assert response_data["data"] == {"session_status": True, "websocket_status": True}
         MockBreezeSessionManager.initialize_session.assert_called_once_with(
             request.user.id
         )
@@ -400,9 +394,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response_data["msg"], "WebSocket Started successfully")
-        self.assertEqual(response_data["data"], "WebSocket Started")
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response_data["msg"] == "WebSocket Started successfully"
+        assert response_data["data"] == "WebSocket Started"
         MockWebsocketStart.delay.assert_called_once_with(request.user.id)
 
     @patch(
@@ -433,9 +427,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_data["msg"], "Session refreshed successfully")
-        self.assertEqual(response_data["data"], {"session_status": True})
+        assert response.status_code == status.HTTP_200_OK
+        assert response_data["msg"] == "Session refreshed successfully"
+        assert response_data["data"] == {"session_status": True}
         MockBreezeSessionManager.refresh_session.assert_called_once_with(
             request.user.id
         )
@@ -449,6 +443,7 @@ class TestBreezeAccountViewSet(unittest.TestCase):
     @patch(
         "apps.core.views.BreezeAccount.DoesNotExist"
     )  # Patch the actual exception class
+    @pytest.mark.django_db
     def test_refresh_session_failed(
         self, MockDoesNotExist, MockBreezeSessionManager, MockBreezeAccountObjects
     ):
@@ -471,9 +466,9 @@ class TestBreezeAccountViewSet(unittest.TestCase):
         response.render()
         response_data = json.loads(response.content)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_data["msg"], "Session refresh failed")
-        self.assertEqual(response_data["data"], {"session_status": False})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response_data["msg"] == "Session refresh failed"
+        assert response_data["data"] == {"session_status": False}
         MockBreezeSessionManager.refresh_session.assert_called_once_with(
             request.user.id
         )

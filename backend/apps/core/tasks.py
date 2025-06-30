@@ -10,6 +10,7 @@ from pytz import timezone
 from apps.account.models import User
 from apps.core.breeze import BreezeConnect, breeze_session_manager
 from apps.core.helper import date_parser
+from apps.core.utils import fetch_historical_data
 from apps.core.models import (
     Candle,
     SubscribedInstruments,
@@ -185,17 +186,48 @@ def sub_candle_maker(ins_id: int):
             # buy_volume = tick.get("totalBuyQt", 0)
             # sell_volume = tick.get("totalSellQ", 0)
             candle_time = tick.date.replace(second=0, microsecond=0)
-            candle, created = Candle.objects.get_or_create(
-                instrument_id=ins_id,
-                date=candle_time,
-                defaults={
-                    "open": tick.ltp,
-                    "high": tick.ltp,
-                    "low": tick.ltp,
-                    "close": tick.ltp,
-                    "volume": tick.ltq,
-                },
-            )
+            try:
+                # Try to get a single candle
+                candle, created = Candle.objects.get_or_create(
+                    instrument_id=ins_id,
+                    date=candle_time,
+                    defaults={
+                        "open": tick.ltp,
+                        "high": tick.ltp,
+                        "low": tick.ltp,
+                        "close": tick.ltp,
+                        "volume": tick.ltq,
+                    },
+                )
+            except Candle.MultipleObjectsReturned:
+                # If multiple candles exist for the same time, merge them
+                candles = list(
+                    Candle.objects.filter(instrument_id=ins_id, date=candle_time)
+                )
+                logger.warning(
+                    f"Multiple candles found for instrument ID {ins_id} at {candle_time}. Merging."
+                )
+
+                # Create a new merged candle with the first candle's open and earliest date
+                merged_candle = candles[0]
+
+                # Find the lowest low, highest high, and sum volumes
+                for c in candles[1:]:
+                    merged_candle.low = min(merged_candle.low, c.low)
+                    merged_candle.high = max(merged_candle.high, c.high)
+                    merged_candle.volume += c.volume
+                    # Keep the latest close
+                    merged_candle.close = c.close
+
+                # Save the merged candle and delete others
+                merged_candle.save()
+                Candle.objects.filter(instrument_id=ins_id, date=candle_time).exclude(
+                    id=merged_candle.id
+                ).delete()
+
+                # Use the merged candle for further processing
+                candle = merged_candle
+                created = False
 
             if not created:
                 updated = False
@@ -267,21 +299,32 @@ def load_instrument_candles(ins_id: int, user_id: int, duration: int = 4):
         if sub_ins.expiry:
             expiry = sub_ins.expiry
 
-        data = fetch_historical_data(
-            sess, start, end, sub_ins.short_name, expiry, sub_ins.stock_token, sub_ins
-        )
-
-        if data:
+        # Define a callback function to process data batches as they arrive
+        def process_candle_batch(batch_data):
             candles_to_create = []
-            for item in data:
+
+            # Log batch processing start time
+            batch_start = datetime.now()
+            logger.info(
+                f"Processing batch of {len(batch_data)} candles for instrument ID {ins_id}"
+            )
+
+            for item in batch_data:
                 date = datetime.strptime(item["datetime"], "%Y-%m-%d %H:%M:%S")
                 market_open_time = date.replace(
                     hour=9, minute=15, second=0, microsecond=0
                 )
+                market_close_time = date.replace(
+                    hour=15, minute=30, second=0, microsecond=0
+                )
 
-                if date.time() < market_open_time.time():
+                if (
+                    date.time() < market_open_time.time()
+                    or date.time() > market_close_time.time()
+                ):
                     continue
-
+                # now convert date to India timezone
+                date = india_tz.localize(date)
                 candle = Candle(
                     instrument=sub_ins,
                     date=date,
@@ -293,23 +336,42 @@ def load_instrument_candles(ins_id: int, user_id: int, duration: int = 4):
                 )
                 candles_to_create.append(candle)
 
-            # Bulk create candles in chunks
+            # Bulk create the batch of candles immediately
             if candles_to_create:
-                chunk_size = 800
-                for i in range(0, len(candles_to_create), chunk_size):
-                    chunk = candles_to_create[i : i + chunk_size]
-                    Candle.objects.bulk_create(chunk)
+                db_start = datetime.now()
+                Candle.objects.bulk_create(candles_to_create, ignore_conflicts=True)
+                db_time = datetime.now() - db_start
+                batch_time = datetime.now() - batch_start
+
                 logger.info(
-                    f"Loaded {len(candles_to_create)} candles for instrument ID {ins_id}."
+                    f"Created {len(candles_to_create)} candles for instrument ID {ins_id}. "
+                    f"DB time: {db_time.total_seconds():.2f}s, Total time: {batch_time.total_seconds():.2f}s"
                 )
+
+        # Fetch and process historical data using the callback with reverse order
+        logger.info(
+            f"Starting historical data fetch for instrument ID {ins_id} from {start} to {end}"
+        )
+        fetch_historical_data(
+            sess,
+            start,
+            end,
+            sub_ins.short_name,
+            expiry,
+            sub_ins.stock_token,
+            sub_ins,
+            batch_callback=process_candle_batch,
+            reverse_order=True,
+        )
 
         # Update percentage loading status
         percentage = sub_ins.percentage
         percentage.percentage = 100
         percentage.is_loading = True
         percentage.save()
+
         # Enqueue the subscription request in Redis cache
-        redis_client = cache.client.get_client()
+        redis_client = cache.client.get_client("default")
         subscription = {"stock_token": sub_ins.stock_token}
         subscription_queue = f"user:{user_id}:subscriptions"
         redis_client.rpush(subscription_queue, json.dumps(subscription))
@@ -345,92 +407,6 @@ def load_candles(user_id: int):
         )
     except Exception as e:
         logger.error(f"Error in load_candles: {e}", exc_info=True)
-
-
-def fetch_historical_data(
-    breeze_session: BreezeConnect,
-    start: datetime,
-    end: datetime,
-    short_name: str,
-    expiry: datetime,
-    stock_token: str,
-    instrument: SubscribedInstruments,
-) -> list:
-    """
-    Fetches historical data from the Breeze API for the given instrument within the specified date range.
-
-    Args:
-        session (BreezeSession): The Breeze session for API communication.
-        start (datetime): The start datetime for fetching data.
-        end (datetime): The end datetime for fetching data.
-        short_name (str): The short name of the instrument.
-        expiry (datetime): The expiry datetime if applicable.
-        stock_token (str): The stock token identifier.
-        instrument (SubscribedInstruments): The subscribed instrument instance.
-
-    Returns:
-        list: A list of historical data dictionaries.
-    """
-    data = []
-    current_start = start
-    diff: timedelta = end - start
-    div = max(diff.days // 2, 1)  # Prevent division by zero
-
-    try:
-        while current_start < end:
-            # Update loading percentage incrementally
-            instrument.percentage.percentage += (1 / div) * 100
-            instrument.percentage.save()
-
-            current_end = min(current_start + timedelta(days=2), end)
-
-            if instrument.series.upper() == "OPTION":
-                market = "NFO"
-                product_type = "options"
-                option_type = (
-                    "call" if instrument.option_type.upper() == "CE" else "put"
-                )
-                strike_price = str(instrument.strike_price)
-                date_parser(expiry) if expiry else None
-            else:
-                market = "NSE" if stock_token.startswith("4") else "BSE"
-                product_type = "futures"
-                option_type = None
-                strike_price = None
-
-            current_data = breeze_session.get_historical_data_v2(
-                interval="1minute",
-                from_date=date_parser(current_start),
-                to_date=date_parser(current_end),
-                stock_code=short_name,
-                exchange_code=market,
-                product_type=(
-                    product_type if instrument.series.upper() != "OPTION" else "options"
-                ),
-                expiry_date=date_parser(expiry) if expiry else None,
-                right=option_type,
-                strike_price=strike_price if strike_price else None,
-            )
-            fetched_data = current_data.get("Success", [])
-            if fetched_data:
-                data.extend(fetched_data)
-                logger.info(
-                    f"Fetched {len(fetched_data)} data points for instrument {short_name} from {current_start} to {current_end}."
-                )
-
-            current_start += timedelta(days=2)
-
-        # Final update to set percentage to 90% before completion
-        instrument.percentage.percentage = 90
-        instrument.percentage.save()
-
-    except Exception as e:
-        logger.error(
-            f"Error in fetch_historical_data for instrument {short_name}: {e}",
-            exc_info=True,
-        )
-
-    return data
 
 
 @shared_task(name="resample_candles")

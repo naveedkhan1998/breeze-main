@@ -22,7 +22,7 @@ import { Time } from 'lightweight-charts';
 
 import { Button } from '@/components/ui/button';
 
-import { HiX, HiChartBar } from 'react-icons/hi';
+import { HiChartBar, HiCog } from 'react-icons/hi';
 
 import type { Candle, Instrument } from '@/types/common-types';
 import { useTheme } from '@/components/ThemeProvider';
@@ -118,6 +118,15 @@ const GraphsPage: React.FC = () => {
     );
   }, [data, isDarkMode]);
 
+  // Check if all volume values are zero
+  const hasValidVolume = useMemo(() => {
+    if (!data) return false;
+    return data.data.some(({ volume = 0 }: Candle) => volume > 0);
+  }, [data]);
+
+  // Only show volume if user enabled it AND there's valid volume data
+  const shouldShowVolume = showVolume && hasValidVolume;
+
   useEffect(() => {
     let intervalId: number | null = null;
     if (autoRefresh) {
@@ -136,7 +145,7 @@ const GraphsPage: React.FC = () => {
 
     const getChartsToSync = () => {
       const charts = [];
-      if (showVolume && volumeChartRef.current)
+      if (shouldShowVolume && volumeChartRef.current)
         charts.push(volumeChartRef.current);
       return charts;
     };
@@ -171,14 +180,14 @@ const GraphsPage: React.FC = () => {
         handleVisibleTimeRangeChange
       );
     };
-  }, [showVolume]);
+  }, [shouldShowVolume]);
 
   useEffect(() => {
     const cleanup = syncCharts();
     return () => {
       if (cleanup) cleanup();
     };
-  }, [syncCharts, seriesData, showVolume]);
+  }, [syncCharts, seriesData, shouldShowVolume]);
 
   const handleDownload = () => {
     const headers = 'Date,Time,Open,High,Low,Close,Volume';
@@ -219,7 +228,7 @@ const GraphsPage: React.FC = () => {
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [dispatch]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -256,14 +265,18 @@ const GraphsPage: React.FC = () => {
                 maxSize={35}
                 className="min-w-0"
               >
-                <div className="h-full p-4 bg-gradient-to-b from-sidebar-background/30 to-sidebar-background/10">
+                <div className="h-full p-4 ">
                   <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between p-5 border-b border-sidebar-border/30">
+                    <div className="flex items-center justify-between p-4 border-b border-border/30 ">
                       <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-chart-1 to-chart-2"></div>
-                        <h3 className="font-bold text-sidebar-foreground">
-                          Settings
-                        </h3>
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                          <HiCog className="w-4 h-4 text-chart-1" />
+                        </div>
+                        <div>
+                          <span className="font-bold text-card-foreground">
+                            Controls
+                          </span>
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
@@ -271,10 +284,10 @@ const GraphsPage: React.FC = () => {
                         onClick={() => dispatch(setShowControls(false))}
                         className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
                       >
-                        <HiX className="w-4 h-4" />
+                        <X className="w-4 h-4" />
                       </Button>
                     </div>
-                    <div className="flex-1 p-5 overflow-y-auto scroll-fade scrollbar-hidden">
+                    <div className="flex-1 p-5 overflow-y-auto">
                       <ChartControls />
                     </div>
                   </div>
@@ -289,7 +302,7 @@ const GraphsPage: React.FC = () => {
             <div className="h-full p-4">
               <ResizablePanelGroup direction="vertical">
                 {/* Main Chart */}
-                <ResizablePanel defaultSize={showVolume ? 75 : 100}>
+                <ResizablePanel defaultSize={shouldShowVolume ? 75 : 100}>
                   <MainChart
                     seriesData={seriesData}
                     mode={isDarkMode}
@@ -299,7 +312,7 @@ const GraphsPage: React.FC = () => {
                 </ResizablePanel>
 
                 {/* Enhanced Volume Chart */}
-                {showVolume && (
+                {shouldShowVolume && (
                   <>
                     <ResizableHandle withHandle />
                     <ResizablePanel defaultSize={25} minSize={15}>

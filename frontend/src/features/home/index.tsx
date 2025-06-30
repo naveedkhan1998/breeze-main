@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 
-import { toast } from 'react-toastify';
-import { HiRefresh, HiSearch, HiChartBar, HiClock } from 'react-icons/hi';
+import { toast } from 'sonner';
+import { HiRefresh, HiSearch, HiChartBar } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,8 +28,8 @@ import {
 } from '@/api/instrumentService';
 import { useStartWebsocketMutation } from '@/api/breezeServices';
 import type { Instrument } from '@/types/common-types';
-import BreezeStatusCard from '../dashboard/components/BreezeStatusCard';
-import InstrumentCard from '../instruments/components/InstrumentCard';
+import BreezeStatusCard from '../../shared/components/BreezeStatusCard';
+import InstrumentCard from './components/InstrumentCard';
 
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery('');
@@ -108,21 +108,26 @@ const HomePage: React.FC = () => {
       );
 
       responses.forEach(({ worker, status }, index) => {
-        toast.update(toastIds[index], {
-          render: `${worker.name}: ${status}`,
-          type: status === 'Healthy' ? 'success' : 'error',
-          isLoading: false,
-          autoClose: 1000,
-        });
+        toast.dismiss(toastIds[index]);
+        if (status === 'Healthy') {
+          toast.success(`${worker.name}: ${status}`, {
+            position: 'bottom-right',
+            duration: 1000,
+          });
+        } else {
+          toast.error(`${worker.name}: ${status}`, {
+            position: 'bottom-right',
+            duration: 1000,
+          });
+        }
       });
     } catch (error) {
       console.error('Error during health checks:', error);
       workers.forEach((worker, index) => {
-        toast.update(toastIds[index], {
-          render: `${worker.name}: Check failed`,
-          type: 'error',
-          isLoading: false,
-          autoClose: 1000,
+        toast.dismiss(toastIds[index]);
+        toast.error(`${worker.name}: Check failed`, {
+          position: 'bottom-right',
+          duration: 1000,
         });
       });
     } finally {
@@ -200,7 +205,7 @@ const HomePage: React.FC = () => {
       }
     >
       <PageContent>
-        <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-2">
           <BreezeStatusCard />
           <Card className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -216,18 +221,6 @@ const HomePage: React.FC = () => {
               </p>
             </CardContent>
           </Card>
-          <Card className="overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Last Update</CardTitle>
-              <HiClock className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {new Date().toLocaleTimeString()}
-              </div>
-              <p className="text-xs text-muted-foreground">Updates every 2s</p>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="flex flex-col justify-between gap-4 mb-6 md:flex-row md:items-center">
@@ -238,7 +231,8 @@ const HomePage: React.FC = () => {
           >
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="equity">Equity</TabsTrigger>
+              <TabsTrigger value="0">Index</TabsTrigger>
+              <TabsTrigger value="EQ">Equity</TabsTrigger>
               <TabsTrigger value="future">Future</TabsTrigger>
               <TabsTrigger value="option">Option</TabsTrigger>
             </TabsList>
@@ -275,7 +269,7 @@ const HomePage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+              className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             >
               {sortedAndFilteredInstruments.map((instrument: Instrument) => (
                 <motion.div
@@ -284,6 +278,7 @@ const HomePage: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.2 }}
+                  className="h-full"
                 >
                   <InstrumentCard
                     instrument={instrument}
@@ -300,11 +295,14 @@ const HomePage: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {sortedAndFilteredInstruments.length === 0 && (
+        {data && sortedAndFilteredInstruments.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64">
             <HiSearch className="w-16 h-16 mb-4 text-muted-foreground" />
             <p className="text-xl font-medium text-muted-foreground">
               No instruments found
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Try adjusting your search or filter criteria
             </p>
           </div>
         )}

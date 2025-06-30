@@ -1,11 +1,16 @@
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
 import { Switch } from '@/components/ui/switch';
 import {
   Form,
@@ -67,29 +72,36 @@ const CreateBreezeForm = () => {
       header={
         <PageHeader>
           <span className="bg-gradient-to-r from-primary to-accent bg-clip-text">
-            Create Breeze Account
+            Setup Breeze Account
           </span>
         </PageHeader>
       }
       subheader={
-        <PageSubHeader>Set up your ICICI Direct Breeze account</PageSubHeader>
+        <PageSubHeader>
+          Create your ICICI Direct Breeze account to get started
+        </PageSubHeader>
       }
     >
       <PageContent>
-        <div className="flex items-center justify-center">
+        <div className="flex justify-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
-            className="w-full max-w-lg"
+            className="w-full max-w-md"
           >
-            <Card className="shadow-xl">
-              <CardContent className="pt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Setup</CardTitle>
+                <CardDescription>
+                  Enter your ICICI Direct API credentials
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                    className="space-y-4"
                   >
                     <FormField
                       control={form.control}
@@ -99,7 +111,7 @@ const CreateBreezeForm = () => {
                           <FormLabel>Account Name</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="Enter account name"
+                              placeholder="e.g., My Trading Account"
                               {...field}
                             />
                           </FormControl>
@@ -115,7 +127,10 @@ const CreateBreezeForm = () => {
                         <FormItem>
                           <FormLabel>API Key</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter API key" {...field} />
+                            <Input
+                              placeholder="Enter your API key"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -131,30 +146,10 @@ const CreateBreezeForm = () => {
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="Enter API secret"
+                              placeholder="Enter your API secret"
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="session_token"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Session Token</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter session token (optional)"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Optional: Provide a session token if you have one
-                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -164,13 +159,11 @@ const CreateBreezeForm = () => {
                       control={form.control}
                       name="is_active"
                       render={({ field }) => (
-                        <FormItem className="flex items-center justify-between p-4 border rounded-lg">
+                        <FormItem className="flex items-center justify-between p-3 space-y-0 border rounded-lg">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-base">
-                              Active Status
-                            </FormLabel>
+                            <FormLabel>Activate Account</FormLabel>
                             <FormDescription>
-                              Enable this to activate the account immediately
+                              Enable this account immediately
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -191,10 +184,13 @@ const CreateBreezeForm = () => {
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Creating...
+                          Creating Account...
                         </>
                       ) : (
-                        'Create Breeze Account'
+                        <>
+                          <Check className="w-4 h-4 mr-2" />
+                          Create Account
+                        </>
                       )}
                     </Button>
                   </form>

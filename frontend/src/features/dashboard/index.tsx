@@ -1,123 +1,110 @@
 import { useState } from 'react';
-import { Line } from 'react-chartjs-2';
-import { FaChartLine, FaUser, FaCog, FaBell } from 'react-icons/fa';
-import 'chart.js/auto';
+import {
+  PageLayout,
+  PageHeader,
+  PageSubHeader,
+  PageContent,
+} from '@/components/PageLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LineChart, User, Settings, Bell } from 'lucide-react';
 
 const DashBoardPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
-  const data = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-      {
-        label: 'Portfolio Value',
-        data: [10000, 12000, 14000, 13000, 15000, 16000, 17000],
-        borderColor: 'rgba(75,192,192,1)',
-        backgroundColor: 'rgba(75,192,192,0.2)',
-      },
-    ],
-  };
-
   return (
-    <div className="flex flex-col h-screen p-6 bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-lg dark:bg-gray-800">
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
-          <button
-            className={`flex-1 p-4 text-center ${
-              activeTab === 'overview'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                : 'text-gray-600 dark:text-gray-400'
-            } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <FaChartLine className="mr-2" />
-            <span>Overview</span>
-          </button>
-          <button
-            className={`flex-1 p-4 text-center ${
-              activeTab === 'profile'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                : 'text-gray-600 dark:text-gray-400'
-            } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab('profile')}
-          >
-            <FaUser className="mr-2" />
-            <span>Profile</span>
-          </button>
-          <button
-            className={`flex-1 p-4 text-center ${
-              activeTab === 'settings'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                : 'text-gray-600 dark:text-gray-400'
-            } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab('settings')}
-          >
-            <FaCog className="mr-2" />
-            <span>Settings</span>
-          </button>
-          <button
-            className={`flex-1 p-4 text-center ${
-              activeTab === 'notifications'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                : 'text-gray-600 dark:text-gray-400'
-            } font-semibold flex items-center justify-center space-x-2`}
-            onClick={() => setActiveTab('notifications')}
-          >
-            <FaBell className="mr-2" />
-            <span>Notifications</span>
-          </button>
-        </div>
+    <PageLayout
+      header={
+        <PageHeader>
+          <span className="bg-clip-text bg-gradient-to-r from-primary to-accent">
+            Dashboard
+          </span>
+        </PageHeader>
+      }
+      subheader={
+        <PageSubHeader>
+          Overview of your trading activities and account settings.
+        </PageSubHeader>
+      }
+    >
+      <PageContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">
+              <LineChart className="w-4 h-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="profile">
+              <User className="w-4 h-4 mr-2" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
+            <TabsTrigger value="notifications">
+              <Bell className="w-4 h-4 mr-2" />
+              Notifications
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="p-6">
-          {activeTab === 'overview' && (
-            <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                Portfolio Overview
-              </h3>
-              <div className="w-full h-80">
-                <Line data={data} options={{ maintainAspectRatio: false }} />
-              </div>
-            </div>
-          )}
+          <TabsContent value="overview" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Portfolio Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center w-full rounded-md h-80 bg-muted">
+                  <p className="text-muted-foreground">Chart Placeholder</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {activeTab === 'profile' && (
-            <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                User Profile
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                This section will display the user's profile information.
-              </p>
-              {/* Profile information UI elements would go here */}
-            </div>
-          )}
+          <TabsContent value="profile" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  This section will display the user's profile information.
+                </p>
+                {/* Profile information UI elements would go here */}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {activeTab === 'settings' && (
-            <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                Settings
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Here you can adjust your application settings.
-              </p>
-              {/* Settings form or other UI elements would go here */}
-            </div>
-          )}
+          <TabsContent value="settings" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Here you can adjust your application settings.
+                </p>
+                {/* Settings form or other UI elements would go here */}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {activeTab === 'notifications' && (
-            <div>
-              <h3 className="mb-4 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                Notifications
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Manage your notification preferences here.
-              </p>
-              {/* Notification settings UI elements would go here */}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+          <TabsContent value="notifications" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Manage your notification preferences here.
+                </p>
+                {/* Notification settings UI elements would go here */}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </PageContent>
+    </PageLayout>
   );
 };
 

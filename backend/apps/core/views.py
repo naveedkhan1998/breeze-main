@@ -226,6 +226,10 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
             )
 
 
+from django_filters.rest_framework import DjangoFilterBackend
+from apps.core.filters import InstrumentFilter
+
+
 class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     A ViewSet for viewing Instrument instances.
@@ -234,44 +238,37 @@ class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Instrument.objects.all()
     serializer_class = AllInstrumentSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = InstrumentFilter
 
-    def list(self, request):
-        exchange = request.query_params.get("exchange")
-        search_term = request.query_params.get("search")
+    def list(self, request, *args, **kwargs):
+        # Validate required parameters
+        exchange_param = request.query_params.get("exchange")
+        search_param = request.query_params.get("search")
 
-        if not exchange:
+        # Check if exchange is provided
+        if not exchange_param:
             return Response(
                 {"msg": "Exchange is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not search_term or len(search_term) < 2:
+        # Check if search term is at least 2 characters
+        if search_param and len(search_param) < 2:
             return Response(
                 {"msg": "Search term must be at least 2 characters long"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        qs_exchange = Exchanges.objects.filter(title=exchange).last()
-        if not qs_exchange:
+        # Validate exchange exists
+        if not Exchanges.objects.filter(title=exchange_param).last():
             return Response(
                 {"msg": "Invalid Exchange"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Create filters based on the search term
-        filters = Q(exchange=qs_exchange) & (
-            Q(strike_price__icontains=search_term)
-            | Q(short_name__icontains=search_term)
-            | Q(company_name__icontains=search_term)
-            | Q(stock_token__icontains=search_term)
-            | Q(token__icontains=search_term)
-            | Q(instrument__icontains=search_term)
-            | Q(series__icontains=search_term)
-            | Q(option_type__icontains=search_term)
-            | Q(exchange_code__icontains=search_term)
-        )
+        queryset = self.filter_queryset(self.get_queryset())
 
-        queryset = Instrument.objects.filter(filters)
-
-        if qs_exchange.title == "FON":
+        # Apply the 50-item limit for "FON" exchange if it's part of the filtered queryset
+        if exchange_param and exchange_param.upper() == "FON":
             queryset = queryset[:50]
 
         if queryset.exists():

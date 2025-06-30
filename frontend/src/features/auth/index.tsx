@@ -46,7 +46,7 @@ const LoginRegPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-purple-900 dark:to-violet-900">
+    <div className="h-screen p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-purple-900 dark:to-violet-900">
       {/* Animated background elements */}
       <div className="fixed inset-0">
         {[...Array(20)].map((_, i) => (
@@ -65,16 +65,16 @@ const LoginRegPage: React.FC = () => {
         ))}
       </div>
 
-      <div className="relative flex items-center justify-center min-h-screen py-8 mx-auto ">
+      <div className="relative flex items-center justify-center h-full py-8 mx-auto ">
         <motion.div
           className="w-full max-w-5xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="grid overflow-hidden bg-white shadow-2xl md:grid-cols-5 dark:bg-gray-800/95 backdrop-blur-lg">
+          <Card className="grid grid-cols-1 overflow-hidden bg-white shadow-2xl lg:grid-cols-5 dark:bg-gray-800/95 backdrop-blur-lg">
             {/* Left Panel - Features */}
-            <div className="relative col-span-2 p-8 text-white bg-gradient-to-br from-indigo-600 to-purple-700">
+            <div className="relative hidden col-span-2 p-8 text-white md:block bg-gradient-to-br from-indigo-600 to-purple-700">
               <div className="sticky space-y-8 top-8">
                 <div className="space-y-4">
                   <h1 className="text-4xl font-bold">ICICI Breeze</h1>
@@ -117,7 +117,7 @@ const LoginRegPage: React.FC = () => {
             </div>
 
             {/* Right Panel - Auth Forms */}
-            <div className="col-span-3 p-8 max-h-[90vh] overflow-y-auto">
+            <div className="col-span-full p-8 max-h-[90vh] overflow-y-auto md:col-span-3">
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
@@ -147,7 +147,7 @@ const LoginRegPage: React.FC = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ duration: 0.3 }}
-                      className="mt-4 flex min-h-[400px] items-center"
+                      className="mt-4"
                     >
                       <Login />
                     </motion.div>
