@@ -108,21 +108,26 @@ const HomePage: React.FC = () => {
       );
 
       responses.forEach(({ worker, status }, index) => {
-        toast.update(toastIds[index], {
-          render: `${worker.name}: ${status}`,
-          type: status === 'Healthy' ? 'success' : 'error',
-          isLoading: false,
-          autoClose: 1000,
-        });
+        toast.dismiss(toastIds[index]);
+        if (status === 'Healthy') {
+          toast.success(`${worker.name}: ${status}`, {
+            position: 'bottom-right',
+            duration: 1000,
+          });
+        } else {
+          toast.error(`${worker.name}: ${status}`, {
+            position: 'bottom-right',
+            duration: 1000,
+          });
+        }
       });
     } catch (error) {
       console.error('Error during health checks:', error);
       workers.forEach((worker, index) => {
-        toast.update(toastIds[index], {
-          render: `${worker.name}: Check failed`,
-          type: 'error',
-          isLoading: false,
-          autoClose: 1000,
+        toast.dismiss(toastIds[index]);
+        toast.error(`${worker.name}: Check failed`, {
+          position: 'bottom-right',
+          duration: 1000,
         });
       });
     } finally {
