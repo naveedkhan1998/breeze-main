@@ -46,7 +46,7 @@ const LoginRegPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-purple-900 dark:to-violet-900">
+    <div className="h-screen p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-purple-900 dark:to-violet-900">
       {/* Animated background elements */}
       <div className="fixed inset-0">
         {[...Array(20)].map((_, i) => (
@@ -65,7 +65,7 @@ const LoginRegPage: React.FC = () => {
         ))}
       </div>
 
-      <div className="relative flex items-center justify-center min-h-screen py-8 mx-auto ">
+      <div className="relative flex items-center justify-center h-full py-8 mx-auto ">
         <motion.div
           className="w-full max-w-5xl"
           initial={{ opacity: 0, y: 20 }}
