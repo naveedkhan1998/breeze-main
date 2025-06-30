@@ -1,36 +1,60 @@
-// hooks/useResizeObserver.ts
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface Size {
   width: number;
   height: number;
 }
 
-const useResizeObserver = (ref: React.RefObject<HTMLElement>): Size => {
+const useResizeObserver = (targetRef: React.RefObject<HTMLElement>): Size => {
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    const element = targetRef.current;
+    if (!element) return;
 
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      // eslint-disable-next-line prefer-const
-      for (let entry of entries) {
-        const { width, height } = entry.contentRect;
-        setSize({ width, height });
-      }
+    // Set initial size
+    const updateSize = () => {
+      const rect = element.getBoundingClientRect();
+      setSize({
+        width: Math.floor(rect.width),
+        height: Math.floor(rect.height),
+      });
     };
 
-    const resizeObserver = new ResizeObserver(handleResize);
-    resizeObserver.observe(ref.current);
+    // Initial measurement
+    updateSize();
 
-    // Initialize size
-    const { width, height } = ref.current.getBoundingClientRect();
-    setSize({ width, height });
+    // Create ResizeObserver
+    if (window.ResizeObserver) {
+      resizeObserverRef.current = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          setSize({
+            width: Math.floor(width),
+            height: Math.floor(height),
+          });
+        }
+      });
+
+      resizeObserverRef.current.observe(element);
+    } else {
+      // Fallback for browsers without ResizeObserver
+      const handleResize = () => updateSize();
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }
 
     return () => {
-      resizeObserver.disconnect();
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
     };
-  }, [ref]);
+  }, [targetRef]);
 
   return size;
 };

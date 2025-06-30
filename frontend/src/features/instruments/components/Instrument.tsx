@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useCallback, memo, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { FixedSizeList as List } from 'react-window';
 
 import type { Instrument as InstrumentType } from '@/types/common-types';
 import { Spinner } from '@/components/ui/spinner';
@@ -12,40 +11,6 @@ import {
   useSubscribeInstrumentMutation,
 } from '@/api/instrumentService';
 import InstrumentItem from './InstrumentItem';
-
-// Custom hook to calculate available height
-const useContainerHeight = () => {
-  const [height, setHeight] = useState(500);
-
-  useEffect(() => {
-    const updateHeight = () => {
-      // Use dynamic viewport height for better mobile support
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-      // Calculate available height:
-      // Total viewport - navbar (~60px) - page padding (~48px) - header (~80px) - filters (~120px) - padding (~32px)
-      const reservedHeight = 340;
-      const availableHeight = window.innerHeight - reservedHeight;
-      setHeight(Math.max(300, availableHeight));
-    };
-
-    // Initial calculation
-    updateHeight();
-
-    // Add event listeners
-    window.addEventListener('resize', updateHeight);
-    window.addEventListener('orientationchange', updateHeight);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', updateHeight);
-      window.removeEventListener('orientationchange', updateHeight);
-    };
-  }, []);
-
-  return height;
-};
 
 // Types
 interface Props {
@@ -59,7 +24,6 @@ interface Props {
 }
 
 // Constants
-
 const SEARCH_DEBOUNCE_DELAY = 500;
 
 const fadeIn = {
@@ -68,45 +32,6 @@ const fadeIn = {
   exit: { opacity: 0 },
 };
 
-// Component for displaying instrument details
-// No longer used - removed for cleaner code
-
-// Virtualized list item component for performance
-const VirtualizedInstrumentItem = memo(
-  ({
-    index,
-    style,
-    data,
-  }: {
-    index: number;
-    style: React.CSSProperties;
-    data: {
-      instruments: InstrumentType[];
-      onSubscribe: (id: number, duration: number) => Promise<void>;
-      subscribingIds: number[];
-    };
-  }) => {
-    const { instruments, onSubscribe, subscribingIds } = data;
-    const instrument = instruments[index];
-
-    if (!instrument) return null;
-
-    return (
-      <div style={style}>
-        <InstrumentItem
-          instrument={instrument}
-          onSubscribe={onSubscribe}
-          isSubscribing={subscribingIds.includes(instrument.id)}
-        />
-      </div>
-    );
-  }
-);
-
-VirtualizedInstrumentItem.displayName = 'VirtualizedInstrumentItem';
-
-// Item height constant for virtualization
-const ITEM_HEIGHT = 220;
 const Instrument: React.FC<Props> = ({
   exchange,
   searchTerm,
@@ -116,7 +41,6 @@ const Instrument: React.FC<Props> = ({
   expiryBefore,
   instrumentType,
 }) => {
-  const containerHeight = useContainerHeight();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [debouncedOptionType, setDebouncedOptionType] = useState(optionType);
   const [debouncedStrikePrice, setDebouncedStrikePrice] = useState(strikePrice);
@@ -174,10 +98,8 @@ const Instrument: React.FC<Props> = ({
     skip: shouldSkipQuery,
   });
 
-  // Memoize instruments data to prevent unnecessary re-renders
   const instruments = useMemo(() => data?.data || [], [data?.data]);
   const instrumentsCount = instruments.length;
-  const useVirtualization = instrumentsCount > 0; // Always use virtualization when there are items
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -215,25 +137,15 @@ const Instrument: React.FC<Props> = ({
     [subscribeInstrument, refetch]
   );
 
-  // Memoize virtualization data
-  const virtualizationData = useMemo(
-    () => ({
-      instruments,
-      onSubscribe: handleSubscribe,
-      subscribingIds,
-    }),
-    [instruments, handleSubscribe, subscribingIds]
-  );
-
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-muted/50">
+      <div className="flex flex-col items-center justify-center h-full rounded-lg bg-muted/50">
         <Spinner className="w-12 h-12 text-primary" />
         <p className="mt-4 text-lg font-medium text-foreground">
           Loading instruments...
         </p>
         <p className="text-sm text-muted-foreground">
-          Please wait while we fetch the latest data
+          Please wait while we fetch the latest data.
         </p>
       </div>
     );
@@ -241,16 +153,16 @@ const Instrument: React.FC<Props> = ({
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-destructive/5">
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center rounded-lg bg-destructive/5">
         <div className="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-destructive/10">
           <AlertCircle className="w-8 h-8 text-destructive" />
         </div>
         <h3 className="mb-2 text-lg font-semibold text-destructive">
           Error Loading Instruments
         </h3>
-        <p className="max-w-md text-sm text-center text-muted-foreground">
-          We encountered an issue while fetching the instruments. Please try
-          refreshing the page or contact support if the problem persists.
+        <p className="max-w-md text-sm text-muted-foreground">
+          We encountered an issue while fetching instruments. Please try
+          refreshing or contact support.
         </p>
       </div>
     );
@@ -260,58 +172,42 @@ const Instrument: React.FC<Props> = ({
     return (
       <motion.div
         {...fadeIn}
-        className="flex flex-col items-center justify-center h-full bg-muted/30"
+        className="flex flex-col items-center justify-center h-full p-8 text-center"
       >
         <div className="flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-muted">
-          <span className="text-2xl">🔍</span>
+          <span className="text-4xl">🔍</span>
         </div>
         <h3 className="mb-2 text-xl font-semibold text-foreground">
           No Instruments Found
         </h3>
-        <p className="max-w-md text-center text-muted-foreground">
-          Try adjusting your search terms or filters to find the instruments
-          you're looking for.
+        <p className="max-w-md text-muted-foreground">
+          Try adjusting your search or filter criteria to find what you're
+          looking for.
         </p>
       </motion.div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Performance indicator for large datasets */}
-      {useVirtualization && (
-        <div className="flex-shrink-0 px-4 py-2 text-xs border-b text-muted-foreground bg-muted/30 border-border">
-          Displaying {instrumentsCount} instruments with performance
-          optimization
+    <div className="flex flex-col h-[calc(100vh-20rem)]">
+      <div className="flex-shrink-0 px-4 py-3 text-sm border-b text-muted-foreground bg-muted/30 border-border">
+        <div className="flex items-center justify-between">
+          <span>Displaying {instrumentsCount} instruments</span>
+          <span className="text-xs">Ready to subscribe</span>
         </div>
-      )}
+      </div>
 
-      <div className="flex-1 overflow-hidden">
-        {useVirtualization ? (
-          <List
-            height={containerHeight}
-            width="100%"
-            itemCount={instrumentsCount}
-            itemSize={ITEM_HEIGHT}
-            itemData={virtualizationData}
-            overscanCount={5}
-          >
-            {VirtualizedInstrumentItem}
-          </List>
-        ) : (
-          <div className="h-full overflow-auto">
-            <AnimatePresence>
-              {instruments.map((instrument: InstrumentType) => (
-                <InstrumentItem
-                  key={instrument.id}
-                  instrument={instrument}
-                  onSubscribe={handleSubscribe}
-                  isSubscribing={subscribingIds.includes(instrument.id)}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+      <div className="flex-1 p-4 overflow-y-auto bg-muted/20">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 auto-rows-max">
+          {instruments.map((instrument: InstrumentType) => (
+            <InstrumentItem
+              key={instrument.id}
+              instrument={instrument}
+              onSubscribe={handleSubscribe}
+              isSubscribing={subscribingIds.includes(instrument.id)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

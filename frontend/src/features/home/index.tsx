@@ -276,7 +276,7 @@ const HomePage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+              className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             >
               {sortedAndFilteredInstruments.map((instrument: Instrument) => (
                 <motion.div
@@ -285,6 +285,7 @@ const HomePage: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.2 }}
+                  className="h-full"
                 >
                   <InstrumentCard
                     instrument={instrument}
@@ -301,11 +302,14 @@ const HomePage: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {sortedAndFilteredInstruments.length === 0 && (
+        {data && sortedAndFilteredInstruments.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64">
             <HiSearch className="w-16 h-16 mb-4 text-muted-foreground" />
             <p className="text-xl font-medium text-muted-foreground">
               No instruments found
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Try adjusting your search or filter criteria
             </p>
           </div>
         )}

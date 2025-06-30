@@ -1,10 +1,18 @@
 import React, { useState, useCallback, memo } from 'react';
-import { Plus } from 'lucide-react';
+import {
+  Plus,
+  Building2,
+  Calendar,
+  Target,
+  TrendingUp,
+  BarChart3,
+  Currency,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
-
-import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 import type { Instrument as InstrumentType } from '@/types/common-types';
 import { Spinner } from '@/components/ui/spinner';
@@ -28,160 +36,144 @@ const InstrumentItem: React.FC<InstrumentItemProps> = memo(
   ({ instrument, onSubscribe, isSubscribing }) => {
     const [duration, setDuration] = useState<number>(4);
 
-    const getInstrumentTypeIcon = useCallback(() => {
-      if (instrument.series === 'OPTION') {
-        return instrument.option_type === 'CE' ? '📞' : '📉';
-      }
-      if (instrument.series === 'FUTURE') return '📊';
-      return '🏢';
-    }, [instrument.series, instrument.option_type]);
-
-    const getInstrumentTypeBadge = useCallback(() => {
-      if (instrument.series === 'OPTION') {
-        return (
-          <div className="flex items-center gap-1">
-            <span className="text-xs">{getInstrumentTypeIcon()}</span>
-            <span className="text-xs font-semibold text-accent-foreground">
-              {instrument.option_type} Option
-            </span>
-          </div>
-        );
-      }
-      if (instrument.series === 'FUTURE') {
-        return (
-          <div className="flex items-center gap-1">
-            <span className="text-xs">📊</span>
-            <span className="text-xs font-semibold text-primary">Future</span>
-          </div>
-        );
-      }
-      return (
-        <div className="flex items-center gap-1">
-          <span className="text-xs">🏢</span>
-          <span className="text-xs font-semibold text-muted-foreground">
-            Equity
-          </span>
-        </div>
-      );
-    }, [instrument.series, instrument.option_type, getInstrumentTypeIcon]);
+    const getTypeConfig = useCallback((series: string) => {
+      const configs = {
+        OPTION: {
+          colors:
+            'bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-300 border-violet-200 dark:border-violet-800',
+          gradient: 'from-violet-500 to-fuchsia-500',
+          icon: TrendingUp,
+        },
+        FUTURE: {
+          colors:
+            'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+          gradient: 'from-amber-500 to-orange-500',
+          icon: Calendar,
+        },
+        EQ: {
+          colors:
+            'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+          gradient: 'from-emerald-500 to-teal-500',
+          icon: Currency,
+        },
+        '0': {
+          colors:
+            'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+          gradient: 'from-blue-500 to-indigo-500',
+          icon: BarChart3,
+        },
+      };
+      return configs[series as keyof typeof configs] || configs.EQ;
+    }, []);
 
     const handleSubscribeClick = useCallback(() => {
       onSubscribe(instrument.id, duration);
     }, [onSubscribe, instrument.id, duration]);
 
+    const formatDate = useCallback((dateString?: string) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    }, []);
+
+    const config = getTypeConfig(instrument.series || 'EQ');
+    const TypeIcon = config.icon;
+
     return (
-      <motion.div
-        {...fadeInUp}
-        className="flex flex-col justify-between p-6 transition-all duration-200 ease-in-out border-b border-border sm:flex-row sm:items-center hover:bg-muted/50 group"
-      >
-        <div className="flex-grow mb-4 sm:mb-0">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="text-xl font-bold transition-colors text-foreground group-hover:text-primary">
-              {instrument.exchange_code}
-            </h3>
-            {getInstrumentTypeBadge()}
+      <motion.div {...fadeInUp} className="w-full">
+        <Card className="relative h-full overflow-hidden group min-h-[20rem]">
+          <div className="absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none group-hover:opacity-100">
+            <div
+              className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-5`}
+            />
           </div>
 
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">📊</span>
-                <span className="font-medium">Token:</span>
-                <span className="px-2 py-1 text-xs rounded bg-muted text-muted-foreground">
-                  {instrument.stock_token || instrument.token}
-                </span>
+          <CardContent className="flex flex-col h-full p-6">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex-1 min-w-0">
+                <Badge variant="secondary" className={`mb-2 ${config.colors}`}>
+                  {instrument.series === 'OPTION'
+                    ? `${instrument.option_type} Option`
+                    : instrument.series === 'FUTURE'
+                      ? 'Future'
+                      : instrument.series === '0'
+                        ? 'Index'
+                        : 'Equity'}
+                </Badge>
+                <h3 className="text-2xl font-bold truncate text-foreground">
+                  {instrument.exchange_code}
+                </h3>
               </div>
-              {instrument.series && (
-                <div className="flex items-center gap-1">
-                  <span className="font-medium">Series:</span>
-                  <span className="px-2 py-1 text-xs rounded bg-muted text-muted-foreground">
-                    {instrument.series}
-                  </span>
+              <TypeIcon className="flex-shrink-0 w-6 h-6 opacity-50 text-muted-foreground" />
+            </div>
+
+            <div className="flex-grow mb-6 space-y-4">
+              {instrument.company_name && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Building2 className="flex-shrink-0 w-4 h-4" />
+                  <span className="truncate">{instrument.company_name}</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="text-xs">🔢</span>
+                <span>Token: {instrument.stock_token || instrument.token}</span>
+              </div>
+
+              {(instrument.series === 'OPTION' ||
+                instrument.series === 'FUTURE') && (
+                <div className="space-y-2">
+                  {instrument.strike_price !== null && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Target className="w-4 h-4 text-primary" />
+                      <span className="text-muted-foreground">Strike:</span>
+                      <Badge className="font-mono bg-primary/10 text-primary border-primary/20">
+                        ₹{instrument.strike_price}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {instrument.expiry && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      <span>Expires: {formatDate(instrument.expiry)}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-1">
-                <span className="text-xs">🏢</span>
-                <span className="font-medium">Exchange:</span>
-                <span>{instrument.exchange_code}</span>
-              </div>
-              {instrument.expiry && (
-                <div className="flex items-center gap-1">
-                  <span className="text-xs">📅</span>
-                  <span className="font-medium">Expiry:</span>
-                  <span className="px-2 py-1 text-xs rounded bg-accent/10 text-accent">
-                    {instrument.expiry}
-                  </span>
-                </div>
-              )}
+            <div className="pt-4 mt-auto space-y-3 border-t border-border">
+              <DurationSelector
+                duration={duration}
+                onDurationChange={setDuration}
+              />
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleSubscribeClick}
+                disabled={isSubscribing}
+                className="w-full transition-all duration-200 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-lg "
+              >
+                {isSubscribing ? (
+                  <>
+                    <Spinner className="w-4 h-4 mr-2" />
+                    Loading Data...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Load {duration} Weeks Data
+                  </>
+                )}
+              </Button>
             </div>
-
-            {instrument.strike_price !== null && instrument.option_type && (
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <span className="text-xs">💰</span>
-                  <span className="font-medium">Strike:</span>
-                  <span className="px-2 py-1 font-mono text-xs rounded bg-primary/10 text-primary">
-                    ₹{instrument.strike_price}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs">
-                    {instrument.option_type === 'CE' ? '📞' : '📉'}
-                  </span>
-                  <span className="font-medium">Type:</span>
-                  <span
-                    className={cn(
-                      'px-2 py-1 text-xs rounded font-semibold',
-                      instrument.option_type === 'CE'
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-destructive/10 text-destructive'
-                    )}
-                  >
-                    {instrument.option_type}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {instrument.company_name && (
-              <div className="flex items-start gap-1 mt-2">
-                <span className="text-xs mt-0.5">🏭</span>
-                <div>
-                  <span className="font-medium">Company:</span>
-                  <p className="mt-0.5 text-foreground font-medium">
-                    {instrument.company_name}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center mt-4 space-x-3 sm:mt-0">
-          <DurationSelector
-            duration={duration}
-            onDurationChange={setDuration}
-          />
-          <Button
-            variant="default"
-            size="lg"
-            onClick={handleSubscribeClick}
-            disabled={isSubscribing}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 min-w-[140px] action-button"
-          >
-            {isSubscribing ? (
-              <Spinner className="w-4 h-4" />
-            ) : (
-              <>
-                <Plus className="w-4 h-4 mr-2" />
-                Subscribe
-              </>
-            )}
-          </Button>
-        </div>
+          </CardContent>
+        </Card>
       </motion.div>
     );
   }
