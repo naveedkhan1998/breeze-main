@@ -1,11 +1,16 @@
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, KeyRound, Lock, Check } from 'lucide-react';
 
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
 import { Switch } from '@/components/ui/switch';
 import {
   Form,
@@ -20,12 +25,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {
-  PageLayout,
-  PageHeader,
-  PageSubHeader,
-  PageContent,
-} from '@/components/PageLayout';
+import { PageLayout, PageContent } from '@/components/PageLayout';
 import { useCreateBreezeMutation } from '@/api/breezeServices';
 
 const formSchema = z.object({
@@ -63,146 +63,138 @@ const CreateBreezeForm = () => {
   };
 
   return (
-    <PageLayout
-      header={
-        <PageHeader>
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text">
-            Create Breeze Account
-          </span>
-        </PageHeader>
-      }
-      subheader={
-        <PageSubHeader>Set up your ICICI Direct Breeze account</PageSubHeader>
-      }
-    >
-      <PageContent>
-        <div className="flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-lg"
-          >
-            <Card className="shadow-xl">
-              <CardContent className="pt-6">
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Account Name</FormLabel>
-                          <FormControl>
+    <PageLayout>
+      <PageContent className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/40">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-lg"
+        >
+          <Card className="overflow-hidden shadow-2xl rounded-xl">
+            <CardHeader className="p-8 text-center bg-gradient-to-br from-primary to-accent">
+              <CardTitle className="text-3xl font-bold text-primary-foreground">
+                Welcome to Breeze
+              </CardTitle>
+              <CardDescription className="text-lg text-primary-foreground/90">
+                Let's set up your trading account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-8">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Account Name</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute w-5 h-5 -translate-y-1/2 text-muted-foreground left-3 top-1/2" />
                             <Input
-                              placeholder="Enter account name"
+                              placeholder="e.g., My Trading Account"
                               {...field}
+                              className="pl-10"
                             />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="api_key"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>API Key</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter API key" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="api_key"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>API Key</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <KeyRound className="absolute w-5 h-5 -translate-y-1/2 text-muted-foreground left-3 top-1/2" />
+                            <Input
+                              placeholder="Enter your API key"
+                              {...field}
+                              className="pl-10"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="api_secret"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>API Secret</FormLabel>
-                          <FormControl>
+                  <FormField
+                    control={form.control}
+                    name="api_secret"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>API Secret</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Lock className="absolute w-5 h-5 -translate-y-1/2 text-muted-foreground left-3 top-1/2" />
                             <Input
                               type="password"
-                              placeholder="Enter API secret"
+                              placeholder="Enter your API secret"
                               {...field}
+                              className="pl-10"
                             />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="session_token"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Session Token</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter session token (optional)"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Optional: Provide a session token if you have one
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="is_active"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">
-                              Active Status
-                            </FormLabel>
-                            <FormDescription>
-                              Enable this to activate the account immediately
-                            </FormDescription>
                           </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Creating...
-                        </>
-                      ) : (
-                        'Create Breeze Account'
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+                  <FormField
+                    control={form.control}
+                    name="is_active"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base font-semibold">
+                            Activate Account
+                          </FormLabel>
+                          <FormDescription>
+                            Enable this to start using the account right away.
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    className="w-full py-6 text-lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-5 h-5 mr-3" />
+                        Complete Setup
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </motion.div>
       </PageContent>
     </PageLayout>
   );

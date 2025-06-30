@@ -16,9 +16,8 @@ import {
 import type { BreezeAccount } from '@/types/common-types';
 
 import CreateBreezeForm from './components/CreateBreezeForm';
-import AccountDetailsCard from './components/AccountDetailsCard';
+import AccountDashboard from './components/AccountDashboard';
 import UpdateSessionTokenDialog from './components/UpdateSessionTokenDialog';
-import QuickActionsCard from './components/QuickActionsCard';
 import BreezeStatusCard from '../dashboard/components/BreezeStatusCard';
 
 const AccountsPage = () => {
@@ -117,32 +116,15 @@ const AccountsPage = () => {
             <BreezeStatusCard />
           </motion.div>
 
-          <div className="grid gap-8 md:grid-cols-2">
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <AccountDetailsCard
-                account={account}
-                lastUpdatedHours={lastUpdatedHours}
-                onUpdateSession={() => {
-                  setSelectedAccount(account);
-                  setOpenModal(true);
-                }}
-                onOpenLink={handleOpenLink}
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-6"
-            >
-              <QuickActionsCard />
-            </motion.div>
-          </div>
+          <AccountDashboard
+            account={account}
+            lastUpdatedHours={lastUpdatedHours}
+            onUpdateSession={() => {
+              setSelectedAccount(account);
+              setOpenModal(true);
+            }}
+            onOpenLink={handleOpenLink}
+          />
         </div>
 
         <UpdateSessionTokenDialog
