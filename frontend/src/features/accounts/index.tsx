@@ -18,7 +18,7 @@ import type { BreezeAccount } from '@/types/common-types';
 import CreateBreezeForm from './components/CreateBreezeForm';
 import AccountDashboard from './components/AccountDashboard';
 import UpdateSessionTokenDialog from './components/UpdateSessionTokenDialog';
-import BreezeStatusCard from '../dashboard/components/BreezeStatusCard';
+import BreezeStatusCard from '../../shared/components/BreezeStatusCard';
 
 const AccountsPage = () => {
   const { data, isSuccess, refetch, isLoading } = useGetBreezeQuery('', {

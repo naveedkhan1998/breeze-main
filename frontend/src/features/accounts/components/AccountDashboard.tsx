@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import type { BreezeAccount } from '@/types/common-types';
 
@@ -124,7 +124,10 @@ const AccountDashboard = ({
             className="border-blue-200 bg-blue-50 dark:bg-blue-950/50 dark:border-blue-800"
           >
             <Info className="w-5 h-5 text-blue-600" />
-            <AlertDescription className="ml-3 text-blue-800 dark:text-blue-200">
+            <AlertTitle className="font-semibold text-blue-800 dark:text-blue-200">
+              Important Notice
+            </AlertTitle>
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
               For uninterrupted trading, it's crucial to refresh your session
               token daily.
             </AlertDescription>

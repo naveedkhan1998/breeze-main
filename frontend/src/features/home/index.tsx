@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 
 import { toast } from 'react-toastify';
-import { HiRefresh, HiSearch, HiChartBar, HiClock } from 'react-icons/hi';
+import { HiRefresh, HiSearch, HiChartBar } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ import {
 } from '@/api/instrumentService';
 import { useStartWebsocketMutation } from '@/api/breezeServices';
 import type { Instrument } from '@/types/common-types';
-import BreezeStatusCard from '../dashboard/components/BreezeStatusCard';
+import BreezeStatusCard from '../../shared/components/BreezeStatusCard';
 import InstrumentCard from './components/InstrumentCard';
 
 const HomePage: React.FC = () => {
@@ -200,7 +200,7 @@ const HomePage: React.FC = () => {
       }
     >
       <PageContent>
-        <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-2">
           <BreezeStatusCard />
           <Card className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -214,18 +214,6 @@ const HomePage: React.FC = () => {
               <p className="text-xs text-muted-foreground">
                 Active instruments
               </p>
-            </CardContent>
-          </Card>
-          <Card className="overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">Last Update</CardTitle>
-              <HiClock className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {new Date().toLocaleTimeString()}
-              </div>
-              <p className="text-xs text-muted-foreground">Updates every 2s</p>
             </CardContent>
           </Card>
         </div>
@@ -308,7 +296,7 @@ const HomePage: React.FC = () => {
             <p className="text-xl font-medium text-muted-foreground">
               No instruments found
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="mt-2 text-sm text-muted-foreground">
               Try adjusting your search or filter criteria
             </p>
           </div>
