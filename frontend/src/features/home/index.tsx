@@ -29,7 +29,7 @@ import {
 import { useStartWebsocketMutation } from '@/api/breezeServices';
 import type { Instrument } from '@/types/common-types';
 import BreezeStatusCard from '../dashboard/components/BreezeStatusCard';
-import InstrumentCard from '../instruments/components/InstrumentCard';
+import InstrumentCard from './components/InstrumentCard';
 
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery('');

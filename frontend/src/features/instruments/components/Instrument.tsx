@@ -20,6 +20,40 @@ import {
   useSubscribeInstrumentMutation,
 } from '@/api/instrumentService';
 
+// Custom hook to calculate available height
+const useContainerHeight = () => {
+  const [height, setHeight] = useState(500);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      // Use dynamic viewport height for better mobile support
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+      // Calculate available height:
+      // Total viewport - navbar (~60px) - page padding (~48px) - header (~80px) - filters (~120px) - padding (~32px)
+      const reservedHeight = 340;
+      const availableHeight = window.innerHeight - reservedHeight;
+      setHeight(Math.max(300, availableHeight));
+    };
+
+    // Initial calculation
+    updateHeight();
+
+    // Add event listeners
+    window.addEventListener('resize', updateHeight);
+    window.addEventListener('orientationchange', updateHeight);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      window.removeEventListener('orientationchange', updateHeight);
+    };
+  }, []);
+
+  return height;
+};
+
 // Types
 interface Props {
   exchange: string;
@@ -296,6 +330,7 @@ const Instrument: React.FC<Props> = ({
   expiryBefore,
   instrumentType,
 }) => {
+  const containerHeight = useContainerHeight();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [debouncedOptionType, setDebouncedOptionType] = useState(optionType);
   const [debouncedStrikePrice, setDebouncedStrikePrice] = useState(strikePrice);
@@ -356,7 +391,7 @@ const Instrument: React.FC<Props> = ({
   // Memoize instruments data to prevent unnecessary re-renders
   const instruments = useMemo(() => data?.data || [], [data?.data]);
   const instrumentsCount = instruments.length;
-  const useVirtualization = instrumentsCount > 5; // Use virtualization for large lists
+  const useVirtualization = instrumentsCount > 0; // Always use virtualization when there are items
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -406,7 +441,7 @@ const Instrument: React.FC<Props> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 bg-muted/50">
+      <div className="flex flex-col items-center justify-center h-full bg-muted/50">
         <Spinner className="w-12 h-12 text-primary" />
         <p className="mt-4 text-lg font-medium text-foreground">
           Loading instruments...
@@ -420,7 +455,7 @@ const Instrument: React.FC<Props> = ({
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center h-96 bg-destructive/5">
+      <div className="flex flex-col items-center justify-center h-full bg-destructive/5">
         <div className="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-destructive/10">
           <AlertCircle className="w-8 h-8 text-destructive" />
         </div>
@@ -439,7 +474,7 @@ const Instrument: React.FC<Props> = ({
     return (
       <motion.div
         {...fadeIn}
-        className="flex flex-col items-center justify-center h-96 bg-muted/30"
+        className="flex flex-col items-center justify-center h-full bg-muted/30"
       >
         <div className="flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-muted">
           <span className="text-2xl">🔍</span>
@@ -456,38 +491,42 @@ const Instrument: React.FC<Props> = ({
   }
 
   return (
-    <div className="border-0 rounded-none shadow-none">
+    <div className="flex flex-col h-full">
       {/* Performance indicator for large datasets */}
       {useVirtualization && (
-        <div className="px-4 py-2 text-xs border-b text-muted-foreground bg-muted/30 border-border">
+        <div className="flex-shrink-0 px-4 py-2 text-xs border-b text-muted-foreground bg-muted/30 border-border">
           Displaying {instrumentsCount} instruments with performance
           optimization
         </div>
       )}
 
-      {useVirtualization ? (
-        <List
-          height={600}
-          width="100%"
-          itemCount={instrumentsCount}
-          itemSize={ITEM_HEIGHT}
-          itemData={virtualizationData}
-          overscanCount={5}
-        >
-          {VirtualizedInstrumentItem}
-        </List>
-      ) : (
-        <AnimatePresence>
-          {instruments.map((instrument: InstrumentType) => (
-            <InstrumentItem
-              key={instrument.id}
-              instrument={instrument}
-              onSubscribe={handleSubscribe}
-              isSubscribing={subscribingIds.includes(instrument.id)}
-            />
-          ))}
-        </AnimatePresence>
-      )}
+      <div className="flex-1 overflow-hidden">
+        {useVirtualization ? (
+          <List
+            height={containerHeight}
+            width="100%"
+            itemCount={instrumentsCount}
+            itemSize={ITEM_HEIGHT}
+            itemData={virtualizationData}
+            overscanCount={5}
+          >
+            {VirtualizedInstrumentItem}
+          </List>
+        ) : (
+          <div className="h-full overflow-auto">
+            <AnimatePresence>
+              {instruments.map((instrument: InstrumentType) => (
+                <InstrumentItem
+                  key={instrument.id}
+                  instrument={instrument}
+                  onSubscribe={handleSubscribe}
+                  isSubscribing={subscribingIds.includes(instrument.id)}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

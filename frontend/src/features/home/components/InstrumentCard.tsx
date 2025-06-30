@@ -49,7 +49,7 @@ export const InstrumentCard: React.FC<InstrumentCardProps> = ({
         gradient: 'from-emerald-500 to-teal-500',
         icon: CurrencyIcon,
       },
-      "0": {
+      '0': {
         colors:
           'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800',
         gradient: 'from-blue-500 to-indigo-500',

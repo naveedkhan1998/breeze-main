@@ -36,6 +36,7 @@
     --sidebar-accent-foreground: 210 10% 30%;
     --sidebar-border: 210 10% 85%;
     --sidebar-ring: 210 90% 40%;
+    --vh: 1vh;
   }
   .dark {
     --background: 220 10% 10%; /* Dark Gray */

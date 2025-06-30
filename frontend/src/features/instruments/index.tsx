@@ -142,9 +142,9 @@ const InstrumentsPage: React.FC = () => {
       }
     >
       <PageContent>
-        <div className="">
-          {/* Content Header */}
-          <div className="mb-6">
+        <div className="flex flex-col h-full">
+          {/* Content Header - Fixed */}
+          <div className="mb-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-foreground">
@@ -166,8 +166,9 @@ const InstrumentsPage: React.FC = () => {
               )}
             </div>
           </div>
+
           {/* Sticky Search & Filter Section */}
-          <div className="sticky z-40 w-full p-4 rounded-lg shadow-sm top-16 ">
+          <div className="sticky top-0 z-50 mb-4 p-4 rounded-lg shadow-sm bg-card border flex-shrink-0">
             <div className="space-y-4">
               {/* Search Bar */}
               <div className="relative max-w-2xl mx-auto">
@@ -238,7 +239,7 @@ const InstrumentsPage: React.FC = () => {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <Card className=" border-primary/20">
+                    <Card className="border-primary/20">
                       <CardContent className="p-4">
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="flex items-center gap-2">
@@ -401,46 +402,48 @@ const InstrumentsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Instruments Display */}
-          <Card className="shadow-xl chart-container">
-            <CardContent className="p-0">
-              {useMemo(
-                () => (
-                  <Instrument
-                    exchange={currentExchange?.instrumentExchange || 'NSE'}
-                    searchTerm={searchTerm}
-                    optionType={selectedExchange === 'NFO' ? optionType : ''}
-                    strikePrice={
-                      selectedExchange === 'NFO' ? strikePrice : null
-                    }
-                    expiryAfter={
-                      selectedExchange === 'NFO' && expiryAfter
-                        ? format(expiryAfter, 'yyyy-MM-dd')
-                        : ''
-                    }
-                    expiryBefore={
-                      selectedExchange === 'NFO' && expiryBefore
-                        ? format(expiryBefore, 'yyyy-MM-dd')
-                        : ''
-                    }
-                    instrumentType={
-                      selectedExchange === 'NFO' ? instrumentType : undefined
-                    }
-                  />
-                ),
-                [
-                  currentExchange?.instrumentExchange,
-                  searchTerm,
-                  selectedExchange,
-                  optionType,
-                  strikePrice,
-                  expiryAfter,
-                  expiryBefore,
-                  instrumentType,
-                ]
-              )}
-            </CardContent>
-          </Card>
+          {/* Instruments Display - Flexible height */}
+          <div className="flex-1 overflow-hidden">
+            <Card className="shadow-xl h-full">
+              <CardContent className="p-0 h-full">
+                {useMemo(
+                  () => (
+                    <Instrument
+                      exchange={currentExchange?.instrumentExchange || 'NSE'}
+                      searchTerm={searchTerm}
+                      optionType={selectedExchange === 'NFO' ? optionType : ''}
+                      strikePrice={
+                        selectedExchange === 'NFO' ? strikePrice : null
+                      }
+                      expiryAfter={
+                        selectedExchange === 'NFO' && expiryAfter
+                          ? format(expiryAfter, 'yyyy-MM-dd')
+                          : ''
+                      }
+                      expiryBefore={
+                        selectedExchange === 'NFO' && expiryBefore
+                          ? format(expiryBefore, 'yyyy-MM-dd')
+                          : ''
+                      }
+                      instrumentType={
+                        selectedExchange === 'NFO' ? instrumentType : undefined
+                      }
+                    />
+                  ),
+                  [
+                    currentExchange?.instrumentExchange,
+                    searchTerm,
+                    selectedExchange,
+                    optionType,
+                    strikePrice,
+                    expiryAfter,
+                    expiryBefore,
+                    instrumentType,
+                  ]
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </PageContent>
     </PageLayout>
