@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import {
   FaSignOutAlt,
   FaUserCircle,

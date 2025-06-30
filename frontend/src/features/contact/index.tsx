@@ -96,8 +96,8 @@ const ContactPage = () => {
       header={<PageHeader>Get in Touch</PageHeader>}
       subheader={
         <PageSubHeader>
-          Have a question or project in mind? We'd love to hear from you. Send
-          us a message and we'll respond as soon as possible.
+          Whether you’re looking to collaborate, hire, or just connect—drop a
+          message and I’ll respond shortly.
         </PageSubHeader>
       }
     >
@@ -108,24 +108,18 @@ const ContactPage = () => {
               <CardHeader>
                 <CardTitle>Contact Information</CardTitle>
                 <CardDescription>
-                  Reach out to us through any of these channels
+                  You can also reach me through these channels:
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <ContactItem
-                  icon={Mail}
-                  text="nkhan364@uwo.ca"
-                  href="mailto:nkhan364@uwo.ca"
-                />
+                <ContactItem icon={Mail} text="Email available on request" />
                 <ContactItem
                   icon={Phone}
-                  text="+1 (226) 236-7245"
-                  href="tel:+12262367245"
+                  text="Phone number available upon request"
                 />
                 <ContactItem
                   icon={MapPin}
-                  text="London, Ontario, Canada"
-                  href={'/'}
+                  text="Open to remote or hybrid roles in Canada & worldwide"
                 />
               </CardContent>
             </Card>
@@ -134,7 +128,7 @@ const ContactPage = () => {
               <CardHeader>
                 <CardTitle>Send a Message</CardTitle>
                 <CardDescription>
-                  Fill out the form below and we'll get back to you
+                  Fill out this form to contact me directly.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -206,8 +200,8 @@ const ContactPage = () => {
             >
               <AlertDescription>
                 {submitStatus === 'success'
-                  ? "Message sent successfully! We'll get back to you soon."
-                  : 'Failed to send message. Please try again.'}
+                  ? 'Message sent successfully! I’ll get back to you soon.'
+                  : 'Failed to send message. Please try again later.'}
               </AlertDescription>
             </Alert>
           )}

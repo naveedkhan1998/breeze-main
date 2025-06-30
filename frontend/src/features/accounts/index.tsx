@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 

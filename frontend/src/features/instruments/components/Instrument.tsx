@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 import type { Instrument as InstrumentType } from '@/types/common-types';
 import { Spinner } from '@/components/ui/spinner';

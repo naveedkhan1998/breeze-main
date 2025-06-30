@@ -228,7 +228,7 @@ const GraphsPage: React.FC = () => {
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [dispatch]);
 
   if (isLoading) {
     return <LoadingScreen />;

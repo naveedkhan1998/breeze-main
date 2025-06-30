@@ -33,7 +33,7 @@ vi.mock('src/app/hooks', () => ({
   useAppSelector: () => mockSelector(),
 }));
 
-// Mock react-toastify
+// Mock sonner
 vi.mock('react-toastify', () => ({
   toast: {
     success: vi.fn(),

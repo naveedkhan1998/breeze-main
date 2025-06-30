@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { HiRefresh, HiSearch, HiChartBar } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

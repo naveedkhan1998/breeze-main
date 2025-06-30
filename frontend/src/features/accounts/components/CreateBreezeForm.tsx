@@ -1,4 +1,4 @@
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Loader2, Check } from 'lucide-react';
 

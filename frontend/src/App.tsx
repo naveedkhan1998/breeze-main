@@ -4,7 +4,6 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { useAppSelector } from './app/hooks';
 import { getCurrentToken } from './features/auth/authSlice';
 import { useHealthCheckQuery } from './shared/api/baseApi';
-import Toast from './shared/components/ToastContainer';
 import LoadingScreen from './shared/components/LoadingScreen';
 
 import HomePage from './features/home';
@@ -21,7 +20,7 @@ import DashBoardPage from './features/dashboard';
 
 import { checkEnvironment } from './shared/lib/environment';
 import { ThemeProvider } from './shared/components/ThemeProvider';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
 
 const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
 
@@ -80,7 +79,7 @@ export default function App() {
             />
           ))}
         </Routes>
-        <Toast />
+
         <Toaster />
       </ThemeProvider>
     </BrowserRouter>
