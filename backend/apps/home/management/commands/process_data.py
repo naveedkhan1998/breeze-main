@@ -24,6 +24,35 @@ REQUIRED_EXCHANGES = {
     "NSE": {"code": "4", "exchange": "NSE", "is_option": False},
 }
 
+# Column mappings for each exchange type
+EXCHANGE_COLUMN_MAPPINGS = {
+    "NSE": {
+        "token": 0,
+        "short_name": 1,
+        "series": 2,
+        "company_name": 3,
+        "exchange_code": -1,  # Last column
+    },
+    "BSE": {
+        "token": 0,
+        "short_name": 1,
+        "series": 2,
+        "company_name": 3,
+        "exchange_code": -1,  # Last column
+    },
+    "FON": {
+        "token": 0,
+        "instrument": 1,
+        "short_name": 2,
+        "series": 3,
+        "expiry_date": 4,
+        "strike_price": 5,
+        "option_type": 6,
+        "company_name": 29,  # CompanyName is at index 29
+        "exchange_code": -1,  # Last column
+    },
+}
+
 CHUNK_SIZE = 1000  # Number of records to process in bulk
 
 
@@ -66,8 +95,12 @@ class Command(BaseCommand):
         """
         Downloads and processes the master data if required exchanges are missing or outdated.
         """
-        existing_exchanges = Exchanges.objects.filter(title__in=REQUIRED_EXCHANGES.keys())
-        existing_exchange_titles = set(existing_exchanges.values_list("title", flat=True))
+        existing_exchanges = Exchanges.objects.filter(
+            title__in=REQUIRED_EXCHANGES.keys()
+        )
+        existing_exchange_titles = set(
+            existing_exchanges.values_list("title", flat=True)
+        )
         missing_exchanges = set(REQUIRED_EXCHANGES.keys()) - existing_exchange_titles
 
         # Check for exchanges that need reprocessing due to date criteria
@@ -98,9 +131,7 @@ class Command(BaseCommand):
                         f"Outdated exchanges (>7 days or None dates): {', '.join(outdated_exchanges)}"
                     )
                 )
-            self.stdout.write(
-                self.style.NOTICE("Proceeding to download and process.")
-            )
+            self.stdout.write(self.style.NOTICE("Proceeding to download and process."))
 
         url = "https://directlink.icicidirect.com/NewSecurityMaster/SecurityMaster.zip"
         zip_path = Path(settings.MEDIA_ROOT) / "SecurityMaster.zip"
@@ -161,7 +192,7 @@ class Command(BaseCommand):
                         # Prepare for bulk update
                         exchange = exchange_qs.first()
                         # Convert Path to Django File object
-                        with open(exchange_file_path, 'rb') as f:
+                        with open(exchange_file_path, "rb") as f:
                             django_file = File(f, name=extracted_file)
                             exchange.file.save(extracted_file, django_file, save=False)
                         # Clear existing instruments for this exchange since we're reprocessing
@@ -183,10 +214,12 @@ class Command(BaseCommand):
                         # Save the exchange first to get an ID
                         new_exchange.save()
                         # Then save the file
-                        with open(exchange_file_path, 'rb') as f:
+                        with open(exchange_file_path, "rb") as f:
                             django_file = File(f, name=extracted_file)
-                            new_exchange.file.save(extracted_file, django_file, save=True)
-                        
+                            new_exchange.file.save(
+                                extracted_file, django_file, save=True
+                            )
+
                         self.stdout.write(
                             self.style.SUCCESS(
                                 f"Created new Exchange entry for: {exchange_title}"
@@ -228,7 +261,9 @@ class Command(BaseCommand):
             )
 
             # Check if Instruments already exist for this exchange and exchange is not recently updated
-            if Instrument.objects.filter(exchange=ins).exists() and not self.needs_reprocessing(ins):
+            if Instrument.objects.filter(
+                exchange=ins
+            ).exists() and not self.needs_reprocessing(ins):
                 self.stdout.write(
                     self.style.SUCCESS(
                         f"Instruments for Exchange '{ins.title}' already exist and are up to date. Skipping data loading."
@@ -256,6 +291,16 @@ class Command(BaseCommand):
                     )
                     continue
 
+                # Get column mapping for this exchange
+                column_mapping = EXCHANGE_COLUMN_MAPPINGS.get(ins.title)
+                if not column_mapping:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            f"No column mapping found for exchange: {ins.title}. Skipping."
+                        )
+                    )
+                    continue
+
                 ins_list = []
                 line_count = 0
 
@@ -266,46 +311,106 @@ class Command(BaseCommand):
                     for index, data in enumerate(
                         reader, start=2
                     ):  # Start at 2 considering header
-                        if len(data) < 7:
-                            logger.warning(f"Skipping malformed line {index}: {data}")
-                            continue
-
-                        token = data[0].strip()
-                        short_name = data[1].strip()
-
-                        if token in existing_tokens:
+                        # Validate minimum required columns based on exchange type
+                        min_columns = max(
+                            abs(v)
+                            for v in column_mapping.values()
+                            if isinstance(v, int)
+                        )
+                        if len(data) < min_columns:
+                            logger.warning(
+                                f"Skipping malformed line {index}: insufficient columns ({len(data)} < {min_columns})"
+                            )
                             continue
 
                         try:
+                            token = data[column_mapping["token"]].strip()
+                            if not token:
+                                continue
+
+                            if token in existing_tokens:
+                                continue
+
+                            # Common fields for all exchanges
+                            short_name = data[column_mapping["short_name"]].strip()
+                            exchange_code = data[
+                                column_mapping["exchange_code"]
+                            ].strip()
+
                             if ins.is_option:
-                                expiry_date = (
-                                    datetime.strptime(data[4], "%d-%b-%Y").date()
-                                    if data[4]
-                                    else None
-                                )
-                                strike_price = float(data[5]) if data[5] else 0.0
+                                # For options (FON)
+                                instrument_name = data[
+                                    column_mapping["instrument"]
+                                ].strip()
+                                series = data[column_mapping["series"]].strip()
+                                company_name = data[
+                                    column_mapping["company_name"]
+                                ].strip()
+
+                                # Handle expiry date
+                                expiry_date = None
+                                expiry_str = data[column_mapping["expiry_date"]].strip()
+                                if expiry_str:
+                                    try:
+                                        expiry_date = datetime.strptime(
+                                            expiry_str, "%d-%b-%Y"
+                                        ).date()
+                                    except ValueError:
+                                        try:
+                                            expiry_date = datetime.strptime(
+                                                expiry_str, "%Y-%m-%d"
+                                            ).date()
+                                        except ValueError:
+                                            logger.warning(
+                                                f"Could not parse expiry date '{expiry_str}' for token {token}"
+                                            )
+
+                                # Handle strike price
+                                strike_price = 0.0
+                                strike_str = data[
+                                    column_mapping["strike_price"]
+                                ].strip()
+                                if strike_str:
+                                    try:
+                                        strike_price = float(strike_str)
+                                    except ValueError:
+                                        logger.warning(
+                                            f"Could not parse strike price '{strike_str}' for token {token}"
+                                        )
+
+                                option_type = data[
+                                    column_mapping["option_type"]
+                                ].strip()
+
                                 instrument = Instrument(
                                     exchange=ins,
                                     stock_token=f"{ins.code}.1!{token}",
                                     token=token,
-                                    instrument=data[1].strip(),
+                                    instrument=instrument_name,
                                     short_name=short_name,
-                                    series=data[3].strip(),
-                                    company_name=data[3].strip(),
+                                    series=series,
+                                    company_name=company_name,
                                     expiry=expiry_date,
                                     strike_price=strike_price,
-                                    option_type=data[6].strip(),
-                                    exchange_code=data[-1].strip(),
+                                    option_type=option_type,
+                                    exchange_code=exchange_code,
                                 )
                             else:
+                                # For equity exchanges (NSE, BSE)
+                                series = data[column_mapping["series"]].strip()
+                                company_name = data[
+                                    column_mapping["company_name"]
+                                ].strip()
+
                                 instrument = Instrument(
                                     exchange=ins,
                                     stock_token=f"{ins.code}.1!{token}",
                                     token=token,
+                                    instrument=short_name,  # Use short_name as instrument for equity
                                     short_name=short_name,
-                                    series=data[2].strip(),
-                                    company_name=data[3].strip(),
-                                    exchange_code=data[-1].strip(),
+                                    series=series,
+                                    company_name=company_name,
+                                    exchange_code=exchange_code,
                                 )
 
                             ins_list.append(instrument)
@@ -324,7 +429,8 @@ class Command(BaseCommand):
 
                         except Exception as e:
                             logger.error(
-                                f"Error processing line {index}: {e}", exc_info=True
+                                f"Error processing line {index} for exchange {ins.title}: {e}",
+                                exc_info=True,
                             )
 
                 # Bulk create any remaining instruments

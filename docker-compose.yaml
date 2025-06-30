@@ -91,8 +91,6 @@ services:
     container_name: breeze-celery-worker
     env_file:
       - ./.envs/.env.local
-    environment:
-      PYTHONWARNINGS: "ignore:DateTimeField .* received a naive datetime:RuntimeWarning:django.db.models.fields"
     depends_on:
       backend:
         condition: service_started
