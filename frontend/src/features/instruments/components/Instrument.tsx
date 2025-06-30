@@ -98,7 +98,10 @@ const Instrument: React.FC<Props> = ({
     skip: shouldSkipQuery,
   });
 
-  const instruments = useMemo(() => data?.data || [], [data?.data]);
+  const instruments = useMemo(
+    () => [...(data?.data || [])].reverse(),
+    [data?.data]
+  );
   const instrumentsCount = instruments.length;
 
   useEffect(() => {

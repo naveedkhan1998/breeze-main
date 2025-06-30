@@ -245,20 +245,20 @@ class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
         # Validate required parameters
         exchange_param = request.query_params.get("exchange")
         search_param = request.query_params.get("search")
-        
+
         # Check if exchange is provided
         if not exchange_param:
             return Response(
                 {"msg": "Exchange is required"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Check if search term is at least 2 characters
         if search_param and len(search_param) < 2:
             return Response(
-                {"msg": "Search term must be at least 2 characters long"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"msg": "Search term must be at least 2 characters long"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         # Validate exchange exists
         if not Exchanges.objects.filter(title=exchange_param).last():
             return Response(
