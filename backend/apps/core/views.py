@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
 
 from apps.core.breeze import breeze_session_manager
@@ -26,6 +26,7 @@ from apps.core.serializers import (
     InstrumentSerializer,
     SubscribedSerializer,
 )
+from apps.core.pagination import OffsetPagination
 from apps.core.tasks import load_instrument_candles, resample_candles, websocket_start
 
 logger = logging.getLogger(__name__)
@@ -282,6 +283,8 @@ class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
 
+
+
 class SubscribedInstrumentsViewSet(viewsets.ModelViewSet):
     """
     A ViewSet for viewing and editing SubscribedInstruments instances.
@@ -289,7 +292,8 @@ class SubscribedInstrumentsViewSet(viewsets.ModelViewSet):
 
     queryset = SubscribedInstruments.objects.all()
     serializer_class = SubscribedSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    pagination_class = OffsetPagination
 
     def list(self, request):
         queryset = self.get_queryset()
@@ -325,6 +329,18 @@ class SubscribedInstrumentsViewSet(viewsets.ModelViewSet):
         return Response(
             {"msg": "success", "data": serializer.data}, status=status.HTTP_201_CREATED
         )
+
+    @action(detail=True, methods=["get"], url_path="candles")
+    def candles(self, request, pk=None):
+        instrument = self.get_object()
+        queryset = Candle.objects.filter(instrument=instrument).order_by("-date")
+
+        paginator = self.pagination_class()
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+        serializer = CandleSerializer(paginated_queryset, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
+
 
 
 class CandleViewSet(viewsets.ViewSet):
