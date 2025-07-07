@@ -12,7 +12,13 @@ import {
   selectActiveIndicators,
   removeIndicator,
 } from './graphSlice';
-import React, { useEffect, useMemo, useCallback, useRef } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   ResizableHandle,
@@ -28,7 +34,10 @@ import { HiChartBar, HiCog } from 'react-icons/hi';
 
 import type { Candle, Instrument } from '@/types/common-types';
 import { useTheme } from '@/components/ThemeProvider';
-import { useGetPaginatedCandlesQuery } from '@/api/instrumentService';
+import {
+  useGetPaginatedCandlesQuery,
+  useLazyGetPaginatedCandlesQuery,
+} from '@/api/instrumentService';
 import {
   formatDate,
   calculateRSI,
@@ -64,14 +73,151 @@ const GraphsPage: React.FC = () => {
   const showVolume = useAppSelector(selectShowVolume);
   const autoRefresh = useAppSelector(selectAutoRefresh);
   const seriesType = useAppSelector(selectSeriesType);
-
   const showControls = useAppSelector(selectShowControls);
   const activeIndicators = useAppSelector(selectActiveIndicators);
 
-  const { data, refetch, isLoading, isError } = useGetPaginatedCandlesQuery({
+  // Pagination state
+  const [allCandles, setAllCandles] = useState<Candle[]>([]);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const initialLimit = 200;
+  const loadMoreLimit = 200;
+
+  // Initial data fetch
+  const {
+    data: initialData,
+    refetch,
+    isLoading,
+    isError,
+  } = useGetPaginatedCandlesQuery({
     id: obj?.id,
     tf: timeframe,
+    limit: initialLimit,
+    offset: 0,
   });
+
+  // Lazy query for loading more data
+  const [fetchMoreData] = useLazyGetPaginatedCandlesQuery();
+
+  // Initialize data when initial fetch completes
+  useEffect(() => {
+    if (initialData?.results) {
+      setAllCandles(initialData.results);
+      setCurrentOffset(prev => prev + initialData.results.length);
+      // Check if there's more data using the 'next' field from Django pagination
+      setHasMoreData(!!initialData.next);
+      console.log(
+        'Initial data loaded:',
+        initialData.results.length,
+        'records, offset set to:',
+        initialData.results.length
+      );
+    }
+  }, [initialData]);
+
+  // Reset pagination when timeframe or instrument changes - simplified approach
+  useEffect(() => {
+    // Reset pagination state when key dependencies change
+    setAllCandles([]);
+    setCurrentOffset(0);
+    setHasMoreData(true);
+    setIsLoadingMore(false);
+    console.log('Pagination reset for new timeframe/instrument');
+  }, [timeframe]);
+
+  // Load more data function
+  const loadMoreHistoricalData = useCallback(async () => {
+    if (!obj?.id || isLoadingMore || !hasMoreData || currentOffset === 0) {
+      console.log('Skipping load more data:', {
+        hasObjId: !!obj?.id,
+        isLoadingMore,
+        hasMoreData,
+        currentOffset,
+        reason: currentOffset === 0 ? 'offset is 0' : 'other condition failed',
+      });
+      return;
+    }
+
+    console.log(
+      'Loading more data with offset:',
+      currentOffset,
+      'limit:',
+      loadMoreLimit
+    );
+    console.log('Request params:', {
+      id: obj.id,
+      tf: timeframe,
+      limit: loadMoreLimit,
+      offset: currentOffset,
+    });
+
+    setIsLoadingMore(true);
+
+    try {
+      const response = await fetchMoreData({
+        id: obj.id,
+        tf: timeframe,
+        limit: loadMoreLimit,
+        offset: currentOffset,
+      }).unwrap();
+
+      console.log('Received response:', response);
+      console.log('Response results length:', response?.results?.length);
+
+      if (response?.results && response.results.length > 0) {
+        // Prepend older data to the beginning of the array
+        // Since Django returns newest first, the offset data is older
+        setAllCandles(prev => {
+          console.log('Previous candles length:', prev.length);
+          console.log('Adding candles length:', response.results.length);
+          return [...response.results, ...prev];
+        });
+
+        const newOffset = currentOffset + response.results.length;
+        console.log('Updating offset from', currentOffset, 'to', newOffset);
+        setCurrentOffset(newOffset);
+
+        // Use Django's 'next' field to determine if more data is available
+        setHasMoreData(!!response.next);
+        console.log('Has more data:', !!response.next);
+      } else {
+        console.log('No more data available');
+        setHasMoreData(false);
+      }
+    } catch (error) {
+      console.error('Error loading more data:', error);
+      setHasMoreData(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [
+    obj?.id,
+    timeframe,
+    currentOffset,
+    isLoadingMore,
+    hasMoreData,
+    fetchMoreData,
+    loadMoreLimit,
+  ]);
+
+  // Update refetch to reset pagination
+  const handleRefetch = useCallback(() => {
+    setAllCandles([]);
+    setCurrentOffset(0);
+    setHasMoreData(true);
+    refetch();
+  }, [refetch]);
+
+  // Use the data that's available - either from allCandles or initialData
+  const data = useMemo(() => {
+    const candles =
+      allCandles.length > 0 ? allCandles : initialData?.results || [];
+    return {
+      results: candles,
+      count: candles.length,
+    };
+  }, [allCandles, initialData]);
 
   // Refs
   const mainChartRef = useRef<any>(null);
@@ -339,7 +485,7 @@ const GraphsPage: React.FC = () => {
         obj={obj}
         handleDownload={handleDownload}
         toggleFullscreen={toggleFullscreen}
-        refetch={refetch}
+        refetch={handleRefetch}
       />
 
       {/* Main Content */}
@@ -399,6 +545,9 @@ const GraphsPage: React.FC = () => {
                     setTimeScale={setMainChartTimeScale}
                     emaData={emaData}
                     bollingerBandsData={bollingerBandsData}
+                    onLoadMoreData={loadMoreHistoricalData}
+                    isLoadingMore={isLoadingMore}
+                    hasMoreData={hasMoreData}
                   />
                 </ResizablePanel>
 

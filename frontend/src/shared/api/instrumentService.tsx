@@ -28,8 +28,8 @@ export const instrumentApi = baseApi.injectEndpoints({
       query: ({ id, tf, limit, offset }) => {
         const params = new URLSearchParams();
         params.append('tf', tf);
-        if (limit) params.append('limit', limit);
-        if (offset) params.append('offset', offset);
+        if (limit !== undefined && limit !== null) params.append('limit', String(limit));
+        if (offset !== undefined && offset !== null) params.append('offset', String(offset));
 
         return {
           url: `core/subscribed_instruments/${id}/candles/?${params.toString()}`,
