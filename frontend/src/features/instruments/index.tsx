@@ -395,7 +395,7 @@ const InstrumentsPage: React.FC = () => {
                 )}
               </CardHeader>
             </Card>
-            <Card className="shadow-xl  min-h-[32rem]">
+            <Card className="shadow-xl ">
               <CardContent className="h-full p-0">
                 {useMemo(
                   () => (
