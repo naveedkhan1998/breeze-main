@@ -15,3 +15,8 @@ class OffsetPagination(LimitOffsetPagination):
                 "data": data,
             }
         )
+
+
+class CandleBucketPagination(LimitOffsetPagination):
+    default_limit = 100
+    max_limit = 1000

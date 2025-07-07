@@ -2,9 +2,19 @@ from datetime import datetime, timedelta
 
 from apps.core.breeze import BreezeConnect, breeze_session_manager
 from apps.core.helper import date_parser
-from apps.core.models import (
-    SubscribedInstruments,
+from apps.core.models import SubscribedInstruments, Candle
+
+from django.db import models
+from django.db.models import (
+    F,
+    Sum,
+    Min,
+    Max,
+    Window,
+    Func,
+    Value,
 )
+from django.db.models.functions import FirstValue, LastValue, RowNumber
 
 
 def fetch_historical_data(
@@ -156,3 +166,36 @@ def fetch_historical_data(
 
     # Only return collected data if no callback was used
     return data
+
+
+def resample_qs(instrument_id: int, minutes: int):
+    bucket = Func(
+        Value(f"{minutes} minutes"),
+        F("date"),
+        Value("1970-01-01 00:00:00+00"),
+        function="date_bin",
+        output_field=models.DateTimeField(),
+    )
+
+    qs = (
+        Candle.objects.filter(instrument_id=instrument_id)
+        .annotate(bucket=bucket)
+        .annotate(  # window calcs inside each bucket
+            o=Window(
+                FirstValue("open"), partition_by=[F("bucket")], order_by=F("date").asc()
+            ),
+            c=Window(
+                LastValue("close"), partition_by=[F("bucket")], order_by=F("date").asc()
+            ),
+            h=Window(Max("high"), partition_by=[F("bucket")]),
+            l=Window(Min("low"), partition_by=[F("bucket")]),
+            v=Window(Sum("volume"), partition_by=[F("bucket")]),
+            rn=Window(
+                RowNumber(), partition_by=[F("bucket")], order_by=F("date").asc()
+            ),
+        )
+        .filter(rn=1)
+        .values("bucket", "o", "h", "l", "c", "v")
+        .order_by("-bucket")
+    )
+    return qs

@@ -3,11 +3,11 @@
 import logging
 
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from apps.core.breeze import breeze_session_manager
@@ -25,9 +25,11 @@ from apps.core.serializers import (
     CandleSerializer,
     InstrumentSerializer,
     SubscribedSerializer,
+    AggregatedCandleSerializer,
 )
-from apps.core.pagination import OffsetPagination
+from apps.core.pagination import OffsetPagination, CandleBucketPagination
 from apps.core.tasks import load_instrument_candles, resample_candles, websocket_start
+from apps.core.utils import resample_qs
 
 logger = logging.getLogger(__name__)
 
@@ -283,8 +285,6 @@ class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
 
-
-
 class SubscribedInstrumentsViewSet(viewsets.ModelViewSet):
     """
     A ViewSet for viewing and editing SubscribedInstruments instances.
@@ -332,15 +332,21 @@ class SubscribedInstrumentsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="candles")
     def candles(self, request, pk=None):
+        """
+        Retrives paginated candles for a subscribed instrument.
+        The candles are ordered by date in descending order.
+        """
         instrument = self.get_object()
-        queryset = Candle.objects.filter(instrument=instrument).order_by("-date")
+        tf = int(request.query_params.get("tf", 1))
 
-        paginator = self.pagination_class()
-        paginated_queryset = paginator.paginate_queryset(queryset, request)
-        serializer = CandleSerializer(paginated_queryset, many=True)
+        qs = resample_qs(instrument.id, tf)  # as before
+        total = qs.aggregate(cnt=Count("bucket", distinct=True))["cnt"]
 
+        paginator = CandleBucketPagination()
+        page = paginator.paginate_queryset(qs, request)
+        paginator.count = total
+        serializer = AggregatedCandleSerializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
-
 
 
 class CandleViewSet(viewsets.ViewSet):

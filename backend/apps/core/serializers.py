@@ -54,3 +54,12 @@ class BreezeAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = BreezeAccount
         fields = "__all__"
+
+
+class AggregatedCandleSerializer(serializers.Serializer):
+    date   = serializers.DateTimeField(source="bucket")
+    open   = serializers.FloatField(source="o")
+    high   = serializers.FloatField(source="h")
+    low    = serializers.FloatField(source="l")
+    close  = serializers.FloatField(source="c")
+    volume = serializers.FloatField(source="v")
