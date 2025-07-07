@@ -38,6 +38,8 @@ COPY . /app
 
 # Make the scripts directory executable
 RUN chmod +x /app/scripts/*.sh
+# Make sure that scripts/production/*.sh are executable
+RUN chmod +x /app/scripts/production/*.sh
 
 # Expose the port
 EXPOSE 8000
