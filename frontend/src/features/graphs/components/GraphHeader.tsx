@@ -101,7 +101,7 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
               <Separator orientation="vertical" className="h-3" />
               <span>{timeframe}m</span>
               <Separator orientation="vertical" className="h-3" />
-              <span>{data?.data?.length || 0} data points</span>
+              <span>{data?.count || 0} data points</span>
               {autoRefresh && (
                 <>
                   <Separator orientation="vertical" className="h-3" />

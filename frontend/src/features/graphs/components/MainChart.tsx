@@ -65,6 +65,11 @@ const MainChart: React.FC<MainChartProps> = ({
   const legendContainerRef = useRef<HTMLDivElement | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const loadingIndicatorRef = useRef<HTMLDivElement | null>(null);
+  const onLoadMoreDataRef = useRef(onLoadMoreData);
+
+  useEffect(() => {
+    onLoadMoreDataRef.current = onLoadMoreData;
+  }, [onLoadMoreData]);
 
   const createSeries = useCallback(
     (chart: IChartApi, type: SeriesType): ISeriesApi<SeriesType> => {
@@ -313,7 +318,7 @@ const MainChart: React.FC<MainChartProps> = ({
 
     // Create loading indicator
     const loadingIndicator = document.createElement('div');
-    loadingIndicator.className = 
+    loadingIndicator.className =
       'absolute top-12 left-2 p-2 rounded-lg glass-card shadow-md z-[10] hidden';
     loadingIndicator.innerHTML = `
       <div class="flex items-center gap-2 text-sm">
@@ -330,9 +335,9 @@ const MainChart: React.FC<MainChartProps> = ({
 
       // Check if we need to load more data (when user scrolls to the left/beginning)
       const threshold = 10; // Load more data when less than 10 bars are visible on the left
-      
+
       if (logicalRange.from < threshold && hasMoreData && !isLoadingMore) {
-        onLoadMoreData();
+        onLoadMoreDataRef.current();
       }
     });
   }, [
@@ -344,7 +349,6 @@ const MainChart: React.FC<MainChartProps> = ({
     mode,
     seriesData,
     createSeries,
-    onLoadMoreData,
     hasMoreData,
     isLoadingMore,
   ]);
@@ -512,7 +516,9 @@ const MainChart: React.FC<MainChartProps> = ({
   // Show/hide loading indicator
   useEffect(() => {
     if (loadingIndicatorRef.current) {
-      loadingIndicatorRef.current.style.display = isLoadingMore ? 'block' : 'none';
+      loadingIndicatorRef.current.style.display = isLoadingMore
+        ? 'block'
+        : 'none';
     }
   }, [isLoadingMore]);
 

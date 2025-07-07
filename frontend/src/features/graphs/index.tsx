@@ -104,15 +104,9 @@ const GraphsPage: React.FC = () => {
   useEffect(() => {
     if (initialData?.results) {
       setAllCandles(initialData.results);
-      setCurrentOffset(prev => prev + initialData.results.length);
+      setCurrentOffset(initialData.results.length);
       // Check if there's more data using the 'next' field from Django pagination
       setHasMoreData(!!initialData.next);
-      console.log(
-        'Initial data loaded:',
-        initialData.results.length,
-        'records, offset set to:',
-        initialData.results.length
-      );
     }
   }, [initialData]);
 
@@ -123,34 +117,13 @@ const GraphsPage: React.FC = () => {
     setCurrentOffset(0);
     setHasMoreData(true);
     setIsLoadingMore(false);
-    console.log('Pagination reset for new timeframe/instrument');
-  }, [timeframe]);
+  }, [timeframe, obj?.id]);
 
   // Load more data function
   const loadMoreHistoricalData = useCallback(async () => {
-    if (!obj?.id || isLoadingMore || !hasMoreData || currentOffset === 0) {
-      console.log('Skipping load more data:', {
-        hasObjId: !!obj?.id,
-        isLoadingMore,
-        hasMoreData,
-        currentOffset,
-        reason: currentOffset === 0 ? 'offset is 0' : 'other condition failed',
-      });
+    if (!obj?.id || isLoadingMore || !hasMoreData) {
       return;
     }
-
-    console.log(
-      'Loading more data with offset:',
-      currentOffset,
-      'limit:',
-      loadMoreLimit
-    );
-    console.log('Request params:', {
-      id: obj.id,
-      tf: timeframe,
-      limit: loadMoreLimit,
-      offset: currentOffset,
-    });
 
     setIsLoadingMore(true);
 
@@ -162,27 +135,19 @@ const GraphsPage: React.FC = () => {
         offset: currentOffset,
       }).unwrap();
 
-      console.log('Received response:', response);
-      console.log('Response results length:', response?.results?.length);
-
       if (response?.results && response.results.length > 0) {
         // Prepend older data to the beginning of the array
-        // Since Django returns newest first, the offset data is older
-        setAllCandles(prev => {
-          console.log('Previous candles length:', prev.length);
-          console.log('Adding candles length:', response.results.length);
-          return [...response.results, ...prev];
-        });
+        // Since Django returns newest first, the offset data is older, when setting this,
+        // make sure we make a set baed on the date and sort in ascending order
+        // This ensures that the chart displays data in chronological order
 
-        const newOffset = currentOffset + response.results.length;
-        console.log('Updating offset from', currentOffset, 'to', newOffset);
-        setCurrentOffset(newOffset);
+        setAllCandles(prevCandles => [...prevCandles, ...response.results]);
+
+        setCurrentOffset(prevOffset => prevOffset + response.results.length);
 
         // Use Django's 'next' field to determine if more data is available
         setHasMoreData(!!response.next);
-        console.log('Has more data:', !!response.next);
       } else {
-        console.log('No more data available');
         setHasMoreData(false);
       }
     } catch (error) {
@@ -490,7 +455,7 @@ const GraphsPage: React.FC = () => {
 
       {/* Main Content */}
       <div ref={chartSectionRef} className="flex flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="flex-1">
+        <ResizablePanelGroup direction="horizontal" className="relative flex-1">
           {/* Enhanced Controls Sidebar */}
           {showControls && (
             <>
