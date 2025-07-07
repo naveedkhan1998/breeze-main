@@ -3,7 +3,7 @@
 python3 manage.py wait_for_db &
 
 wait
-
+python3 manage.py collectstatic --noinput --skip-checks
 python3 manage.py migrate --noinput --skip-checks
 python3 manage.py initadmin
 
