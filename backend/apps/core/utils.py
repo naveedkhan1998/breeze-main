@@ -2,9 +2,19 @@ from datetime import datetime, timedelta
 
 from apps.core.breeze import BreezeConnect, breeze_session_manager
 from apps.core.helper import date_parser
-from apps.core.models import (
-    SubscribedInstruments,
+from apps.core.models import SubscribedInstruments, Candle
+
+from django.db import models
+from django.db.models import (
+    F,
+    Sum,
+    Min,
+    Max,
+    Window,
+    Func,
+    Value,
 )
+from django.db.models.functions import FirstValue, LastValue, RowNumber, Coalesce
 
 
 def fetch_historical_data(
@@ -156,3 +166,39 @@ def fetch_historical_data(
 
     # Only return collected data if no callback was used
     return data
+
+
+def resample_qs(inst_id: int, minutes: int):
+    anchor = "1970-01-01 09:15:00+05:30"  # NSE session open
+    bucket = Func(
+        Value(f"{minutes} minutes"),
+        F("date"),
+        Value(anchor),
+        function="date_bin",
+        output_field=models.DateTimeField(),
+    )
+
+    qs = (
+        Candle.objects.filter(instrument_id=inst_id)
+        .annotate(bucket=bucket)
+        .annotate(
+            o=Window(
+                FirstValue("open"), partition_by=[F("bucket")], order_by=F("date").asc()
+            ),
+            c=Window(
+                FirstValue("close"),  # ← here
+                partition_by=[F("bucket")],
+                order_by=F("date").desc(),
+            ),  # ← and here
+            h_=Window(Max("high"), partition_by=[F("bucket")]),
+            l_=Window(Min("low"), partition_by=[F("bucket")]),
+            v_=Window(Sum(Coalesce("volume", Value(0.0))), partition_by=[F("bucket")]),
+            rn=Window(
+                RowNumber(), partition_by=[F("bucket")], order_by=F("date").asc()
+            ),
+        )
+        .filter(rn=1)
+        .values("bucket", "o", "h_", "l_", "c", "v_")
+        .order_by("-bucket")  # ASC for the chart
+    )
+    return qs

@@ -9,6 +9,9 @@ import {
   selectChartType,
   selectShowVolume,
   selectAutoRefresh,
+  addIndicator,
+  removeIndicator,
+  selectActiveIndicators,
 } from '../graphSlice';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,6 +37,10 @@ import {
   HiAdjustments,
   HiBeaker,
   HiPresentationChartLine,
+  HiOutlineChartPie,
+  HiOutlineCurrencyDollar,
+  HiOutlineScale,
+  HiOutlineTrendingUp,
 } from 'react-icons/hi';
 import { SeriesType } from 'lightweight-charts';
 
@@ -43,6 +50,7 @@ export default function ChartControls() {
   const chartType = useAppSelector(selectChartType);
   const showVolume = useAppSelector(selectShowVolume);
   const autoRefresh = useAppSelector(selectAutoRefresh);
+  const activeIndicators = useAppSelector(selectActiveIndicators);
   const [isCustomTfDialogOpen, setIsCustomTfDialogOpen] = useState(false);
   const [customTimeframeInput, setCustomTimeframeInput] = useState('');
 
@@ -101,6 +109,37 @@ export default function ChartControls() {
       description: 'Price vs baseline',
     },
   ];
+
+  const indicators = [
+    {
+      name: 'RSI',
+      label: 'Relative Strength Index',
+      icon: <HiOutlineChartPie className="w-4 h-4" />,
+    },
+    {
+      name: 'BollingerBands',
+      label: 'Bollinger Bands',
+      icon: <HiOutlineScale className="w-4 h-4" />,
+    },
+    {
+      name: 'EMA',
+      label: 'Exponential Moving Average',
+      icon: <HiOutlineTrendingUp className="w-4 h-4" />,
+    },
+    {
+      name: 'ATR',
+      label: 'Average True Range',
+      icon: <HiOutlineCurrencyDollar className="w-4 h-4" />,
+    },
+  ];
+
+  const handleIndicatorToggle = (indicatorName: string, checked: boolean) => {
+    if (checked) {
+      dispatch(addIndicator(indicatorName));
+    } else {
+      dispatch(removeIndicator(indicatorName));
+    }
+  };
 
   return (
     <div className="space-y-4 scrollbar-hidden">
@@ -206,6 +245,48 @@ export default function ChartControls() {
                   </div>
                 </div>
               </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Indicators Section */}
+      <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-3 text-base">
+            <div className="p-2 border rounded-lg bg-primary/10 text-primary border-primary/20">
+              <HiOutlineTrendingUp className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-semibold text-card-foreground">
+                Indicators
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Add technical indicators
+              </span>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {indicators.map(indicator => (
+            <div
+              key={indicator.name}
+              className="flex items-center justify-between p-2 rounded-lg bg-background/50"
+            >
+              <Label
+                htmlFor={`indicator-${indicator.name}`}
+                className="flex items-center gap-2 text-sm font-medium cursor-pointer text-card-foreground"
+              >
+                {indicator.icon}
+                {indicator.label}
+              </Label>
+              <Switch
+                id={`indicator-${indicator.name}`}
+                checked={activeIndicators.includes(indicator.name)}
+                onCheckedChange={checked =>
+                  handleIndicatorToggle(indicator.name, checked)
+                }
+              />
             </div>
           ))}
         </CardContent>

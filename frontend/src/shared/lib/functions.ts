@@ -142,3 +142,28 @@ export const calculateMACD = (
     histogram: histogram[index],
   }));
 };
+
+export const calculateATR = (data: Candle[], period: number = 14) => {
+  const trs: number[] = [];
+  const atrs: { time: number; value: number }[] = [];
+
+  for (let i = 0; i < data.length; i++) {
+    const high = data[i].high;
+    const low = data[i].low;
+    const prevClose = i > 0 ? data[i - 1].close : high; // Use high if no previous close
+
+    const tr = Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose));
+    trs.push(tr);
+
+    if (i >= period - 1) {
+      let atr: number;
+      if (i === period - 1) {
+        atr = trs.slice(0, period).reduce((sum, val) => sum + val, 0) / period;
+      } else {
+        atr = (atrs[atrs.length - 1].value * (period - 1) + tr) / period;
+      }
+      atrs.push({ time: formatDate(data[i].date), value: atr });
+    }
+  }
+  return atrs;
+};

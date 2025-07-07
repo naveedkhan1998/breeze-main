@@ -10,6 +10,7 @@ interface GraphState {
   autoRefresh: boolean;
   showControls: boolean;
   isFullscreen: boolean;
+  activeIndicators: string[];
 }
 
 const initialState: GraphState = {
@@ -20,6 +21,7 @@ const initialState: GraphState = {
   autoRefresh: false,
   showControls: true,
   isFullscreen: false,
+  activeIndicators: [],
 };
 
 export const graphSlice = createSlice({
@@ -49,6 +51,16 @@ export const graphSlice = createSlice({
     setIsFullscreen: (state, action: PayloadAction<boolean>) => {
       state.isFullscreen = action.payload;
     },
+    addIndicator: (state, action: PayloadAction<string>) => {
+      if (!state.activeIndicators.includes(action.payload)) {
+        state.activeIndicators.push(action.payload);
+      }
+    },
+    removeIndicator: (state, action: PayloadAction<string>) => {
+      state.activeIndicators = state.activeIndicators.filter(
+        indicator => indicator !== action.payload
+      );
+    },
   },
 });
 
@@ -59,6 +71,8 @@ export const {
   setAutoRefresh,
   setShowControls,
   setIsFullscreen,
+  addIndicator,
+  removeIndicator,
 } = graphSlice.actions;
 
 export const selectTimeframe = (state: RootState) => state.graph.timeframe;
@@ -70,5 +84,7 @@ export const selectShowControls = (state: RootState) =>
   state.graph.showControls;
 export const selectIsFullscreen = (state: RootState) =>
   state.graph.isFullscreen;
+export const selectActiveIndicators = (state: RootState) =>
+  state.graph.activeIndicators;
 
 export default graphSlice.reducer;

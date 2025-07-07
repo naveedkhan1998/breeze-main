@@ -9,8 +9,16 @@ import {
   setIsFullscreen,
   setShowControls,
   selectSeriesType,
+  selectActiveIndicators,
+  removeIndicator,
 } from './graphSlice';
-import React, { useEffect, useMemo, useCallback, useRef } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   ResizableHandle,
@@ -26,8 +34,17 @@ import { HiChartBar, HiCog } from 'react-icons/hi';
 
 import type { Candle, Instrument } from '@/types/common-types';
 import { useTheme } from '@/components/ThemeProvider';
-import { useGetCandlesQuery } from '@/api/instrumentService';
-import { formatDate } from '@/lib/functions';
+import {
+  useGetPaginatedCandlesQuery,
+  useLazyGetPaginatedCandlesQuery,
+} from '@/api/instrumentService';
+import {
+  formatDate,
+  calculateRSI,
+  calculateBollingerBands,
+  calculateATR,
+  calculateMA,
+} from '@/lib/functions';
 import ChartControls from './components/ChartControls';
 import MainChart from './components/MainChart';
 import VolumeChart from './components/VolumeChart';
@@ -37,7 +54,7 @@ import ErrorScreen from './components/ErrorScreen';
 import NotFoundScreen from './components/NotFoundScreen';
 import GraphHeader from './components/GraphHeader';
 import { X } from 'lucide-react';
-
+import IndicatorChart from './components/IndicatorChart';
 interface LocationState {
   obj: Instrument;
 }
@@ -55,17 +72,127 @@ const GraphsPage: React.FC = () => {
   const showVolume = useAppSelector(selectShowVolume);
   const autoRefresh = useAppSelector(selectAutoRefresh);
   const seriesType = useAppSelector(selectSeriesType);
-
   const showControls = useAppSelector(selectShowControls);
+  const activeIndicators = useAppSelector(selectActiveIndicators);
 
-  const { data, refetch, isLoading, isError } = useGetCandlesQuery({
+  // Pagination state
+  const [allCandles, setAllCandles] = useState<Candle[]>([]);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const initialLimit = 500;
+  const loadMoreLimit = 500;
+
+  // Initial data fetch
+  const {
+    data: initialData,
+    refetch,
+    isLoading,
+    isError,
+  } = useGetPaginatedCandlesQuery({
     id: obj?.id,
     tf: timeframe,
+    limit: initialLimit,
+    offset: 0,
   });
+
+  // Lazy query for loading more data
+  const [fetchMoreData] = useLazyGetPaginatedCandlesQuery();
+
+  // Initialize data when initial fetch completes
+  useEffect(() => {
+    if (initialData?.results) {
+      setAllCandles(initialData.results);
+      setCurrentOffset(initialData.results.length);
+      // Check if there's more data using the 'next' field from Django pagination
+      setHasMoreData(!!initialData.next);
+    }
+  }, [initialData]);
+
+  // Reset pagination when timeframe or instrument changes - simplified approach
+  useEffect(() => {
+    // Reset pagination state when key dependencies change
+    setAllCandles([]);
+    setCurrentOffset(0);
+    setHasMoreData(true);
+    setIsLoadingMore(false);
+  }, [timeframe, obj?.id]);
+
+  // Load more data function
+  const loadMoreHistoricalData = useCallback(async () => {
+    if (!obj?.id || isLoadingMore || !hasMoreData || currentOffset === 0) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    try {
+      const response = await fetchMoreData({
+        id: obj.id,
+        tf: timeframe,
+        limit: loadMoreLimit,
+        offset: currentOffset,
+      }).unwrap();
+
+      if (response?.results && response.results.length > 0) {
+        setAllCandles(prevCandles => {
+          const existingDates = new Set(prevCandles.map(c => c.date));
+          const newCandles: Candle[] = response.results.filter(
+            (candle: Candle) => !existingDates.has(candle.date)
+          );
+
+          // Only update the offset by the number of unique new candles
+          if (newCandles.length > 0) {
+            setCurrentOffset(currentOffset + newCandles.length);
+          }
+
+          return [...prevCandles, ...newCandles].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+        });
+
+        setHasMoreData(!!response.next);
+      } else {
+        setHasMoreData(false);
+      }
+    } catch (error) {
+      console.error('Error loading more data:', error);
+      setHasMoreData(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [
+    obj?.id,
+    timeframe,
+    currentOffset,
+    isLoadingMore,
+    hasMoreData,
+    fetchMoreData,
+    loadMoreLimit,
+  ]);
+
+  // Update refetch to reset pagination
+  const handleRefetch = useCallback(() => {
+    setAllCandles([]);
+    setCurrentOffset(0);
+    setHasMoreData(true);
+    refetch();
+  }, [refetch]);
+
+  // Use the data that's available - either from allCandles or initialData
+  const data = useMemo(() => {
+    const candles =
+      allCandles.length > 0 ? allCandles : initialData?.results || [];
+    return {
+      results: candles,
+      count: candles.length,
+    };
+  }, [allCandles, initialData]);
 
   // Refs
   const mainChartRef = useRef<any>(null);
   const volumeChartRef = useRef<any>(null);
+  const indicatorChartRef = useRef<any>(null);
   const chartSectionRef = useRef<HTMLDivElement>(null);
 
   const setMainChartTimeScale = useCallback((timeScale: any) => {
@@ -76,56 +203,126 @@ const GraphsPage: React.FC = () => {
     volumeChartRef.current = timeScale;
   }, []);
 
+  const setIndicatorChartTimeScale = useCallback((timeScale: any) => {
+    indicatorChartRef.current = timeScale;
+  }, []);
+
   const seriesData = useMemo(() => {
     if (!data) return [];
     if (seriesType === 'ohlc') {
-      return data.data.map(({ date, open, high, low, close }: Candle) => ({
-        time: formatDate(date) as Time,
-        open,
-        high,
-        low,
-        close,
-      }));
+      return data.results
+        .map(({ date, open, high, low, close }: Candle) => ({
+          time: formatDate(date) as Time,
+          open,
+          high,
+          low,
+          close,
+        }))
+        .reverse();
     }
     if (seriesType === 'price') {
-      return data.data.map(({ date, close }: Candle) => ({
-        time: formatDate(date) as Time,
-        value: close,
-      }));
+      return data.results
+        .map(({ date, close }: Candle) => ({
+          time: formatDate(date) as Time,
+          value: close,
+        }))
+        .reverse();
     }
     return [];
   }, [data, seriesType]);
 
   const volumeData = useMemo(() => {
     if (!data) return [];
-    return data.data.map(
-      ({ date, close, volume = 0 }: Candle, index: number, array: Candle[]) => {
-        const previousClose = index > 0 ? array[index - 1].close : close;
-        const color =
-          close >= previousClose
-            ? isDarkMode
-              ? 'rgba(34, 197, 94, 0.8)'
-              : 'rgba(22, 163, 74, 0.8)'
-            : isDarkMode
-              ? 'rgba(239, 68, 68, 0.8)'
-              : 'rgba(220, 38, 38, 0.8)';
-        return {
-          time: formatDate(date) as Time,
-          value: volume,
-          color,
-        };
-      }
-    );
+    return data.results
+      .map(
+        (
+          { date, close, volume = 0 }: Candle,
+          index: number,
+          array: Candle[]
+        ) => {
+          const previousClose = index > 0 ? array[index - 1].close : close;
+          const color =
+            close >= previousClose
+              ? isDarkMode
+                ? 'rgba(34, 197, 94, 0.8)'
+                : 'rgba(22, 163, 74, 0.8)'
+              : isDarkMode
+                ? 'rgba(239, 68, 68, 0.8)'
+                : 'rgba(220, 38, 38, 0.8)';
+          return {
+            time: formatDate(date) as Time,
+            value: volume,
+            color,
+          };
+        }
+      )
+      .reverse();
   }, [data, isDarkMode]);
 
   // Check if all volume values are zero
   const hasValidVolume = useMemo(() => {
     if (!data) return false;
-    return data.data.some(({ volume = 0 }: Candle) => volume > 0);
+    return data.results.some(({ volume = 0 }: Candle) => volume > 0);
   }, [data]);
 
   // Only show volume if user enabled it AND there's valid volume data
   const shouldShowVolume = showVolume && hasValidVolume;
+
+  const rsiData = useMemo(() => {
+    if (!data || !activeIndicators.includes('RSI')) return [];
+    return calculateRSI(
+      data.results.map((d: { date: string }) => ({
+        ...d,
+        time: formatDate(d.date) as Time,
+      }))
+    )
+      .filter(item => item.time !== undefined)
+      .map(item => ({ ...item, time: item.time as Time }))
+      .reverse();
+  }, [data, activeIndicators]);
+
+  const atrData = useMemo(() => {
+    if (!data || !activeIndicators.includes('ATR')) return [];
+    return calculateATR(
+      data.results.map((d: { date: string }) => ({
+        ...d,
+        time: formatDate(d.date) as Time,
+      }))
+    )
+      .map(item => ({ ...item, time: item.time as Time }))
+      .reverse();
+  }, [data, activeIndicators]);
+
+  const emaData = useMemo(() => {
+    if (!data || !activeIndicators.includes('EMA')) return [];
+    // Assuming EMA is calculated on close prices
+    return calculateMA(
+      data.results.map((d: { date: string }) => ({
+        ...d,
+        time: formatDate(d.date) as Time,
+      })),
+      14
+    ).reverse(); // Default period 14
+  }, [data, activeIndicators]);
+
+  const bollingerBandsData = useMemo(() => {
+    if (!data || !activeIndicators.includes('BollingerBands')) return [];
+    const bands = calculateBollingerBands(
+      data.results
+        .map((d: { date: string }) => ({
+          ...d,
+          time: formatDate(d.date) as Time,
+        }))
+        .reverse()
+    );
+    // Filter out any entries with undefined time values
+    return bands.filter(band => band.time !== undefined) as {
+      time: Time;
+      upper: number;
+      middle: number;
+      lower: number;
+    }[];
+  }, [data, activeIndicators]);
 
   useEffect(() => {
     let intervalId: number | null = null;
@@ -145,8 +342,16 @@ const GraphsPage: React.FC = () => {
 
     const getChartsToSync = () => {
       const charts = [];
-      if (shouldShowVolume && volumeChartRef.current)
+      if (shouldShowVolume && volumeChartRef.current) {
         charts.push(volumeChartRef.current);
+      }
+      if (
+        (activeIndicators.includes('RSI') ||
+          activeIndicators.includes('ATR')) &&
+        indicatorChartRef.current
+      ) {
+        charts.push(indicatorChartRef.current);
+      }
       return charts;
     };
 
@@ -180,7 +385,7 @@ const GraphsPage: React.FC = () => {
         handleVisibleTimeRangeChange
       );
     };
-  }, [shouldShowVolume]);
+  }, [shouldShowVolume, activeIndicators]);
 
   useEffect(() => {
     const cleanup = syncCharts();
@@ -250,12 +455,12 @@ const GraphsPage: React.FC = () => {
         obj={obj}
         handleDownload={handleDownload}
         toggleFullscreen={toggleFullscreen}
-        refetch={refetch}
+        refetch={handleRefetch}
       />
 
       {/* Main Content */}
       <div ref={chartSectionRef} className="flex flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="flex-1">
+        <ResizablePanelGroup direction="horizontal" className="relative flex-1">
           {/* Enhanced Controls Sidebar */}
           {showControls && (
             <>
@@ -308,6 +513,11 @@ const GraphsPage: React.FC = () => {
                     mode={isDarkMode}
                     obj={obj}
                     setTimeScale={setMainChartTimeScale}
+                    emaData={emaData}
+                    bollingerBandsData={bollingerBandsData}
+                    onLoadMoreData={loadMoreHistoricalData}
+                    isLoadingMore={isLoadingMore}
+                    hasMoreData={hasMoreData}
                   />
                 </ResizablePanel>
 
@@ -340,6 +550,45 @@ const GraphsPage: React.FC = () => {
                         volumeData={volumeData}
                         mode={isDarkMode}
                         setTimeScale={setVolumeChartTimeScale}
+                      />
+                    </ResizablePanel>
+                  </>
+                )}
+
+                {/* Indicator Chart */}
+                {(activeIndicators.includes('RSI') ||
+                  activeIndicators.includes('ATR')) && (
+                  <>
+                    <ResizableHandle withHandle />
+                    <ResizablePanel defaultSize={25} minSize={15}>
+                      <div className="flex items-center justify-between p-4 border-b border-border/30 ">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                            <HiChartBar className="w-4 h-4 text-chart-1" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-card-foreground">
+                              Indicators
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            dispatch(removeIndicator('RSI'));
+                            dispatch(removeIndicator('ATR'));
+                          }}
+                          className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <IndicatorChart
+                        rsiData={rsiData}
+                        atrData={atrData}
+                        mode={isDarkMode}
+                        setTimeScale={setIndicatorChartTimeScale}
                       />
                     </ResizablePanel>
                   </>

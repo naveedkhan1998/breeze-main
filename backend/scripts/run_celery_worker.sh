@@ -23,4 +23,4 @@ watchmedo auto-restart \
     --directory=/app \
     --pattern=*.py \
     --recursive \
-    -- celery -A main worker -l info
+    -- celery -A main worker -l error

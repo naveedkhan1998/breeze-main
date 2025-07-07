@@ -36,7 +36,7 @@ const DurationSelector: React.FC<{
           <DropdownMenuItem
             key={weeks}
             onClick={() => onDurationChange(weeks)}
-            className="justify-center text-center"
+           
           >
             {weeks} weeks{weeks >= 52 ? ` (${Math.round(weeks / 52)} year${weeks > 52 ? 's' : ''})` : ''}
           </DropdownMenuItem>

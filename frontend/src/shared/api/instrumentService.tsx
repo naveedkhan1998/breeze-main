@@ -24,6 +24,22 @@ export const instrumentApi = baseApi.injectEndpoints({
         };
       },
     }),
+    getPaginatedCandles: builder.query({
+      query: ({ id, tf, limit, offset }) => {
+        const params = new URLSearchParams();
+        params.append('tf', tf);
+        if (limit !== undefined && limit !== null) params.append('limit', String(limit));
+        if (offset !== undefined && offset !== null) params.append('offset', String(offset));
+
+        return {
+          url: `core/subscribed_instruments/${id}/candles/?${params.toString()}`,
+          method: 'GET',
+          headers: {
+            'Content-type': 'application/json',
+          },
+        };
+      },
+    }),
     subscribeInstrument: builder.mutation({
       query: ({ id, duration }) => ({
         url: `core/subscribed_instruments/${id}/subscribe/`,
@@ -55,7 +71,14 @@ export const instrumentApi = baseApi.injectEndpoints({
       }),
     }),
     getInstruments: builder.query({
-      query: ({ exchange, search, optionType, strikePrice, expiryAfter, expiryBefore }) => {
+      query: ({
+        exchange,
+        search,
+        optionType,
+        strikePrice,
+        expiryAfter,
+        expiryBefore,
+      }) => {
         const params = new URLSearchParams();
         if (exchange) params.append('exchange', exchange);
         if (search) params.append('search', search);
@@ -84,4 +107,6 @@ export const {
   useSubscribeInstrumentMutation,
   useLoadInstrumentCandlesMutation,
   useDeleteInstrumentMutation,
+  useGetPaginatedCandlesQuery,
+  useLazyGetPaginatedCandlesQuery,
 } = instrumentApi;

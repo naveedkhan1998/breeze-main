@@ -24,8 +24,8 @@ const AboutPage = () => {
       }
       subheader={
         <PageSubHeader>
-          Full-stack Developer | Django, Svelte, React | Building end-to-end
-          systems
+          Full-stack Developer with 2+ years of experience building and
+          deploying production-grade web applications.
         </PageSubHeader>
       }
     >
@@ -34,7 +34,7 @@ const AboutPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto space-y-8"
+          className="space-y-6"
         >
           <Card className="overflow-hidden">
             <CardContent className="p-8">
@@ -53,20 +53,19 @@ const AboutPage = () => {
                       variant="secondary"
                       className="flex items-center gap-1"
                     >
-                      <HiMap className="w-4 h-4" /> Srinagar, Kashmir / London,
-                      ON
+                      <HiMap className="w-4 h-4" /> London, ON, Canada
                     </Badge>
                     <Badge
                       variant="secondary"
                       className="flex items-center gap-1"
                     >
-                      <HiPhone className="w-4 h-4" /> [Phone Redacted]
+                      <HiPhone className="w-4 h-4" /> +1 (226) 236-7245
                     </Badge>
                     <Badge
                       variant="secondary"
                       className="flex items-center gap-1"
                     >
-                      <HiMail className="w-4 h-4" /> [Email Redacted]
+                      <HiMail className="w-4 h-4" /> naveedkhan13041998@gmail.com
                     </Badge>
                     <Badge
                       variant="secondary"
@@ -106,15 +105,13 @@ const AboutPage = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                I’m a Full-stack Developer with experience across backend,
-                frontend, and infrastructure. My career started with
-                backend-heavy work in Django, but over time I’ve grown into
-                full-stack roles spanning React, Svelte, and cloud-native
-                tooling. I enjoy building structured, scalable systems with an
-                eye for performance and developer experience. Currently wrapping
-                up my MEng at Western University, I’m working part-time at
-                Cypienta leading major features end-to-end in both their Django
-                and Svelte stacks.
+                Full-stack Developer with 2+ years of experience building and
+                deploying production-grade web applications using Django, React,
+                Svelte, and modern cloud infrastructure. Strong track record of
+                owning features end-to-end—from backend architecture and API
+                design to responsive UIs and Kubernetes deployments. Skilled in
+                refactoring legacy systems, integrating LLM pipelines, and
+                handling real-time data flows across distributed services.
               </p>
             </CardContent>
           </Card>
@@ -124,30 +121,45 @@ const AboutPage = () => {
               <CardTitle>Skills</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
                 <div>
                   <h3 className="mb-2 font-semibold">Languages</h3>
                   <p className="text-muted-foreground">
-                    Python, JavaScript/TypeScript, SQL, Bash, C++, Java
+                    Python, JavaScript/TypeScript, SQL, Bash, C++
                   </p>
                 </div>
                 <div>
-                  <h3 className="mb-2 font-semibold">Frameworks</h3>
+                  <h3 className="mb-2 font-semibold">Backend & Infra</h3>
                   <p className="text-muted-foreground">
-                    Django, DRF, FastAPI, React, Next.js, SvelteKit
+                    Django, FastAPI, Celery, Redis, WebSockets, REST APIs,
+                    async workers, message queues
+                  </p>
+                </div>
+                <div>
+                  <h3 className="mb-2 font-semibold">Frontend</h3>
+                  <p className="text-muted-foreground">
+                    React, Svelte, Next.js, Tailwind CSS, ShadCN UI, Vite,
+                    TanStack Table
                   </p>
                 </div>
                 <div>
                   <h3 className="mb-2 font-semibold">Databases</h3>
                   <p className="text-muted-foreground">
-                    PostgreSQL, Redis, SQLite, MySQL
+                    PostgreSQL, SQLite, Schema Design, Migrations, Query
+                    Optimization
                   </p>
                 </div>
                 <div>
-                  <h3 className="mb-2 font-semibold">Dev & Infra</h3>
+                  <h3 className="mb-2 font-semibold">Cloud & DevOps</h3>
                   <p className="text-muted-foreground">
-                    Docker, Kubernetes, Celery, GitHub Actions, AWS CDK, Helm,
-                    GCP
+                    Docker, Kubernetes (Helm), AWS (EC2, S3, SES,
+                    CloudFormation), GitHub Actions, NGINX
+                  </p>
+                </div>
+                <div>
+                  <h3 className="mb-2 font-semibold">Testing & Monitoring</h3>
+                  <p className="text-muted-foreground">
+                    Pytest, Vitest, Playwright, Sentry, Prometheus
                   </p>
                 </div>
               </div>
@@ -160,43 +172,78 @@ const AboutPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold">Full-stack Developer</h3>
+                <h3 className="text-lg font-semibold">
+                  Full-stack Developer (Sole Engineer)
+                </h3>
                 <p className="mb-2 text-sm text-muted-foreground">
-                  Cypienta | Jan 2025 - Present
+                  Cypienta (EzSec Inc.) | Jan 2025 - Present
                 </p>
                 <ul className="pl-5 space-y-1 list-disc text-muted-foreground">
                   <li>
-                    Own full-stack development across Django and Svelte
-                    codebases
+                    Owned and maintained two major products end-to-end: a
+                    React-based SaaS demo platform and the core on-prem Svelte +
+                    Django app.
                   </li>
                   <li>
-                    Led architecture refactors: Vite migration, Celery queues,
-                    UI audits
+                    Refactored legacy mono-repo, migrated Svelte 3.4 → 4, Django
+                    3 → 5, and replaced Rollup with Vite, cutting HMR times from
+                    3 minutes to instant.
                   </li>
                   <li>
-                    Handled Kubernetes-based deployments on AWS and Minikube
+                    Integrated pgAdmin and pgHero to monitor query performance;
+                    optimized critical bulk query (2000+ items) from 20s → 2s.
                   </li>
                   <li>
-                    Implemented analytics, AG-Event mapping, and LLM-based
-                    integrations
+                    Architected modular LLM integration via LangChain,
+                    supporting OpenAI, Ollama, Google, Anthropic.
                   </li>
                 </ul>
               </div>
               <Separator />
               <div>
-                <h3 className="text-lg font-semibold">Backend Engineer</h3>
+                <h3 className="text-lg font-semibold">
+                  Founding Engineer (Part-time, Full-stack)
+                </h3>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  RiskTec Systems | Apr 2024 - Dec 2024
+                </p>
+                <ul className="pl-5 space-y-1 list-disc text-muted-foreground">
+                  <li>
+                    Built core modules for a multi-tenant SaaS platform for
+                    asset management firms.
+                  </li>
+                  <li>
+                    Implemented per-firm tenancy with strict data isolation,
+                    RBAC, and per-seat licensing logic.
+                  </li>
+                  <li>
+                    Developed a fully customizable mandate compliance engine to
+                    flag and resolve breaches.
+                  </li>
+                  <li>
+                    Integrated Bloomberg API for real-time price feeds and
+                    constructed backtesting tools.
+                  </li>
+                </ul>
+              </div>
+              <Separator />
+              <div>
+                <h3 className="text-lg font-semibold">Quant Backend Engineer</h3>
                 <p className="mb-2 text-sm text-muted-foreground">
                   GenioBITS Technologies | Jun 2022 - Mar 2023
                 </p>
                 <ul className="pl-5 space-y-1 list-disc text-muted-foreground">
                   <li>
-                    Built scalable modules for trading strategy backtesting
+                    Developed backend infrastructure for a customizable
+                    derivatives trading platform.
                   </li>
                   <li>
-                    Integrated Celery workers and optimized task performance
+                    Engineered a dynamic strategy execution engine supporting
+                    historical data replay and real-time trading.
                   </li>
                   <li>
-                    Reduced compute time by 85% through query tuning and caching
+                    Built a multi-source data ingestion pipeline with WebSocket
+                    and REST API integrations.
                   </li>
                 </ul>
               </div>

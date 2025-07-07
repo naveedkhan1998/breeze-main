@@ -362,7 +362,7 @@ const InstrumentsPage: React.FC = () => {
       }
     >
       <PageContent>
-        <div className="grid h-full grid-cols-1 gap-8 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Left Column: Filters */}
           <aside className="lg:col-span-1 lg:sticky lg:top-20 h-fit">
             <Card className="shadow-lg">
@@ -375,8 +375,8 @@ const InstrumentsPage: React.FC = () => {
 
           {/* Right Column: Instruments Display */}
           <main className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-4">
-              <div>
+            <Card className="z-20 flex items-center justify-between mb-4 lg:sticky lg:top-20">
+              <CardHeader>
                 <h2 className="text-2xl font-semibold text-foreground">
                   {currentExchange?.label} Instruments
                 </h2>
@@ -385,17 +385,17 @@ const InstrumentsPage: React.FC = () => {
                     ? `Browse ${instrumentType.toLowerCase()}s with advanced filtering`
                     : `Discover ${currentExchange?.description} instruments`}
                 </p>
-              </div>
-              {searchTerm && (
-                <Badge
-                  variant="outline"
-                  className="status-badge bg-primary/10 text-primary border-primary/20"
-                >
-                  Searching: "{searchTerm}"
-                </Badge>
-              )}
-            </div>
-            <Card className="shadow-xl max-h-[calc(100vh-16rem)] min-h-[32rem]">
+                {searchTerm && (
+                  <Badge
+                    variant="outline"
+                    className="status-badge bg-primary/10 text-primary border-primary/20"
+                  >
+                    Searching: "{searchTerm}"
+                  </Badge>
+                )}
+              </CardHeader>
+            </Card>
+            <Card className="shadow-xl ">
               <CardContent className="h-full p-0">
                 {useMemo(
                   () => (
