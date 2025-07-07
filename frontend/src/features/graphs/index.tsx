@@ -9,6 +9,8 @@ import {
   setIsFullscreen,
   setShowControls,
   selectSeriesType,
+  selectActiveIndicators,
+  removeIndicator,
 } from './graphSlice';
 import React, { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -27,7 +29,13 @@ import { HiChartBar, HiCog } from 'react-icons/hi';
 import type { Candle, Instrument } from '@/types/common-types';
 import { useTheme } from '@/components/ThemeProvider';
 import { useGetCandlesQuery } from '@/api/instrumentService';
-import { formatDate } from '@/lib/functions';
+import {
+  formatDate,
+  calculateRSI,
+  calculateBollingerBands,
+  calculateATR,
+  calculateMA,
+} from '@/lib/functions';
 import ChartControls from './components/ChartControls';
 import MainChart from './components/MainChart';
 import VolumeChart from './components/VolumeChart';
@@ -37,6 +45,7 @@ import ErrorScreen from './components/ErrorScreen';
 import NotFoundScreen from './components/NotFoundScreen';
 import GraphHeader from './components/GraphHeader';
 import { X } from 'lucide-react';
+import IndicatorChart from './components/IndicatorChart';
 
 interface LocationState {
   obj: Instrument;
@@ -57,6 +66,7 @@ const GraphsPage: React.FC = () => {
   const seriesType = useAppSelector(selectSeriesType);
 
   const showControls = useAppSelector(selectShowControls);
+  const activeIndicators = useAppSelector(selectActiveIndicators);
 
   const { data, refetch, isLoading, isError } = useGetCandlesQuery({
     id: obj?.id,
@@ -66,6 +76,7 @@ const GraphsPage: React.FC = () => {
   // Refs
   const mainChartRef = useRef<any>(null);
   const volumeChartRef = useRef<any>(null);
+  const indicatorChartRef = useRef<any>(null);
   const chartSectionRef = useRef<HTMLDivElement>(null);
 
   const setMainChartTimeScale = useCallback((timeScale: any) => {
@@ -74,6 +85,10 @@ const GraphsPage: React.FC = () => {
 
   const setVolumeChartTimeScale = useCallback((timeScale: any) => {
     volumeChartRef.current = timeScale;
+  }, []);
+
+  const setIndicatorChartTimeScale = useCallback((timeScale: any) => {
+    indicatorChartRef.current = timeScale;
   }, []);
 
   const seriesData = useMemo(() => {
@@ -127,6 +142,57 @@ const GraphsPage: React.FC = () => {
   // Only show volume if user enabled it AND there's valid volume data
   const shouldShowVolume = showVolume && hasValidVolume;
 
+  const rsiData = useMemo(() => {
+    if (!data || !activeIndicators.includes('RSI')) return [];
+    return calculateRSI(
+      data.data.map((d: { date: string }) => ({
+        ...d,
+        time: formatDate(d.date) as Time,
+      }))
+    )
+      .filter(item => item.time !== undefined)
+      .map(item => ({ ...item, time: item.time as Time }));
+  }, [data, activeIndicators]);
+
+  const atrData = useMemo(() => {
+    if (!data || !activeIndicators.includes('ATR')) return [];
+    return calculateATR(
+      data.data.map((d: { date: string }) => ({
+        ...d,
+        time: formatDate(d.date) as Time,
+      }))
+    ).map(item => ({ ...item, time: item.time as Time }));
+  }, [data, activeIndicators]);
+
+  const emaData = useMemo(() => {
+    if (!data || !activeIndicators.includes('EMA')) return [];
+    // Assuming EMA is calculated on close prices
+    return calculateMA(
+      data.data.map((d: { date: string }) => ({
+        ...d,
+        time: formatDate(d.date) as Time,
+      })),
+      14
+    ); // Default period 14
+  }, [data, activeIndicators]);
+
+  const bollingerBandsData = useMemo(() => {
+    if (!data || !activeIndicators.includes('BollingerBands')) return [];
+    const bands = calculateBollingerBands(
+      data.data.map((d: { date: string }) => ({
+        ...d,
+        time: formatDate(d.date) as Time,
+      }))
+    );
+    // Filter out any entries with undefined time values
+    return bands.filter(band => band.time !== undefined) as {
+      time: Time;
+      upper: number;
+      middle: number;
+      lower: number;
+    }[];
+  }, [data, activeIndicators]);
+
   useEffect(() => {
     let intervalId: number | null = null;
     if (autoRefresh) {
@@ -145,8 +211,16 @@ const GraphsPage: React.FC = () => {
 
     const getChartsToSync = () => {
       const charts = [];
-      if (shouldShowVolume && volumeChartRef.current)
+      if (shouldShowVolume && volumeChartRef.current) {
         charts.push(volumeChartRef.current);
+      }
+      if (
+        (activeIndicators.includes('RSI') ||
+          activeIndicators.includes('ATR')) &&
+        indicatorChartRef.current
+      ) {
+        charts.push(indicatorChartRef.current);
+      }
       return charts;
     };
 
@@ -180,7 +254,7 @@ const GraphsPage: React.FC = () => {
         handleVisibleTimeRangeChange
       );
     };
-  }, [shouldShowVolume]);
+  }, [shouldShowVolume, activeIndicators]);
 
   useEffect(() => {
     const cleanup = syncCharts();
@@ -308,6 +382,8 @@ const GraphsPage: React.FC = () => {
                     mode={isDarkMode}
                     obj={obj}
                     setTimeScale={setMainChartTimeScale}
+                    emaData={emaData}
+                    bollingerBandsData={bollingerBandsData}
                   />
                 </ResizablePanel>
 
@@ -340,6 +416,45 @@ const GraphsPage: React.FC = () => {
                         volumeData={volumeData}
                         mode={isDarkMode}
                         setTimeScale={setVolumeChartTimeScale}
+                      />
+                    </ResizablePanel>
+                  </>
+                )}
+
+                {/* Indicator Chart */}
+                {(activeIndicators.includes('RSI') ||
+                  activeIndicators.includes('ATR')) && (
+                  <>
+                    <ResizableHandle withHandle />
+                    <ResizablePanel defaultSize={25} minSize={15}>
+                      <div className="flex items-center justify-between p-4 border-b border-border/30 ">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                            <HiChartBar className="w-4 h-4 text-chart-1" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-card-foreground">
+                              Indicators
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            dispatch(removeIndicator('RSI'));
+                            dispatch(removeIndicator('ATR'));
+                          }}
+                          className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <IndicatorChart
+                        rsiData={rsiData}
+                        atrData={atrData}
+                        mode={isDarkMode}
+                        setTimeScale={setIndicatorChartTimeScale}
                       />
                     </ResizablePanel>
                   </>

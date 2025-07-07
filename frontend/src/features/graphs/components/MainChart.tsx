@@ -22,6 +22,13 @@ interface MainChartProps {
   mode: boolean;
   obj: Instrument;
   setTimeScale: (timeScale: ITimeScaleApi<Time>) => void;
+  emaData: LineData[];
+  bollingerBandsData: {
+    time: Time;
+    upper: number;
+    middle: number;
+    lower: number;
+  }[];
 }
 
 const MainChart: React.FC<MainChartProps> = ({
@@ -29,12 +36,24 @@ const MainChart: React.FC<MainChartProps> = ({
   mode,
   obj,
   setTimeScale,
+  emaData,
+  bollingerBandsData,
 }) => {
   const chartType = useAppSelector(selectChartType);
   const timeframe = useAppSelector(selectTimeframe);
   const mainChartContainerRef = useRef<HTMLDivElement | null>(null);
   const mainChartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<SeriesType> | null>(null);
+  const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const bollingerBandsSeriesRefs = useRef<{
+    upper: ISeriesApi<'Line'> | null;
+    middle: ISeriesApi<'Line'> | null;
+    lower: ISeriesApi<'Line'> | null;
+  }>({
+    upper: null,
+    middle: null,
+    lower: null,
+  });
   const prevChartTypeRef = useRef<SeriesType>(chartType);
   const timeframeBadgeRef = useRef<HTMLSpanElement | null>(null);
   const legendContainerRef = useRef<HTMLDivElement | null>(null);
@@ -370,6 +389,85 @@ const MainChart: React.FC<MainChartProps> = ({
     }
   }, [timeframe]);
 
+  // Add/Remove EMA series
+  useEffect(() => {
+    if (!mainChartRef.current) return;
+
+    if (emaData && emaData.length > 0) {
+      if (!emaSeriesRef.current) {
+        emaSeriesRef.current = mainChartRef.current.addLineSeries({
+          color: mode ? '#FBBF24' : '#F59E0B', // Yellow/Orange color for EMA
+          lineWidth: 1,
+          lineStyle: 0, // Solid line
+          crosshairMarkerVisible: false,
+          lastValueVisible: false,
+        });
+      }
+      emaSeriesRef.current.setData(emaData);
+    } else {
+      if (emaSeriesRef.current) {
+        mainChartRef.current.removeSeries(emaSeriesRef.current);
+        emaSeriesRef.current = null;
+      }
+    }
+  }, [emaData, mode]);
+
+  // Add/Remove Bollinger Bands series
+  useEffect(() => {
+    if (!mainChartRef.current) return;
+
+    if (bollingerBandsData && bollingerBandsData.length > 0) {
+      if (!bollingerBandsSeriesRefs.current.upper) {
+        bollingerBandsSeriesRefs.current.upper =
+          mainChartRef.current.addLineSeries({
+            color: mode ? '#FBBF24' : '#F59E0B', // Yellow/Orange color for Upper Bollinger Band
+            lineWidth: 1,
+            lineStyle: 2, // Dashed line
+            crosshairMarkerVisible: false,
+            lastValueVisible: false,
+          });
+        bollingerBandsSeriesRefs.current.middle =
+          mainChartRef.current.addLineSeries({
+            color: mode ? '#60A5FA' : '#3B82F6', // Blue color for Middle Bollinger Band
+            lineWidth: 1,
+            lineStyle: 1, // Dotted line
+            crosshairMarkerVisible: false,
+            lastValueVisible: false,
+          });
+        bollingerBandsSeriesRefs.current.lower =
+          mainChartRef.current.addLineSeries({
+            color: mode ? '#EF4444' : '#DC2626', // Red color for Lower Bollinger Band
+            lineWidth: 1,
+            lineStyle: 2, // Dashed line
+            crosshairMarkerVisible: false,
+            lastValueVisible: false,
+          });
+      }
+      bollingerBandsSeriesRefs.current.upper.setData(
+        bollingerBandsData.map(d => ({ time: d.time, value: d.upper }))
+      );
+      bollingerBandsSeriesRefs.current.middle.setData(
+        bollingerBandsData.map(d => ({ time: d.time, value: d.middle }))
+      );
+      bollingerBandsSeriesRefs.current.lower.setData(
+        bollingerBandsData.map(d => ({ time: d.time, value: d.lower }))
+      );
+    } else {
+      if (bollingerBandsSeriesRefs.current.upper) {
+        mainChartRef.current.removeSeries(bollingerBandsSeriesRefs.current.upper);
+        bollingerBandsSeriesRefs.current.upper = null;
+      }
+      if (bollingerBandsSeriesRefs.current.middle) {
+        mainChartRef.current.removeSeries(bollingerBandsSeriesRefs.current.middle);
+        bollingerBandsSeriesRefs.current.middle = null;
+      }
+      if (bollingerBandsSeriesRefs.current.lower) {
+        mainChartRef.current.removeSeries(bollingerBandsSeriesRefs.current.lower);
+        bollingerBandsSeriesRefs.current.lower = null;
+      }
+    }
+  }, [bollingerBandsData, mode]);
+
   // Cleanup effect for component unmount
   useEffect(() => {
     return () => {
@@ -382,6 +480,10 @@ const MainChart: React.FC<MainChartProps> = ({
       }
       legendContainerRef.current = null;
       seriesRef.current = null;
+      emaSeriesRef.current = null;
+      bollingerBandsSeriesRefs.current.upper = null;
+      bollingerBandsSeriesRefs.current.middle = null;
+      bollingerBandsSeriesRefs.current.lower = null;
     };
   }, []);
 
