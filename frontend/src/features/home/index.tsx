@@ -30,6 +30,7 @@ import { useStartWebsocketMutation } from '@/api/breezeServices';
 import type { Instrument } from '@/types/common-types';
 import BreezeStatusCard from '../../shared/components/BreezeStatusCard';
 import InstrumentCard from './components/InstrumentCard';
+import { getCeleryWorkerUrls, isDevelopment } from '@/lib/environment';
 
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery('');
@@ -79,17 +80,7 @@ const HomePage: React.FC = () => {
 
   const performHealthCheck = async () => {
     setIsHealthChecking(true);
-    const workers = [
-      { name: 'Worker 1', url: 'https://breeze-backend-celery.onrender.com/' },
-      {
-        name: 'Worker 2',
-        url: 'https://breeze-backend-celery-2.onrender.com/',
-      },
-      {
-        name: 'Worker 3',
-        url: 'https://breeze-backend-celery-3.onrender.com/',
-      },
-    ];
+    const workers = getCeleryWorkerUrls();
 
     const toastIds = workers.map(worker =>
       toast.loading(`Checking ${worker.name}...`, { position: 'bottom-right' })
@@ -136,7 +127,7 @@ const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (window.location.hostname !== 'localhost') {
+    if (!isDevelopment) {
       performHealthCheck();
       const interval = setInterval(performHealthCheck, 120000);
       return () => clearInterval(interval);
@@ -174,7 +165,7 @@ const HomePage: React.FC = () => {
       }
       actions={
         <PageActions>
-          {window.location.hostname !== 'localhost' && (
+          {!isDevelopment && (
             <Button
               onClick={performHealthCheck}
               disabled={isHealthChecking}

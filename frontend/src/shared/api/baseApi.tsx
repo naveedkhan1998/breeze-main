@@ -1,14 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getToken } from './auth';
+import { getApiBaseUrl } from '../lib/environment';
 
-const isLocalhost =
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1';
-
-//https://dtemplarsarsh.pythonanywhere.com
-const baseUrl = isLocalhost
-  ? 'http://localhost:8000/api'
-  : 'https://breeze-backend.mnaveedk.com';
+const baseUrl = getApiBaseUrl();
 
 const baseQuery = fetchBaseQuery({
   baseUrl,

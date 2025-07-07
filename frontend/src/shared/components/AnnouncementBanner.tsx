@@ -1,22 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { MdAnnouncement } from 'react-icons/md';
 import { HiX } from 'react-icons/hi';
+import { isDevelopment } from '@/lib/environment';
 
 export default function AnnouncementBanner() {
-  const [isLocalhost, setIsLocalhost] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    const hostname = window.location.hostname;
-    setIsLocalhost(hostname === 'localhost' || hostname === '127.0.0.1');
-  }, []);
 
   const handleClose = () => {
     setIsVisible(false);
   };
 
-  if (isLocalhost || !isVisible) {
+  if (isDevelopment || !isVisible) {
     return null;
   }
 
