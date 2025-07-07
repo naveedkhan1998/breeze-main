@@ -11,6 +11,11 @@ import {
   LineData,
   HistogramData,
   MouseEventParams,
+  CandlestickSeries,
+  BarSeries,
+  AreaSeries,
+  BaselineSeries,
+  LineSeries,
 } from 'lightweight-charts';
 
 import type { Instrument } from '@/types/common-types';
@@ -75,7 +80,7 @@ const MainChart: React.FC<MainChartProps> = ({
     (chart: IChartApi, type: SeriesType): ISeriesApi<SeriesType> => {
       switch (type) {
         case 'Candlestick':
-          return chart.addCandlestickSeries({
+          return chart.addSeries(CandlestickSeries, {
             upColor: mode ? '#10B981' : '#059669',
             downColor: mode ? '#EF4444' : '#DC2626',
             borderVisible: false,
@@ -83,12 +88,12 @@ const MainChart: React.FC<MainChartProps> = ({
             wickDownColor: mode ? '#EF4444' : '#DC2626',
           });
         case 'Bar':
-          return chart.addBarSeries({
+          return chart.addSeries(BarSeries, {
             upColor: mode ? '#10B981' : '#059669',
             downColor: mode ? '#EF4444' : '#DC2626',
           });
         case 'Area':
-          return chart.addAreaSeries({
+          return chart.addSeries(AreaSeries, {
             lineColor: mode ? '#3B82F6' : '#2563EB',
             topColor: mode
               ? 'rgba(59, 130, 246, 0.4)'
@@ -99,7 +104,7 @@ const MainChart: React.FC<MainChartProps> = ({
             lineWidth: 2,
           });
         case 'Baseline':
-          return chart.addBaselineSeries({
+          return chart.addSeries(BaselineSeries, {
             baseValue: {
               type: 'price',
               price:
@@ -118,7 +123,7 @@ const MainChart: React.FC<MainChartProps> = ({
           });
         case 'Line':
         default:
-          return chart.addLineSeries({
+          return chart.addSeries(LineSeries, {
             color: mode ? '#3B82F6' : '#2563EB',
             lineWidth: 2,
             crosshairMarkerVisible: true,
@@ -434,7 +439,7 @@ const MainChart: React.FC<MainChartProps> = ({
 
     if (emaData && emaData.length > 0) {
       if (!emaSeriesRef.current) {
-        emaSeriesRef.current = mainChartRef.current.addLineSeries({
+        emaSeriesRef.current = mainChartRef.current.addSeries(LineSeries, {
           color: mode ? '#FBBF24' : '#F59E0B', // Yellow/Orange color for EMA
           lineWidth: 1,
           lineStyle: 0, // Solid line
@@ -457,38 +462,42 @@ const MainChart: React.FC<MainChartProps> = ({
 
     if (bollingerBandsData && bollingerBandsData.length > 0) {
       if (!bollingerBandsSeriesRefs.current.upper) {
-        bollingerBandsSeriesRefs.current.upper =
-          mainChartRef.current.addLineSeries({
+        bollingerBandsSeriesRefs.current.upper = mainChartRef.current.addSeries(
+          LineSeries,
+          {
             color: mode ? '#FBBF24' : '#F59E0B', // Yellow/Orange color for Upper Bollinger Band
             lineWidth: 1,
             lineStyle: 2, // Dashed line
             crosshairMarkerVisible: false,
             lastValueVisible: false,
-          });
+          }
+        );
         bollingerBandsSeriesRefs.current.middle =
-          mainChartRef.current.addLineSeries({
+          mainChartRef.current.addSeries(LineSeries, {
             color: mode ? '#60A5FA' : '#3B82F6', // Blue color for Middle Bollinger Band
             lineWidth: 1,
             lineStyle: 1, // Dotted line
             crosshairMarkerVisible: false,
             lastValueVisible: false,
           });
-        bollingerBandsSeriesRefs.current.lower =
-          mainChartRef.current.addLineSeries({
+        bollingerBandsSeriesRefs.current.lower = mainChartRef.current.addSeries(
+          LineSeries,
+          {
             color: mode ? '#EF4444' : '#DC2626', // Red color for Lower Bollinger Band
             lineWidth: 1,
             lineStyle: 2, // Dashed line
             crosshairMarkerVisible: false,
             lastValueVisible: false,
-          });
+          }
+        );
       }
-      bollingerBandsSeriesRefs.current.upper.setData(
+      bollingerBandsSeriesRefs.current.upper?.setData(
         bollingerBandsData.map(d => ({ time: d.time, value: d.upper }))
       );
-      bollingerBandsSeriesRefs.current.middle.setData(
+      bollingerBandsSeriesRefs.current.middle?.setData(
         bollingerBandsData.map(d => ({ time: d.time, value: d.middle }))
       );
-      bollingerBandsSeriesRefs.current.lower.setData(
+      bollingerBandsSeriesRefs.current.lower?.setData(
         bollingerBandsData.map(d => ({ time: d.time, value: d.lower }))
       );
     } else {
