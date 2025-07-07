@@ -55,7 +55,6 @@ import NotFoundScreen from './components/NotFoundScreen';
 import GraphHeader from './components/GraphHeader';
 import { X } from 'lucide-react';
 import IndicatorChart from './components/IndicatorChart';
-
 interface LocationState {
   obj: Instrument;
 }
@@ -121,7 +120,7 @@ const GraphsPage: React.FC = () => {
 
   // Load more data function
   const loadMoreHistoricalData = useCallback(async () => {
-    if (!obj?.id || isLoadingMore || !hasMoreData) {
+    if (!obj?.id || isLoadingMore || !hasMoreData || currentOffset === 0) {
       return;
     }
 
@@ -141,7 +140,17 @@ const GraphsPage: React.FC = () => {
         // make sure we make a set baed on the date and sort in ascending order
         // This ensures that the chart displays data in chronological order
 
-        setAllCandles(prevCandles => [...prevCandles, ...response.results]);
+        //setAllCandles(prevCandles => [...prevCandles, ...response.results]);
+        setAllCandles(prevCandles => {
+          // make sure we don't duplicate candles compare by date
+          const existingDates = new Set(prevCandles.map(c => c.date));
+          const newCandles: Candle[] = response.results.filter(
+            (candle: Candle) => !existingDates.has(candle.date)
+          );
+          return [...prevCandles, ...newCandles].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+        });
 
         setCurrentOffset(prevOffset => prevOffset + response.results.length);
 
