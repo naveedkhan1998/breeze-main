@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.postgres.indexes import BrinIndex
 from apps.account.models import User
 
 # Create your models here.
@@ -131,6 +131,26 @@ class Candle(models.Model):
     volume = models.FloatField(null=True)
     date = models.DateTimeField(null=False)
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        indexes = [
+            # Fast point/range look‑ups + ORDER BY on the B‑tree
+            models.Index(
+                fields=[
+                    "instrument",
+                    "-date",
+                ],  # DESC so “latest first” scans are sequential
+                name="idx_candle_instr_date_desc",
+            ),
+            # Optional: ultra‑cheap BRIN for big historical range scans
+            BrinIndex(
+                fields=["date"],
+                name="brin_candle_date",
+            ),
+        ]
+        ordering = [
+            "date"
+        ]  # ASC by default; your queryset can still .order_by('-date')
 
     def __str__(self):
         return (

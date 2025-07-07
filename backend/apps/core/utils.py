@@ -14,7 +14,7 @@ from django.db.models import (
     Func,
     Value,
 )
-from django.db.models.functions import FirstValue, LastValue, RowNumber
+from django.db.models.functions import FirstValue, LastValue, RowNumber, Coalesce
 
 
 def fetch_historical_data(
@@ -168,34 +168,37 @@ def fetch_historical_data(
     return data
 
 
-def resample_qs(instrument_id: int, minutes: int):
+def resample_qs(inst_id: int, minutes: int):
+    anchor = "1970-01-01 09:15:00+05:30"  # NSE session open
     bucket = Func(
         Value(f"{minutes} minutes"),
         F("date"),
-        Value("1970-01-01 00:00:00+00"),
+        Value(anchor),
         function="date_bin",
         output_field=models.DateTimeField(),
     )
 
     qs = (
-        Candle.objects.filter(instrument_id=instrument_id)
+        Candle.objects.filter(instrument_id=inst_id)
         .annotate(bucket=bucket)
-        .annotate(  # window calcs inside each bucket
+        .annotate(
             o=Window(
                 FirstValue("open"), partition_by=[F("bucket")], order_by=F("date").asc()
             ),
             c=Window(
-                LastValue("close"), partition_by=[F("bucket")], order_by=F("date").asc()
-            ),
-            h=Window(Max("high"), partition_by=[F("bucket")]),
-            l=Window(Min("low"), partition_by=[F("bucket")]),
-            v=Window(Sum("volume"), partition_by=[F("bucket")]),
+                FirstValue("close"),  # ← here
+                partition_by=[F("bucket")],
+                order_by=F("date").desc(),
+            ),  # ← and here
+            h_=Window(Max("high"), partition_by=[F("bucket")]),
+            l_=Window(Min("low"), partition_by=[F("bucket")]),
+            v_=Window(Sum(Coalesce("volume", Value(0.0))), partition_by=[F("bucket")]),
             rn=Window(
                 RowNumber(), partition_by=[F("bucket")], order_by=F("date").asc()
             ),
         )
         .filter(rn=1)
-        .values("bucket", "o", "h", "l", "c", "v")
-        .order_by("-bucket")
+        .values("bucket", "o", "h_", "l_", "c", "v_")
+        .order_by("-bucket")  # ASC for the chart
     )
     return qs

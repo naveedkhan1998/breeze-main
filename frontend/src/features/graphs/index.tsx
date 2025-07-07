@@ -28,7 +28,7 @@ import { HiChartBar, HiCog } from 'react-icons/hi';
 
 import type { Candle, Instrument } from '@/types/common-types';
 import { useTheme } from '@/components/ThemeProvider';
-import { useGetCandlesQuery } from '@/api/instrumentService';
+import { useGetPaginatedCandlesQuery } from '@/api/instrumentService';
 import {
   formatDate,
   calculateRSI,
@@ -68,7 +68,7 @@ const GraphsPage: React.FC = () => {
   const showControls = useAppSelector(selectShowControls);
   const activeIndicators = useAppSelector(selectActiveIndicators);
 
-  const { data, refetch, isLoading, isError } = useGetCandlesQuery({
+  const { data, refetch, isLoading, isError } = useGetPaginatedCandlesQuery({
     id: obj?.id,
     tf: timeframe,
   });
@@ -94,49 +94,59 @@ const GraphsPage: React.FC = () => {
   const seriesData = useMemo(() => {
     if (!data) return [];
     if (seriesType === 'ohlc') {
-      return data.data.map(({ date, open, high, low, close }: Candle) => ({
-        time: formatDate(date) as Time,
-        open,
-        high,
-        low,
-        close,
-      }));
+      return data.results
+        .map(({ date, open, high, low, close }: Candle) => ({
+          time: formatDate(date) as Time,
+          open,
+          high,
+          low,
+          close,
+        }))
+        .reverse();
     }
     if (seriesType === 'price') {
-      return data.data.map(({ date, close }: Candle) => ({
-        time: formatDate(date) as Time,
-        value: close,
-      }));
+      return data.results
+        .map(({ date, close }: Candle) => ({
+          time: formatDate(date) as Time,
+          value: close,
+        }))
+        .reverse();
     }
     return [];
   }, [data, seriesType]);
 
   const volumeData = useMemo(() => {
     if (!data) return [];
-    return data.data.map(
-      ({ date, close, volume = 0 }: Candle, index: number, array: Candle[]) => {
-        const previousClose = index > 0 ? array[index - 1].close : close;
-        const color =
-          close >= previousClose
-            ? isDarkMode
-              ? 'rgba(34, 197, 94, 0.8)'
-              : 'rgba(22, 163, 74, 0.8)'
-            : isDarkMode
-              ? 'rgba(239, 68, 68, 0.8)'
-              : 'rgba(220, 38, 38, 0.8)';
-        return {
-          time: formatDate(date) as Time,
-          value: volume,
-          color,
-        };
-      }
-    );
+    return data.results
+      .map(
+        (
+          { date, close, volume = 0 }: Candle,
+          index: number,
+          array: Candle[]
+        ) => {
+          const previousClose = index > 0 ? array[index - 1].close : close;
+          const color =
+            close >= previousClose
+              ? isDarkMode
+                ? 'rgba(34, 197, 94, 0.8)'
+                : 'rgba(22, 163, 74, 0.8)'
+              : isDarkMode
+                ? 'rgba(239, 68, 68, 0.8)'
+                : 'rgba(220, 38, 38, 0.8)';
+          return {
+            time: formatDate(date) as Time,
+            value: volume,
+            color,
+          };
+        }
+      )
+      .reverse();
   }, [data, isDarkMode]);
 
   // Check if all volume values are zero
   const hasValidVolume = useMemo(() => {
     if (!data) return false;
-    return data.data.some(({ volume = 0 }: Candle) => volume > 0);
+    return data.results.some(({ volume = 0 }: Candle) => volume > 0);
   }, [data]);
 
   // Only show volume if user enabled it AND there's valid volume data
@@ -145,44 +155,49 @@ const GraphsPage: React.FC = () => {
   const rsiData = useMemo(() => {
     if (!data || !activeIndicators.includes('RSI')) return [];
     return calculateRSI(
-      data.data.map((d: { date: string }) => ({
+      data.results.map((d: { date: string }) => ({
         ...d,
         time: formatDate(d.date) as Time,
       }))
     )
       .filter(item => item.time !== undefined)
-      .map(item => ({ ...item, time: item.time as Time }));
+      .map(item => ({ ...item, time: item.time as Time }))
+      .reverse();
   }, [data, activeIndicators]);
 
   const atrData = useMemo(() => {
     if (!data || !activeIndicators.includes('ATR')) return [];
     return calculateATR(
-      data.data.map((d: { date: string }) => ({
+      data.results.map((d: { date: string }) => ({
         ...d,
         time: formatDate(d.date) as Time,
       }))
-    ).map(item => ({ ...item, time: item.time as Time }));
+    )
+      .map(item => ({ ...item, time: item.time as Time }))
+      .reverse();
   }, [data, activeIndicators]);
 
   const emaData = useMemo(() => {
     if (!data || !activeIndicators.includes('EMA')) return [];
     // Assuming EMA is calculated on close prices
     return calculateMA(
-      data.data.map((d: { date: string }) => ({
+      data.results.map((d: { date: string }) => ({
         ...d,
         time: formatDate(d.date) as Time,
       })),
       14
-    ); // Default period 14
+    ).reverse(); // Default period 14
   }, [data, activeIndicators]);
 
   const bollingerBandsData = useMemo(() => {
     if (!data || !activeIndicators.includes('BollingerBands')) return [];
     const bands = calculateBollingerBands(
-      data.data.map((d: { date: string }) => ({
-        ...d,
-        time: formatDate(d.date) as Time,
-      }))
+      data.results
+        .map((d: { date: string }) => ({
+          ...d,
+          time: formatDate(d.date) as Time,
+        }))
+        .reverse()
     );
     // Filter out any entries with undefined time values
     return bands.filter(band => band.time !== undefined) as {

@@ -57,9 +57,9 @@ class BreezeAccountSerializer(serializers.ModelSerializer):
 
 
 class AggregatedCandleSerializer(serializers.Serializer):
-    date   = serializers.DateTimeField(source="bucket")
-    open   = serializers.FloatField(source="o")
-    high   = serializers.FloatField(source="h")
-    low    = serializers.FloatField(source="l")
-    close  = serializers.FloatField(source="c")
-    volume = serializers.FloatField(source="v")
+    date = serializers.DateTimeField(source="bucket")
+    open = serializers.FloatField(source="o")
+    high = serializers.FloatField(source="h_")
+    low = serializers.FloatField(source="l_")
+    close = serializers.FloatField(source="c")
+    volume = serializers.FloatField(source="v_")
