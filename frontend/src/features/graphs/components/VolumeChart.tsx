@@ -6,6 +6,7 @@ import {
   Time,
   HistogramData,
   ITimeScaleApi,
+  HistogramSeries,
 } from 'lightweight-charts';
 
 interface VolumeChartProps {
@@ -75,7 +76,7 @@ const VolumeChart: React.FC<VolumeChartProps> = ({
       handleScale: true,
     });
 
-    const volumeSeries = chart.addHistogramSeries({
+    const volumeSeries = chart.addSeries(HistogramSeries, {
       priceFormat: {
         type: 'volume',
       },

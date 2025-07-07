@@ -7,6 +7,7 @@ import {
   ITimeScaleApi,
   Time,
   LineData,
+  LineSeries,
 } from 'lightweight-charts';
 
 interface IndicatorChartProps {
@@ -168,7 +169,7 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
 
     if (rsiData && rsiData.length > 0) {
       if (!rsiSeriesRef.current) {
-        rsiSeriesRef.current = indicatorChartRef.current.addLineSeries({
+        rsiSeriesRef.current = indicatorChartRef.current.addSeries(LineSeries, {
           color: mode ? '#FBBF24' : '#F59E0B', // Yellow/Orange color for RSI
           lineWidth: 2,
         });
@@ -188,7 +189,7 @@ const IndicatorChart: React.FC<IndicatorChartProps> = ({
 
     if (atrData && atrData.length > 0) {
       if (!atrSeriesRef.current) {
-        atrSeriesRef.current = indicatorChartRef.current.addLineSeries({
+        atrSeriesRef.current = indicatorChartRef.current.addSeries(LineSeries, {
           color: mode ? '#60A5FA' : '#3B82F6', // Blue color for ATR
           lineWidth: 2,
         });
