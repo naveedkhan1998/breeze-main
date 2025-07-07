@@ -192,7 +192,7 @@ const Instrument: React.FC<Props> = ({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-20rem)]">
+    <div className="flex flex-col h-full">
       <div className="flex-shrink-0 px-4 py-3 text-sm border-b text-muted-foreground bg-muted/30 border-border">
         <div className="flex items-center justify-between">
           <span>Displaying {instrumentsCount} instruments</span>
@@ -201,7 +201,7 @@ const Instrument: React.FC<Props> = ({
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto bg-muted/20">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 auto-rows-max">
+        <div className="grid flex-shrink grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-3 auto-rows-max">
           {instruments.map((instrument: InstrumentType) => (
             <InstrumentItem
               key={instrument.id}
