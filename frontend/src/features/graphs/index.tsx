@@ -80,8 +80,8 @@ const GraphsPage: React.FC = () => {
   const [currentOffset, setCurrentOffset] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreData, setHasMoreData] = useState(true);
-  const initialLimit = 200;
-  const loadMoreLimit = 200;
+  const initialLimit = 500;
+  const loadMoreLimit = 500;
 
   // Initial data fetch
   const {
@@ -135,26 +135,22 @@ const GraphsPage: React.FC = () => {
       }).unwrap();
 
       if (response?.results && response.results.length > 0) {
-        // Prepend older data to the beginning of the array
-        // Since Django returns newest first, the offset data is older, when setting this,
-        // make sure we make a set baed on the date and sort in ascending order
-        // This ensures that the chart displays data in chronological order
-
-        //setAllCandles(prevCandles => [...prevCandles, ...response.results]);
         setAllCandles(prevCandles => {
-          // make sure we don't duplicate candles compare by date
           const existingDates = new Set(prevCandles.map(c => c.date));
           const newCandles: Candle[] = response.results.filter(
             (candle: Candle) => !existingDates.has(candle.date)
           );
+
+          // Only update the offset by the number of unique new candles
+          if (newCandles.length > 0) {
+            setCurrentOffset(currentOffset + newCandles.length);
+          }
+
           return [...prevCandles, ...newCandles].sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
           );
         });
 
-        setCurrentOffset(prevOffset => prevOffset + response.results.length);
-
-        // Use Django's 'next' field to determine if more data is available
         setHasMoreData(!!response.next);
       } else {
         setHasMoreData(false);
