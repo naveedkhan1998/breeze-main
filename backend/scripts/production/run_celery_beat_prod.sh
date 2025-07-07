@@ -20,4 +20,4 @@ rm -f /var/run/celery/beat.pid
 celery -A main beat \
     --pidfile=/var/run/celery/beat.pid \
     --logfile=/var/log/celery/beat.log \
-    --loglevel=DEBUG
+    --loglevel=ERROR
