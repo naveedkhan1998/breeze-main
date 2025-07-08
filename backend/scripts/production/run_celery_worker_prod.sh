@@ -11,8 +11,5 @@ celery -A main worker \
     --loglevel=ERROR \
     --time-limit=0 \
     --concurrency=1 \
-    --pool=solo \
-    --without-gossip \
-    --without-mingle \
-    --without-heartbeat
+    --pool=solo
 #celery multi start w1 w2 -A main --loglevel=INFO
