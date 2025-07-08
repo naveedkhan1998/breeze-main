@@ -12,8 +12,6 @@ celery -A main worker \
     --time-limit=0 \
     --concurrency=1 \
     --pool=solo \
-    --broker-connection-retry-on-startup=True \
-    --broker-connection-max-retries=3 \
     --without-gossip \
     --without-mingle \
     --without-heartbeat
