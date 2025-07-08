@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import type React from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { toast } from 'sonner';
 import {
-  FaSignOutAlt,
-  FaUserCircle,
-  FaHome,
-  FaChartLine,
-  FaInfoCircle,
-  FaEnvelope,
-  FaBars,
-  FaTimes,
-} from 'react-icons/fa';
+  TrendingUp,
+  User,
+  Home,
+  BarChart3,
+  Info,
+  Mail,
+  Menu,
+  Settings,
+  LogOut,
+  Search,
+} from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +30,14 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { getCurrentToken, logOut } from 'src/features/auth/authSlice';
 import { ModeToggle } from './ModeToggle';
 
@@ -33,6 +47,7 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -46,11 +61,36 @@ const Navbar: React.FC = () => {
   };
 
   const navItems = [
-    { path: '/', label: 'Home', icon: FaHome },
-    { path: '/instruments', label: 'Instruments', icon: FaChartLine },
-    { path: '/accounts', label: 'Accounts', icon: FaUserCircle },
-    { path: '/about', label: 'About', icon: FaInfoCircle },
-    { path: '/contact', label: 'Contact', icon: FaEnvelope },
+    {
+      path: '/',
+      label: 'Home',
+      icon: Home,
+      description: 'Overview & Analytics',
+    },
+    {
+      path: '/instruments',
+      label: 'Instruments',
+      icon: BarChart3,
+      description: 'Trading Instruments',
+    },
+    {
+      path: '/accounts',
+      label: 'Account',
+      icon: TrendingUp,
+      description: 'Account Management',
+    },
+    {
+      path: '/about',
+      label: 'About',
+      icon: Info,
+      description: 'Developer Information',
+    },
+    {
+      path: '/contact',
+      label: 'Support',
+      icon: Mail,
+      description: 'Help & Contact',
+    },
   ];
 
   if (!access_token) return null;
@@ -60,34 +100,61 @@ const Navbar: React.FC = () => {
       <nav
         className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
           isScrolled
-            ? 'bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-sm'
-            : 'bg-background/95 backdrop-blur-sm'
+            ? 'bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/95 shadow-lg border-border/50'
+            : 'bg-background/98 backdrop-blur-md border-border/30'
         }`}
       >
         <div className="container px-4 mx-auto sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
+          <div className="flex items-center justify-between h-16 lg:h-18">
+            {/* Logo Section */}
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="relative">
                 <img
                   src="/android-chrome-192x192.png"
                   alt="Logo"
-                  className="transition-transform rounded-lg w-9 h-9 group-hover:scale-105"
+                  className="flex items-center justify-center w-10 h-10 transition-all duration-300 shadow-lg rounded-xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 group-hover:shadow-xl group-hover:scale-105"
                 />
-                <div className="absolute inset-0 transition-opacity rounded-lg opacity-0 bg-gradient-to-br from-primary/20 to-transparent group-hover:opacity-100" />
+
+                <div className="absolute transition-opacity duration-300 opacity-0 -inset-1 bg-gradient-to-br from-primary/20 to-transparent rounded-xl group-hover:opacity-100 blur-sm" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold tracking-tight text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text">
+              <div className="flex-col hidden sm:flex">
+                <span className="text-xl font-bold tracking-tight text-transparent bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text">
                   ICICI Breeze
                 </span>
-                <Badge variant="secondary" className="text-xs w-fit">
-                  Trading Platform
-                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Badge
+                    variant="secondary"
+                    className="text-xs px-2 py-0.5 font-medium"
+                  >
+                    Wrapper
+                  </Badge>
+                  {/* <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Live
+                    </span>
+                  </div> */}
+                </div>
               </div>
             </Link>
 
+            {/* Desktop Search Bar */}
+            <div className="flex-1 hidden max-w-md mx-8 lg:flex">
+              <div className="relative w-full">
+                <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search instruments, symbols..."
+                  value={searchQuery}
+                  disabled={true}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="h-10 pl-10 pr-4 transition-all duration-200 bg-muted/50 border-border/50 focus:bg-background focus:border-primary/50"
+                />
+              </div>
+            </div>
+
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex lg:items-center lg:space-x-8">
+            <div className="items-center hidden space-x-1 lg:flex">
               <nav className="flex items-center space-x-1">
                 {navItems.map(item => {
                   const isActive = location.pathname === item.path;
@@ -95,86 +162,130 @@ const Navbar: React.FC = () => {
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`relative flex items-center px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg group ${
+                      className={`relative flex items-center px-4 py-2.5 text-sm font-medium transition-all duration-200 rounded-lg group ${
                         isActive
-                          ? 'text-primary bg-primary/10'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                          ? 'text-primary bg-primary/10 shadow-sm border border-primary/20'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
                       }`}
                     >
-                      <item.icon className="w-4 h-4 mr-2 transition-transform group-hover:scale-110" />
-                      {item.label}
+                      <item.icon className="w-4 h-4 mr-2.5 transition-transform group-hover:scale-110" />
+                      <span className="font-medium">{item.label}</span>
                       {isActive && (
-                        <div className="absolute bottom-0 w-1 h-1 transform -translate-x-1/2 rounded-full left-1/2 bg-primary" />
+                        <div className="absolute w-1 h-1 transform -translate-x-1/2 rounded-full -bottom-1 left-1/2 bg-primary" />
                       )}
                     </Link>
                   );
                 })}
               </nav>
 
-              <Separator orientation="vertical" className="h-6" />
+              <Separator orientation="vertical" className="h-8 mx-4" />
 
-              <div className="flex items-center space-x-3">
+              {/* Desktop Actions */}
+              <div className="flex items-center space-x-2">
+                {/* Notifications */}
+                {/* <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative w-10 h-10"
+                >
+                  <Bell className="w-4 h-4" />
+                  <div className="absolute flex items-center justify-center w-3 h-3 rounded-full -top-1 -right-1 bg-destructive">
+                    <span className="text-xs font-bold text-destructive-foreground">
+                      3
+                    </span>
+                  </div>
+                </Button> */}
+
                 <ModeToggle />
 
+                {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative w-10 h-10 p-0 rounded-full"
+                      className="relative h-10 px-3 rounded-lg"
                     >
-                      <Avatar className="w-10 h-10 transition-all duration-200 hover:scale-105 hover:ring-2 hover:ring-primary/20">
-                        <AvatarImage
-                          src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
-                          alt="Profile"
-                        />
-                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
-                          NK
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute w-3 h-3 bg-green-500 border-2 rounded-full -bottom-1 -right-1 border-background" />
+                      <div className="flex items-center space-x-2">
+                        <Avatar className="w-8 h-8 transition-all duration-200 hover:scale-105">
+                          <AvatarImage
+                            src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
+                            alt="Profile"
+                          />
+                          <AvatarFallback className="font-semibold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                            NK
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-col items-start hidden xl:flex">
+                          <span className="text-sm font-medium">
+                            Naveed Khan
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Premium
+                          </span>
+                        </div>
+                      </div>
+                      <div className="absolute w-3 h-3 border-2 rounded-full -bottom-1 -right-1 bg-success border-background" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 p-2">
-                    <DropdownMenuLabel className="p-3">
+                  <DropdownMenuContent align="end" className="p-2 w-72">
+                    <DropdownMenuLabel className="p-4">
                       <div className="flex items-center space-x-3">
                         <Avatar className="w-12 h-12">
                           <AvatarImage
                             src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
                             alt="Profile"
                           />
-                          <AvatarFallback>NK</AvatarFallback>
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
+                            NK
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-semibold">Naveed Khan</p>
                           <p className="text-xs text-muted-foreground">
                             admin@icici.com
                           </p>
-                          <Badge variant="outline" className="text-xs w-fit">
-                            Premium
-                          </Badge>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline" className="text-xs">
+                              Premium
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Verified
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild className="p-3 cursor-pointer">
                       <Link to="/profile" className="flex items-center">
-                        <FaUserCircle className="w-4 h-4 mr-3" />
+                        <User className="w-4 h-4 mr-3" />
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">
-                            Profile Settings
+                            Account Settings
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            Manage your account
+                            Manage your profile and preferences
                           </span>
                         </div>
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem className="p-3 cursor-pointer">
+                      <Settings className="w-4 h-4 mr-3" />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          Trading Settings
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Configure trading preferences
+                        </span>
+                      </div>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={signOut}
-                      className="p-3 text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20"
+                      className="p-3 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
                     >
-                      <FaSignOutAlt className="w-4 h-4 mr-3" />
+                      <LogOut className="w-4 h-4 mr-3" />
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">Sign Out</span>
                         <span className="text-xs text-muted-foreground">
@@ -187,115 +298,129 @@ const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Actions */}
             <div className="flex items-center space-x-2 lg:hidden">
+              {/* <Button variant="ghost" size="icon" className="relative h-9 w-9">
+                <Bell className="w-4 h-4" />
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full" />
+              </Button> */}
               <ModeToggle />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                <div className="relative w-5 h-5">
-                  <FaBars
-                    className={`absolute inset-0 w-5 h-5 transition-all duration-200 ${
-                      isMobileMenuOpen
-                        ? 'opacity-0 rotate-45'
-                        : 'opacity-100 rotate-0'
-                    }`}
-                  />
-                  <FaTimes
-                    className={`absolute inset-0 w-5 h-5 transition-all duration-200 ${
-                      isMobileMenuOpen
-                        ? 'opacity-100 rotate-0'
-                        : 'opacity-0 -rotate-45'
-                    }`}
-                  />
-                </div>
-              </Button>
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="p-0 overflow-auto w-80">
+                  <SheetHeader className="p-6 pb-4 border-b">
+                    <SheetTitle className="flex items-center space-x-3">
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage
+                          src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
+                          alt="Profile"
+                        />
+                        <AvatarFallback>NK</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col items-start">
+                        <span className="text-base font-semibold">
+                          Naveed Khan
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          admin@icici.com
+                        </span>
+                        <Badge variant="outline" className="mt-1 text-xs">
+                          Premium Account
+                        </Badge>
+                      </div>
+                    </SheetTitle>
+                  </SheetHeader>
+
+                  <div className="flex flex-col h-full">
+                    {/* Mobile Search */}
+                    <div className="p-6 pb-4">
+                      <div className="relative">
+                        <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
+                        <Input
+                          type="text"
+                          placeholder="Search instruments..."
+                          value={searchQuery}
+                          disabled={true}
+                          onChange={e => setSearchQuery(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Mobile Navigation */}
+                    <div className="flex-1 px-6">
+                      <div className="space-y-2">
+                        {navItems.map(item => {
+                          const isActive = location.pathname === item.path;
+                          return (
+                            <Link
+                              key={item.path}
+                              to={item.path}
+                              className={`flex items-center px-4 py-3.5 text-base font-medium rounded-xl transition-all duration-200 ${
+                                isActive
+                                  ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm'
+                                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
+                              }`}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <item.icon className="w-5 h-5 mr-4" />
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {item.label}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {item.description}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Mobile Footer Actions */}
+                    <div className="p-6 pt-4 space-y-3 border-t">
+                      <Link
+                        to="/profile"
+                        className="flex items-center w-full px-4 py-3 text-sm font-medium transition-colors border rounded-xl hover:bg-accent/60"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <User className="w-4 h-4 mr-3" />
+                        <div className="flex flex-col items-start">
+                          <span>Account Settings</span>
+                          <span className="text-xs text-muted-foreground">
+                            Manage your profile
+                          </span>
+                        </div>
+                      </Link>
+                      <Button
+                        variant="destructive"
+                        className="justify-start w-full h-12"
+                        onClick={() => {
+                          signOut();
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="w-4 h-4 mr-3" />
+                        <div className="flex flex-col items-start">
+                          <span>Sign Out</span>
+                          <span className="text-xs opacity-90">
+                            End your session
+                          </span>
+                        </div>
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
       </nav>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Menu */}
-      <div
-        className={`fixed top-16 left-0 right-0 z-50 bg-background border-b shadow-lg lg:hidden transition-all duration-300 ${
-          isMobileMenuOpen
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 -translate-y-full pointer-events-none'
-        }`}
-      >
-        <div className="container px-4 py-6 mx-auto">
-          <div className="space-y-2">
-            {navItems.map(item => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-primary/10 text-primary border border-primary/20'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <item.icon className="w-5 h-5 mr-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <div className="flex items-center px-4 space-x-3">
-              <Avatar className="w-12 h-12">
-                <AvatarImage
-                  src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
-                  alt="Profile"
-                />
-                <AvatarFallback>NK</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <p className="text-sm font-semibold">Naveed Khan</p>
-                <p className="text-xs text-muted-foreground">admin@icici.com</p>
-              </div>
-            </div>
-
-            <Link
-              to="/profile"
-              className="flex items-center w-full px-4 py-2 text-sm font-medium transition-colors border rounded-lg hover:bg-accent/50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <FaUserCircle className="w-4 h-4 mr-3" />
-              Profile Settings
-            </Link>
-
-            <Button
-              variant="destructive"
-              className="justify-start w-full"
-              onClick={() => {
-                signOut();
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              <FaSignOutAlt className="w-4 h-4 mr-3" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </div>
     </>
   );
 };
