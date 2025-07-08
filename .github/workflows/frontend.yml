@@ -1,8 +1,6 @@
 name: "Frontend"
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
     branches: [main]
 
@@ -51,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [20]
 
     steps:
       - name: Checkout code
@@ -73,7 +71,7 @@ jobs:
       - name: Run Prettier (formatting check)
         working-directory: ./frontend
         run: |
-          npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}" --ignore-path .gitignore
+          format:check
 
       - name: Run ESLint
         working-directory: ./frontend
