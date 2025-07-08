@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
-
+import { Analytics } from '@vercel/analytics/react';
 import { useAppSelector } from './app/hooks';
 import { getCurrentToken } from './features/auth/authSlice';
 import { useHealthCheckQuery } from './shared/api/baseApi';
@@ -68,6 +68,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <Analytics />
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <AnnouncementBanner />
         <Routes>
