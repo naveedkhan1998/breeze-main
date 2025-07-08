@@ -9,8 +9,16 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "main.settings.local")
 
 app = Celery("main", include=[])
 
+# get schedule from CANDLE_MAKER_SCHEDULCING environment variable
+
+CANDLE_MAKER_SCHEDULE = int(os.getenv("CANDLE_MAKER_SCHEDULE", 1))
+
 app.conf.beat_schedule = {
-    "candle_making_job": {"task": "candle_maker", "schedule": 1, "relative": True},
+    "candle_making_job": {
+        "task": "candle_maker",
+        "schedule": CANDLE_MAKER_SCHEDULE,
+        "relative": True,
+    },
     # "websocket_connect": {
     #     "task": "websocket_start",
     #     "schedule": 6000,

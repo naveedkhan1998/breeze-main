@@ -11,8 +11,7 @@ mkdir -p /var/log/celery
 rm -f /var/run/celery/beat.pid
 
 # Start Celery Beat scheduler
-echo "Starting Celery Beat with INFO logging..."
+echo "Starting Celery Beat with ERROR logging..."
 celery -A main beat \
     --pidfile=/var/run/celery/beat.pid \
-    --logfile=/var/log/celery/beat.log \
-    --loglevel=INFO
+    --loglevel=ERROR

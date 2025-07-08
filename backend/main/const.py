@@ -1,0 +1,2 @@
+WEBSOCKET_HEARTBEAT_KEY  = "ticks_received"
+WEBSOCKET_HEARTBEAT_TTL  = 10            
