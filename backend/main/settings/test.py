@@ -3,6 +3,7 @@ Test settings for main project.
 """
 
 from .base import *  # noqa: F403, F401
+from .base import SIMPLE_JWT  # noqa: F401
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-test-key-for-testing-only"
@@ -35,6 +36,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
+
 # Disable migrations during tests
 class DisableMigrations:
     def __contains__(self, item):
@@ -42,6 +44,7 @@ class DisableMigrations:
 
     def __getitem__(self, item):
         return None
+
 
 MIGRATION_MODULES = DisableMigrations()
 

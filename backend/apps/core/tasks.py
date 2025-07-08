@@ -1,21 +1,22 @@
 from datetime import datetime, time, timedelta
 import json
 import time as PythonTime
-from redis.exceptions import RedisError
+
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
-from pytz import timezone
 from django.db import close_old_connections
+from pytz import timezone
+from redis.exceptions import RedisError
+
 from apps.account.models import User
-from apps.core.breeze import BreezeConnect, breeze_session_manager
-from apps.core.helper import date_parser
-from apps.core.utils import fetch_historical_data
+from apps.core.breeze import breeze_session_manager
 from apps.core.models import (
     Candle,
     SubscribedInstruments,
     Tick,
 )
+from apps.core.utils import fetch_historical_data
 from main import const
 
 logger = get_task_logger(__name__)
@@ -36,7 +37,7 @@ RETRY_BACKOFF_MAX = 300  # cap 5 min
     retry_backoff_max=RETRY_BACKOFF_MAX,
     max_retries=RETRY_MAX,
 )
-def websocket_start(self, user_id: int) -> None:
+def websocket_start(_self, user_id: int) -> None:
     """
     Single‑shot task that owns ONE websocket session.
     It will autoretry on any uncaught error with exponential back‑off.

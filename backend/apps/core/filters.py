@@ -1,6 +1,7 @@
-import django_filters
-from apps.core.models import Instrument, Exchanges
 from django.db.models import Q
+import django_filters
+
+from apps.core.models import Instrument
 
 
 class InstrumentFilter(django_filters.FilterSet):

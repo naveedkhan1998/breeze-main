@@ -116,12 +116,21 @@ const Registration: React.FC = () => {
       toast.success('Account created successfully!');
       navigate('/');
     } catch (error: unknown) {
-      if (typeof error === 'object' && error !== null && 'data' in error && typeof error.data === 'object' && error.data !== null && 'detail' in error.data) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'data' in error &&
+        typeof error.data === 'object' &&
+        error.data !== null &&
+        'detail' in error.data
+      ) {
         setError(error.data.detail as string);
         toast.error(error.data.detail as string);
       } else {
         setError('Registration failed. Please try again.');
-        toast.error('Registration failed. An account with this email may already exist.');
+        toast.error(
+          'Registration failed. An account with this email may already exist.'
+        );
       }
     }
   };

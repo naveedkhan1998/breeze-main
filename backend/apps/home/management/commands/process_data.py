@@ -165,7 +165,7 @@ class Command(BaseCommand):
                 )
 
                 # Prepare bulk operations
-                exchanges_to_create = []
+                _ = []
                 exchanges_to_update = []
 
                 for extracted_file in zf.namelist():
@@ -192,7 +192,7 @@ class Command(BaseCommand):
                         # Prepare for bulk update
                         exchange = exchange_qs.first()
                         # Convert Path to Django File object
-                        with open(exchange_file_path, "rb") as f:
+                        with Path.open(exchange_file_path, "rb") as f:
                             django_file = File(f, name=extracted_file)
                             exchange.file.save(extracted_file, django_file, save=False)
                         # Clear existing instruments for this exchange since we're reprocessing
@@ -214,7 +214,7 @@ class Command(BaseCommand):
                         # Save the exchange first to get an ID
                         new_exchange.save()
                         # Then save the file
-                        with open(exchange_file_path, "rb") as f:
+                        with Path.open(exchange_file_path, "rb") as f:
                             django_file = File(f, name=extracted_file)
                             new_exchange.file.save(
                                 extracted_file, django_file, save=True
@@ -304,7 +304,7 @@ class Command(BaseCommand):
                 ins_list = []
                 line_count = 0
 
-                with Path(file_path).open(encoding="utf-8") as f:
+                with Path(file_path).Path.open(encoding="utf-8") as f:
                     reader = csv.reader(f)
                     next(reader, None)  # Skip header
 

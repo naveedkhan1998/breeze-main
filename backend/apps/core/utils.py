@@ -1,20 +1,20 @@
 from datetime import datetime, timedelta
 
-from apps.core.breeze import BreezeConnect, breeze_session_manager
-from apps.core.helper import date_parser
-from apps.core.models import SubscribedInstruments, Candle
-
 from django.db import models
 from django.db.models import (
     F,
-    Sum,
-    Min,
-    Max,
-    Window,
     Func,
+    Max,
+    Min,
+    Sum,
     Value,
+    Window,
 )
-from django.db.models.functions import FirstValue, LastValue, RowNumber, Coalesce
+from django.db.models.functions import Coalesce, FirstValue, RowNumber
+
+from apps.core.breeze import BreezeConnect
+from apps.core.helper import date_parser
+from apps.core.models import Candle, SubscribedInstruments
 
 
 def fetch_historical_data(
@@ -49,7 +49,7 @@ def fetch_historical_data(
     chunk_size = timedelta(days=2)  # Fetch data in 2-day chunks
     diff: timedelta = end - start
     total_days = diff.days + 1
-    num_chunks = max((total_days + 1) // 2, 1)  # Calculate number of chunks
+    _ = max((total_days + 1) // 2, 1)  # Calculate number of chunks
 
     # Create a list of date ranges to process
     date_ranges = []

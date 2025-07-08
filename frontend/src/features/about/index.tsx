@@ -65,7 +65,8 @@ const AboutPage = () => {
                       variant="secondary"
                       className="flex items-center gap-1"
                     >
-                      <HiMail className="w-4 h-4" /> naveedkhan13041998@gmail.com
+                      <HiMail className="w-4 h-4" />{' '}
+                      naveedkhan13041998@gmail.com
                     </Badge>
                     <Badge
                       variant="secondary"
@@ -131,8 +132,8 @@ const AboutPage = () => {
                 <div>
                   <h3 className="mb-2 font-semibold">Backend & Infra</h3>
                   <p className="text-muted-foreground">
-                    Django, FastAPI, Celery, Redis, WebSockets, REST APIs,
-                    async workers, message queues
+                    Django, FastAPI, Celery, Redis, WebSockets, REST APIs, async
+                    workers, message queues
                   </p>
                 </div>
                 <div>
@@ -228,7 +229,9 @@ const AboutPage = () => {
               </div>
               <Separator />
               <div>
-                <h3 className="text-lg font-semibold">Quant Backend Engineer</h3>
+                <h3 className="text-lg font-semibold">
+                  Quant Backend Engineer
+                </h3>
                 <p className="mb-2 text-sm text-muted-foreground">
                   GenioBITS Technologies | Jun 2022 - Mar 2023
                 </p>
