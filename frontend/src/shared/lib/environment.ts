@@ -38,5 +38,9 @@ export const getCeleryWorkerUrls = () => {
       name: 'Worker 3',
       url: import.meta.env.VITE_CELERY_WORKER_3_URL || 'http://localhost:8003/',
     },
+    {
+      name: 'Beat',
+      url: import.meta.env.VITE_CELERY_BEAT_URL || 'http://localhost:8004/',
+    },
   ];
 };

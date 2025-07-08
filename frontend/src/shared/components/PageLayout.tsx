@@ -19,8 +19,8 @@ export const PageHeader: React.FC<{
   children: React.ReactNode;
   className?: string;
 }> = ({ children, className = '' }) => (
-  <div className={`mb-6 ${className}`}>
-    <h1 className="text-4xl font-bold tracking-tight text-foreground bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+  <div className={`mb-4 sm:mb-6 ${className}`}>
+    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl text-foreground bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
       {children}
     </h1>
   </div>
@@ -31,7 +31,7 @@ export const PageSubHeader: React.FC<{
   className?: string;
 }> = ({ children, className = '' }) => (
   <div
-    className={`mb-8 text-lg text-muted-foreground leading-relaxed ${className}`}
+    className={`mb-4 sm:mb-6 lg:mb-8 text-base sm:text-lg text-muted-foreground leading-relaxed ${className}`}
   >
     {children}
   </div>

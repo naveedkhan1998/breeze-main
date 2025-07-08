@@ -16,9 +16,9 @@ export default function AnnouncementBanner() {
   }
 
   return (
-    <div className="flex justify-between w-full p-4 border-b border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700">
+    <div className="flex justify-between w-full p-4 border-b border-border bg-card">
       <div className="flex items-center mx-auto">
-        <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
+        <p className="flex items-center text-sm font-normal text-muted-foreground">
           <MdAnnouncement className="w-4 h-4 mr-4" aria-hidden="true" />
           <span className="[&_p]:inline">
             This deployed version is using free services, so the limit for data
@@ -30,7 +30,7 @@ export default function AnnouncementBanner() {
       </div>
       <button
         onClick={handleClose}
-        className="text-gray-500 bg-transparent border-0 dark:text-gray-400"
+        className="transition-colors bg-transparent border-0 text-muted-foreground hover:text-foreground"
         aria-label="Close announcement"
       >
         <HiX className="w-4 h-4" aria-hidden="true" />
