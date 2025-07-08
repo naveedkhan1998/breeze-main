@@ -80,17 +80,25 @@ describe('Navbar Component', () => {
     // Get all home links and check the desktop one
     const homeLinks = screen.getAllByRole('link', { name: /home/i });
     expect(homeLinks.length).toBeGreaterThanOrEqual(1);
-    
+
     // The first home link should be the desktop version
     const desktopHomeLink = homeLinks[0];
     expect(desktopHomeLink).toBeInTheDocument();
     expect(desktopHomeLink).toHaveAttribute('href', '/');
 
     // Check other navigation items exist (they will also have duplicates)
-    expect(screen.getAllByRole('link', { name: /instruments/i }).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByRole('link', { name: /accounts/i }).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByRole('link', { name: /about/i }).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByRole('link', { name: /contact/i }).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByRole('link', { name: /instruments/i }).length
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByRole('link', { name: /accounts/i }).length
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByRole('link', { name: /about/i }).length
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByRole('link', { name: /contact/i }).length
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('shows mobile menu toggle button', () => {
@@ -121,16 +129,27 @@ describe('Navbar Component', () => {
     expect(hamburgerButton).toBeInTheDocument();
 
     // Check that mobile menu container is not visible initially
-    const mobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
-    expect(mobileMenuContainer).toHaveClass('opacity-0', '-translate-y-full', 'pointer-events-none');
+    const mobileMenuContainer = document.querySelector(
+      '.fixed.top-16.left-0.right-0'
+    );
+    expect(mobileMenuContainer).toHaveClass(
+      'opacity-0',
+      '-translate-y-full',
+      'pointer-events-none'
+    );
 
     // Click to open menu
     fireEvent.click(hamburgerButton!);
 
     // Wait for mobile menu to appear
     await waitFor(() => {
-      const updatedMobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
-      expect(updatedMobileMenuContainer).toHaveClass('opacity-100', 'translate-y-0');
+      const updatedMobileMenuContainer = document.querySelector(
+        '.fixed.top-16.left-0.right-0'
+      );
+      expect(updatedMobileMenuContainer).toHaveClass(
+        'opacity-100',
+        'translate-y-0'
+      );
       expect(updatedMobileMenuContainer).not.toHaveClass('pointer-events-none');
     });
   });
@@ -170,20 +189,30 @@ describe('Navbar Component', () => {
 
     // Wait for menu to open
     await waitFor(() => {
-      const mobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
+      const mobileMenuContainer = document.querySelector(
+        '.fixed.top-16.left-0.right-0'
+      );
       expect(mobileMenuContainer).toHaveClass('opacity-100', 'translate-y-0');
     });
 
     // Click on a navigation item in the mobile menu
-    const mobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
+    const mobileMenuContainer = document.querySelector(
+      '.fixed.top-16.left-0.right-0'
+    );
     const homeLink = mobileMenuContainer?.querySelector('a[href="/"]');
     expect(homeLink).toBeInTheDocument();
     fireEvent.click(homeLink!);
 
     // Menu should close
     await waitFor(() => {
-      const updatedMobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
-      expect(updatedMobileMenuContainer).toHaveClass('opacity-0', '-translate-y-full', 'pointer-events-none');
+      const updatedMobileMenuContainer = document.querySelector(
+        '.fixed.top-16.left-0.right-0'
+      );
+      expect(updatedMobileMenuContainer).toHaveClass(
+        'opacity-0',
+        '-translate-y-full',
+        'pointer-events-none'
+      );
     });
   });
 });

@@ -2,28 +2,36 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from 'src/test/test-utils';
 import HomePage from './index';
 
+// Mock environment variables
+vi.mock('@/lib/environment', () => ({
+  isDevelopment: true,
+  getCeleryWorkerUrls: () => [],
+}));
+
 // Mock API hooks
 vi.mock('@/api/instrumentService', () => ({
   useDeleteInstrumentMutation: () => [vi.fn(), { isLoading: false }],
   useGetSubscribedInstrumentsQuery: () => ({
-    data: [
-      {
-        id: '1',
-        name: 'Test Instrument 1',
-        exchange: 'NSE',
-        segment: 'EQUITY',
-        percentage: { percentage: 5.5 },
-        stock_code: 'TEST1',
-      },
-      {
-        id: '2',
-        name: 'Test Instrument 2',
-        exchange: 'BSE',
-        segment: 'OPTION',
-        percentage: { percentage: -2.1 },
-        stock_code: 'TEST2',
-      },
-    ],
+    data: {
+      data: [
+        {
+          id: '1',
+          name: 'Test Instrument 1',
+          exchange: 'NSE',
+          segment: 'EQUITY',
+          percentage: { percentage: 5.5 },
+          stock_code: 'TEST1',
+        },
+        {
+          id: '2',
+          name: 'Test Instrument 2',
+          exchange: 'BSE',
+          segment: 'OPTION',
+          percentage: { percentage: -2.1 },
+          stock_code: 'TEST2',
+        },
+      ],
+    },
     isLoading: false,
     error: null,
     refetch: vi.fn(),
