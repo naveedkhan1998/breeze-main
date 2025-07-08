@@ -8,7 +8,8 @@ python3 http_server.py & # Run HTTP server in background
 
 echo "STARTING CELERY WORKER WITH MEMORY LIMIT..."
 celery -A main worker \
-    --loglevel=ERROR \
+    --loglevel=debug \
     --time-limit=0 \
-    --concurrency=1
+    --concurrency=1 \
+    --pool=solo
 #celery multi start w1 w2 -A main --loglevel=INFO

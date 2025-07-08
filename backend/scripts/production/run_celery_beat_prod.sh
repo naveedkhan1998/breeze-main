@@ -11,7 +11,6 @@ echo "STARTING CELERY BEAT SCHEDULER WITH MEMORY LIMIT..."
 
 # Create necessary directories
 mkdir -p /var/run/celery
-mkdir -p /var/log/celery
 
 # Remove existing beat PID file
 rm -f /var/run/celery/beat.pid
@@ -19,5 +18,4 @@ rm -f /var/run/celery/beat.pid
 # Start Celery Beat scheduler detached
 celery -A main beat \
     --pidfile=/var/run/celery/beat.pid \
-    --logfile=/var/log/celery/beat.log \
-    --loglevel=ERROR
+    --loglevel=INFO

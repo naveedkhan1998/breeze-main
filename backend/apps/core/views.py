@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
+from apps.core.filters import InstrumentFilter
 from rest_framework.response import Response
 
 from apps.core.breeze import breeze_session_manager
@@ -30,6 +32,7 @@ from apps.core.serializers import (
 from apps.core.pagination import OffsetPagination, CandleBucketPagination
 from apps.core.tasks import load_instrument_candles, resample_candles, websocket_start
 from apps.core.utils import resample_qs
+from main import const
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +108,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
             check_breeze_session = session.get_funds()
 
             # Check if ticks have been received in the last 10 seconds
-            websocket_status = bool(cache.get("ticks_received", False))
+            websocket_status = bool(cache.get(const.WEBSOCKET_HEARTBEAT_KEY, False))
 
             # Determine session status message
             if check_breeze_session.get("Status") == 200:
@@ -229,10 +232,6 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
             )
 
 
-from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.filters import InstrumentFilter
-
-
 class InstrumentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     A ViewSet for viewing Instrument instances.
@@ -292,7 +291,7 @@ class SubscribedInstrumentsViewSet(viewsets.ModelViewSet):
 
     queryset = SubscribedInstruments.objects.all()
     serializer_class = SubscribedSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     pagination_class = OffsetPagination
 
     def list(self, request):
