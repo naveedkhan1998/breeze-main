@@ -452,7 +452,7 @@ const GraphsPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-background via-background to-muted/10">
+    <div className="flex flex-col h-[100dvh] bg-gradient-to-br from-background via-background to-muted/10">
       {/* Enhanced Header */}
       <GraphHeader
         data={data}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -178,7 +178,9 @@ const Instrument: React.FC<Props> = ({
         className="flex flex-col items-center justify-center h-full p-8 text-center"
       >
         <div className="flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-muted">
-          <span className="text-4xl">🔍</span>
+          <span className="text-4xl">
+            <Search />
+          </span>
         </div>
         <h3 className="mb-2 text-xl font-semibold text-foreground">
           No Instruments Found
