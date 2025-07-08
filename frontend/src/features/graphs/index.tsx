@@ -55,12 +55,16 @@ import NotFoundScreen from './components/NotFoundScreen';
 import GraphHeader from './components/GraphHeader';
 import { X } from 'lucide-react';
 import IndicatorChart from './components/IndicatorChart';
+import { useIsMobile } from '@/hooks/useMobile';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+
 interface LocationState {
   obj: Instrument;
 }
 
 const GraphsPage: React.FC = () => {
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const { obj } = (location.state as LocationState) || {};
   const { theme } = useTheme();
@@ -460,143 +464,256 @@ const GraphsPage: React.FC = () => {
 
       {/* Main Content */}
       <div ref={chartSectionRef} className="flex flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="relative flex-1">
-          {/* Enhanced Controls Sidebar */}
-          {showControls && (
-            <>
-              <ResizablePanel
-                defaultSize={24}
-                minSize={20}
-                maxSize={35}
-                className="min-w-0"
-              >
-                <div className="h-full p-4 ">
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between p-4 border-b border-border/30 ">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
-                          <HiCog className="w-4 h-4 text-chart-1" />
-                        </div>
-                        <div>
-                          <span className="font-bold text-card-foreground">
-                            Controls
-                          </span>
-                        </div>
+        {isMobile ? (
+          <div className="flex-1 p-2">
+            <Sheet
+              open={showControls}
+              onOpenChange={open => dispatch(setShowControls(open))}
+            >
+              <SheetContent side="left" className="p-0">
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center justify-between p-4 border-b border-border/30">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                        <HiCog className="w-4 h-4 text-chart-1" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-card-foreground">
+                          Controls
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-1 p-5 overflow-y-auto">
+                    <ChartControls />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+            <ResizablePanelGroup direction="vertical">
+              {/* Main Chart */}
+              <ResizablePanel defaultSize={shouldShowVolume ? 75 : 100}>
+                <MainChart
+                  seriesData={seriesData}
+                  mode={isDarkMode}
+                  obj={obj}
+                  setTimeScale={setMainChartTimeScale}
+                  emaData={emaData}
+                  bollingerBandsData={bollingerBandsData}
+                  onLoadMoreData={loadMoreHistoricalData}
+                  isLoadingMore={isLoadingMore}
+                  hasMoreData={hasMoreData}
+                />
+              </ResizablePanel>
+
+              {/* Enhanced Volume Chart */}
+              {shouldShowVolume && (
+                <>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel defaultSize={25} minSize={15}>
+                    <div className="flex items-center justify-between p-2 border-b border-border/30">
+                      <div className="flex items-center space-x-2">
+                        <HiChartBar className="w-4 h-4 text-chart-1" />
+                        <span className="font-bold text-card-foreground">
+                          Volume
+                        </span>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => dispatch(setShowControls(false))}
-                        className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                        onClick={() => dispatch(setShowVolume(false))}
+                        className="w-8 h-8 p-0 rounded-lg"
                       >
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
-                    <div className="flex-1 p-5 overflow-y-auto">
-                      <ChartControls />
+                    <VolumeChart
+                      volumeData={volumeData}
+                      mode={isDarkMode}
+                      setTimeScale={setVolumeChartTimeScale}
+                    />
+                  </ResizablePanel>
+                </>
+              )}
+
+              {/* Indicator Chart */}
+              {(activeIndicators.includes('RSI') ||
+                activeIndicators.includes('ATR')) && (
+                <>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel defaultSize={25} minSize={15}>
+                    <div className="flex items-center justify-between p-2 border-b border-border/30">
+                      <div className="flex items-center space-x-2">
+                        <HiChartBar className="w-4 h-4 text-chart-1" />
+                        <span className="font-bold text-card-foreground">
+                          Indicators
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          dispatch(removeIndicator('RSI'));
+                          dispatch(removeIndicator('ATR'));
+                        }}
+                        className="w-8 h-8 p-0 rounded-lg"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <IndicatorChart
+                      rsiData={rsiData}
+                      atrData={atrData}
+                      mode={isDarkMode}
+                      setTimeScale={setIndicatorChartTimeScale}
+                    />
+                  </ResizablePanel>
+                </>
+              )}
+            </ResizablePanelGroup>
+          </div>
+        ) : (
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="relative flex-1"
+          >
+            {/* Enhanced Controls Sidebar */}
+            {showControls && (
+              <>
+                <ResizablePanel
+                  defaultSize={24}
+                  minSize={20}
+                  maxSize={35}
+                  className="min-w-0"
+                >
+                  <div className="h-full p-4 ">
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-center justify-between p-4 border-b border-border/30 ">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                            <HiCog className="w-4 h-4 text-chart-1" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-card-foreground">
+                              Controls
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => dispatch(setShowControls(false))}
+                          className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <div className="flex-1 p-5 overflow-y-auto">
+                        <ChartControls />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-            </>
-          )}
-
-          {/* Enhanced Chart Area */}
-          <ResizablePanel defaultSize={showControls ? 76 : 100}>
-            <div className="h-full p-4">
-              <ResizablePanelGroup direction="vertical">
-                {/* Main Chart */}
-                <ResizablePanel defaultSize={shouldShowVolume ? 75 : 100}>
-                  <MainChart
-                    seriesData={seriesData}
-                    mode={isDarkMode}
-                    obj={obj}
-                    setTimeScale={setMainChartTimeScale}
-                    emaData={emaData}
-                    bollingerBandsData={bollingerBandsData}
-                    onLoadMoreData={loadMoreHistoricalData}
-                    isLoadingMore={isLoadingMore}
-                    hasMoreData={hasMoreData}
-                  />
                 </ResizablePanel>
+                <ResizableHandle withHandle />
+              </>
+            )}
 
-                {/* Enhanced Volume Chart */}
-                {shouldShowVolume && (
-                  <>
-                    <ResizableHandle withHandle />
-                    <ResizablePanel defaultSize={25} minSize={15}>
-                      <div className="flex items-center justify-between p-4 border-b border-border/30 ">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
-                            <HiChartBar className="w-4 h-4 text-chart-1" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-card-foreground">
-                              Volume
-                            </span>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => dispatch(setShowVolume(false))}
-                          className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <VolumeChart
-                        volumeData={volumeData}
-                        mode={isDarkMode}
-                        setTimeScale={setVolumeChartTimeScale}
-                      />
-                    </ResizablePanel>
-                  </>
-                )}
+            {/* Enhanced Chart Area */}
+            <ResizablePanel defaultSize={showControls ? 76 : 100}>
+              <div className="h-full p-4">
+                <ResizablePanelGroup direction="vertical">
+                  {/* Main Chart */}
+                  <ResizablePanel defaultSize={shouldShowVolume ? 75 : 100}>
+                    <MainChart
+                      seriesData={seriesData}
+                      mode={isDarkMode}
+                      obj={obj}
+                      setTimeScale={setMainChartTimeScale}
+                      emaData={emaData}
+                      bollingerBandsData={bollingerBandsData}
+                      onLoadMoreData={loadMoreHistoricalData}
+                      isLoadingMore={isLoadingMore}
+                      hasMoreData={hasMoreData}
+                    />
+                  </ResizablePanel>
 
-                {/* Indicator Chart */}
-                {(activeIndicators.includes('RSI') ||
-                  activeIndicators.includes('ATR')) && (
-                  <>
-                    <ResizableHandle withHandle />
-                    <ResizablePanel defaultSize={25} minSize={15}>
-                      <div className="flex items-center justify-between p-4 border-b border-border/30 ">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
-                            <HiChartBar className="w-4 h-4 text-chart-1" />
+                  {/* Enhanced Volume Chart */}
+                  {shouldShowVolume && (
+                    <>
+                      <ResizableHandle withHandle />
+                      <ResizablePanel defaultSize={25} minSize={15}>
+                        <div className="flex items-center justify-between p-4 border-b border-border/30 ">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                              <HiChartBar className="w-4 h-4 text-chart-1" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-card-foreground">
+                                Volume
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-bold text-card-foreground">
-                              Indicators
-                            </span>
-                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => dispatch(setShowVolume(false))}
+                            className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            dispatch(removeIndicator('RSI'));
-                            dispatch(removeIndicator('ATR'));
-                          }}
-                          className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <IndicatorChart
-                        rsiData={rsiData}
-                        atrData={atrData}
-                        mode={isDarkMode}
-                        setTimeScale={setIndicatorChartTimeScale}
-                      />
-                    </ResizablePanel>
-                  </>
-                )}
-              </ResizablePanelGroup>
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+                        <VolumeChart
+                          volumeData={volumeData}
+                          mode={isDarkMode}
+                          setTimeScale={setVolumeChartTimeScale}
+                        />
+                      </ResizablePanel>
+                    </>
+                  )}
+
+                  {/* Indicator Chart */}
+                  {(activeIndicators.includes('RSI') ||
+                    activeIndicators.includes('ATR')) && (
+                    <>
+                      <ResizableHandle withHandle />
+                      <ResizablePanel defaultSize={25} minSize={15}>
+                        <div className="flex items-center justify-between p-4 border-b border-border/30 ">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/10">
+                              <HiChartBar className="w-4 h-4 text-chart-1" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-card-foreground">
+                                Indicators
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              dispatch(removeIndicator('RSI'));
+                              dispatch(removeIndicator('ATR'));
+                            }}
+                            className="w-8 h-8 p-0 rounded-lg action-button hover:bg-gradient-to-r hover:from-destructive/20 hover:to-destructive/10 hover:text-destructive"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <IndicatorChart
+                          rsiData={rsiData}
+                          atrData={atrData}
+                          mode={isDarkMode}
+                          setTimeScale={setIndicatorChartTimeScale}
+                        />
+                      </ResizablePanel>
+                    </>
+                  )}
+                </ResizablePanelGroup>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </div>
     </div>
   );
