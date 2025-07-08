@@ -161,10 +161,11 @@ select = [
     "PTH",    # flake8-use-pathlib
 ]
 ignore = [
-    "E501", # line too long, handled by black
-    "B008", # do not perform function calls in argument defaults
-    "C901", # too complex
-    "W191", # indentation contains tabs
+    "E501",   # line too long, handled by black
+    "B008",   # do not perform function calls in argument defaults
+    "C901",   # too complex
+    "W191",   # indentation contains tabs
+    "SIM113",
 ]
 unfixable = [
     "F841", # remove unused variables

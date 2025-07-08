@@ -1,8 +1,8 @@
 import json
-import pytest
 from unittest.mock import MagicMock, patch
 
 from django.test import RequestFactory
+import pytest
 from rest_framework import status
 
 from apps.core.views import BreezeAccountViewSet, InstrumentViewSet
@@ -21,7 +21,11 @@ class TestInstrumentViewSet:
     @patch("apps.core.views.InstrumentViewSet.get_serializer")
     @patch("apps.core.views.InstrumentViewSet.permission_classes", new=[])
     def test_list_instruments_success(
-        self, MockGetSerializer, MockExchangesObjects, MockInstrumentObjects, MockFilterQueryset
+        self,
+        MockGetSerializer,
+        MockExchangesObjects,
+        MockInstrumentObjects,
+        MockFilterQueryset,
     ):
         # Create a mock request
         request = self.factory.get(
@@ -114,7 +118,11 @@ class TestInstrumentViewSet:
     @patch("apps.core.views.InstrumentViewSet.get_serializer")
     @patch("apps.core.views.InstrumentViewSet.permission_classes", new=[])
     def test_list_instruments_no_instruments_found(
-        self, MockGetSerializer, MockInstrumentObjects, MockExchangesObjects, MockFilterQueryset
+        self,
+        MockGetSerializer,
+        MockInstrumentObjects,
+        MockExchangesObjects,
+        MockFilterQueryset,
     ):
         request = self.factory.get(
             "/instruments/", {"exchange": "NSE", "search": "nomatch"}
@@ -376,7 +384,10 @@ class TestBreezeAccountViewSet:
 
         assert response.status_code == status.HTTP_200_OK
         assert response_data["msg"] == "done"
-        assert response_data["data"] == {"session_status": True, "websocket_status": True}
+        assert response_data["data"] == {
+            "session_status": True,
+            "websocket_status": True,
+        }
         MockBreezeSessionManager.initialize_session.assert_called_once_with(
             request.user.id
         )

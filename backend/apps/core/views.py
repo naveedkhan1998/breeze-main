@@ -3,16 +3,16 @@
 import logging
 
 from django.core.cache import cache
-from django.db.models import Q, Count
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from django_filters.rest_framework import DjangoFilterBackend
-from apps.core.filters import InstrumentFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.core.breeze import breeze_session_manager
+from apps.core.filters import InstrumentFilter
 from apps.core.models import (
     BreezeAccount,
     Candle,
@@ -21,15 +21,15 @@ from apps.core.models import (
     PercentageInstrument,
     SubscribedInstruments,
 )
+from apps.core.pagination import CandleBucketPagination, OffsetPagination
 from apps.core.serializers import (
+    AggregatedCandleSerializer,
     AllInstrumentSerializer,
     BreezeAccountSerializer,
     CandleSerializer,
     InstrumentSerializer,
     SubscribedSerializer,
-    AggregatedCandleSerializer,
 )
-from apps.core.pagination import OffsetPagination, CandleBucketPagination
 from apps.core.tasks import load_instrument_candles, resample_candles, websocket_start
 from apps.core.utils import resample_qs
 from main import const
