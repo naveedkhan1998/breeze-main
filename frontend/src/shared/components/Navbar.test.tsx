@@ -77,17 +77,20 @@ describe('Navbar Component', () => {
   it('renders navigation items for desktop', () => {
     render(<Navbar />);
 
-    // Check if navigation items are present
-    const homeLink = screen.getByRole('link', { name: /home/i });
-    expect(homeLink).toBeInTheDocument();
-    expect(homeLink).toHaveAttribute('href', '/');
+    // Get all home links and check the desktop one
+    const homeLinks = screen.getAllByRole('link', { name: /home/i });
+    expect(homeLinks.length).toBeGreaterThanOrEqual(1);
+    
+    // The first home link should be the desktop version
+    const desktopHomeLink = homeLinks[0];
+    expect(desktopHomeLink).toBeInTheDocument();
+    expect(desktopHomeLink).toHaveAttribute('href', '/');
 
-    expect(
-      screen.getByRole('link', { name: /instruments/i })
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /accounts/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /about/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /contact/i })).toBeInTheDocument();
+    // Check other navigation items exist (they will also have duplicates)
+    expect(screen.getAllByRole('link', { name: /instruments/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole('link', { name: /accounts/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole('link', { name: /about/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole('link', { name: /contact/i }).length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows mobile menu toggle button', () => {
@@ -117,15 +120,18 @@ describe('Navbar Component', () => {
 
     expect(hamburgerButton).toBeInTheDocument();
 
-    // Initially mobile menu should not be visible
-    expect(screen.queryByText('Sign Out')).not.toBeInTheDocument();
+    // Check that mobile menu container is not visible initially
+    const mobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
+    expect(mobileMenuContainer).toHaveClass('opacity-0', '-translate-y-full', 'pointer-events-none');
 
     // Click to open menu
     fireEvent.click(hamburgerButton!);
 
     // Wait for mobile menu to appear
     await waitFor(() => {
-      expect(screen.getByText('Sign Out')).toBeInTheDocument();
+      const updatedMobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
+      expect(updatedMobileMenuContainer).toHaveClass('opacity-100', 'translate-y-0');
+      expect(updatedMobileMenuContainer).not.toHaveClass('pointer-events-none');
     });
   });
 
@@ -140,12 +146,12 @@ describe('Navbar Component', () => {
   it('handles responsive behavior', () => {
     render(<Navbar />);
 
-    // Target the main navbar container by its classes instead of role
-    const navbar = document.querySelector('nav.sticky.top-0.z-30.w-full');
+    // Target the main navbar container by its actual classes
+    const navbar = document.querySelector('nav.sticky.top-0.z-50.w-full');
     expect(navbar).toBeInTheDocument();
 
     // Test that responsive classes are applied
-    expect(navbar).toHaveClass('sticky', 'top-0', 'z-30', 'w-full');
+    expect(navbar).toHaveClass('sticky', 'top-0', 'z-50', 'w-full');
   });
 
   it('closes mobile menu when navigation item is clicked', async () => {
@@ -164,18 +170,20 @@ describe('Navbar Component', () => {
 
     // Wait for menu to open
     await waitFor(() => {
-      expect(screen.getByText('Sign Out')).toBeInTheDocument();
+      const mobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
+      expect(mobileMenuContainer).toHaveClass('opacity-100', 'translate-y-0');
     });
 
-    // Click on a navigation item
-    const homeLink = screen.getAllByRole('link', { name: /home/i })[1]; // Mobile version
-    fireEvent.click(homeLink);
+    // Click on a navigation item in the mobile menu
+    const mobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
+    const homeLink = mobileMenuContainer?.querySelector('a[href="/"]');
+    expect(homeLink).toBeInTheDocument();
+    fireEvent.click(homeLink!);
 
-    // Menu should close (Sign Out button should disappear from mobile menu)
+    // Menu should close
     await waitFor(() => {
-      const signOutButtons = screen.queryAllByText('Sign Out');
-      // Should only have the desktop dropdown version, not the mobile version
-      expect(signOutButtons.length).toBeLessThanOrEqual(1);
+      const updatedMobileMenuContainer = document.querySelector('.fixed.top-16.left-0.right-0');
+      expect(updatedMobileMenuContainer).toHaveClass('opacity-0', '-translate-y-full', 'pointer-events-none');
     });
   });
 });

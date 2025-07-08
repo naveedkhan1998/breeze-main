@@ -63,7 +63,14 @@ const Login: React.FC = () => {
       toast.success('Welcome back!');
       navigate('/');
     } catch (error: unknown) {
-      if (typeof error === 'object' && error !== null && 'data' in error && typeof error.data === 'object' && error.data !== null && 'detail' in error.data) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'data' in error &&
+        typeof error.data === 'object' &&
+        error.data !== null &&
+        'detail' in error.data
+      ) {
         setError(error.data.detail as string);
         toast.error(error.data.detail as string);
       } else {

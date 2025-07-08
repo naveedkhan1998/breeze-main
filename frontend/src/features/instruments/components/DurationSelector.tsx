@@ -31,14 +31,16 @@ const DurationSelector: React.FC<{
           <ChevronDown className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="bg-background border-border w-[--radix-dropdown-menu-trigger-width]">
+      <DropdownMenuContent
+        align="center"
+        className="bg-background border-border w-[--radix-dropdown-menu-trigger-width]"
+      >
         {HISTORIC_DATA_DURATIONS.map(weeks => (
-          <DropdownMenuItem
-            key={weeks}
-            onClick={() => onDurationChange(weeks)}
-           
-          >
-            {weeks} weeks{weeks >= 52 ? ` (${Math.round(weeks / 52)} year${weeks > 52 ? 's' : ''})` : ''}
+          <DropdownMenuItem key={weeks} onClick={() => onDurationChange(weeks)}>
+            {weeks} weeks
+            {weeks >= 52
+              ? ` (${Math.round(weeks / 52)} year${weeks > 52 ? 's' : ''})`
+              : ''}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

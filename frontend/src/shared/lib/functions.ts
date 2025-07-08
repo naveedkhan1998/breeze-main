@@ -152,7 +152,11 @@ export const calculateATR = (data: Candle[], period: number = 14) => {
     const low = data[i].low;
     const prevClose = i > 0 ? data[i - 1].close : high; // Use high if no previous close
 
-    const tr = Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose));
+    const tr = Math.max(
+      high - low,
+      Math.abs(high - prevClose),
+      Math.abs(low - prevClose)
+    );
     trs.push(tr);
 
     if (i >= period - 1) {
