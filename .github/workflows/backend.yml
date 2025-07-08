@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  quality:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,23 +31,19 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./backend
-        run: |
-          uv sync --dev --frozen
+        run: uv sync --dev --frozen
 
       - name: Run Black (formatting check)
         working-directory: ./backend
-        run: |
-          uvx black --check --diff .
+        run: uvx black --check --diff .
 
       - name: Run Ruff (linting)
         working-directory: ./backend
-        run: |
-          uvx ruff check --output-format=github .
+        run: uvx ruff check --output-format=github .
 
       - name: Run Tests
         working-directory: ./backend
-        run: |
-          uv run pytest --verbose --tb=short
+        run: uv run pytest --verbose --tb=short
 
       - name: Backend Quality Summary
         if: always()
