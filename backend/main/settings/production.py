@@ -57,3 +57,25 @@ SIMPLE_JWT.update(
         "SIGNING_KEY": SECRET_KEY,
     }
 )
+
+# Redis connection pooling settings for production
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 3
+CELERY_BROKER_POOL_LIMIT = 5  # Reduced from 10 for 3 workers
+CELERY_REDIS_MAX_CONNECTIONS = 10  # Reduced from 20 for 3 workers
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'visibility_timeout': 3600,
+    'retry_policy': {
+        'timeout': 5.0
+    },
+    'connection_pool_kwargs': {
+        'max_connections': 10,  # Reduced from 20 for 3 workers
+        'retry_on_timeout': True,
+    },
+}
+
+# Additional Celery settings for production
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
