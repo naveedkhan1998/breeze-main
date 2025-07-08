@@ -44,6 +44,7 @@ import {
 } from '../graphSlice';
 import { Instrument } from '@/types/common-types';
 import { ModeToggle } from '@/components/ModeToggle';
+import { useIsMobile } from '@/hooks/useMobile';
 
 interface GraphHeaderProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,14 +69,20 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
   const showVolume = useAppSelector(selectShowVolume);
   const showControls = useAppSelector(selectShowControls);
   const isFullscreen = useAppSelector(selectIsFullscreen);
+  const isMobile = useIsMobile();
+
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-sm">
       <Helmet>
         <title>{obj?.company_name} - Breeze</title>
       </Helmet>
-      <div className="flex items-center justify-between h-20 px-4 mx-auto sm:px-6 lg:px-8">
+      <div
+        className={`flex items-center justify-between ${
+          isMobile ? 'h-16 px-2' : 'h-20 px-4'
+        } mx-auto sm:px-6 lg:px-8`}
+      >
         {/* Left Section - Navigation & Title */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
@@ -93,64 +100,74 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
           </TooltipProvider>
 
           <div>
-            <h1 className="text-lg font-semibold text-foreground">
+            <h1
+              className={`${
+                isMobile ? 'text-base' : 'text-lg'
+              } font-semibold text-foreground`}
+            >
               {obj?.company_name || 'Chart'}
             </h1>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{obj?.exchange_code || 'N/A'}</span>
-              <Separator orientation="vertical" className="h-3" />
-              <span>{timeframe}m</span>
-              <Separator orientation="vertical" className="h-3" />
-              <span>{data?.count || 0} data points</span>
-              {autoRefresh && (
-                <>
-                  <Separator orientation="vertical" className="h-3" />
-                  <div className="flex items-center gap-1.5 text-green-500">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span>Live</span>
-                  </div>
-                </>
-              )}
-            </div>
+            {!isMobile && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{obj?.exchange_code || 'N/A'}</span>
+                <Separator orientation="vertical" className="h-3" />
+                <span>{timeframe}m</span>
+                <Separator orientation="vertical" className="h-3" />
+                <span>{data?.count || 0} data points</span>
+                {autoRefresh && (
+                  <>
+                    <Separator orientation="vertical" className="h-3" />
+                    <div className="flex items-center gap-1.5 text-green-500">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span>Live</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Right Section - Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={autoRefresh ? 'secondary' : 'ghost'}
-                  size="icon"
-                  onClick={() => dispatch(setAutoRefresh(!autoRefresh))}
-                  className="rounded-full"
-                >
-                  {autoRefresh ? (
-                    <HiPause className="w-5 h-5" />
-                  ) : (
-                    <HiPlay className="w-5 h-5" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {autoRefresh ? 'Pause Live Updates' : 'Enable Live Updates'}
-              </TooltipContent>
-            </Tooltip>
+            {!isMobile && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={autoRefresh ? 'secondary' : 'ghost'}
+                      size="icon"
+                      onClick={() => dispatch(setAutoRefresh(!autoRefresh))}
+                      className="rounded-full"
+                    >
+                      {autoRefresh ? (
+                        <HiPause className="w-5 h-5" />
+                      ) : (
+                        <HiPlay className="w-5 h-5" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {autoRefresh ? 'Pause Live Updates' : 'Enable Live Updates'}
+                  </TooltipContent>
+                </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={refetch}
-                  className="rounded-full"
-                >
-                  <HiRefresh className="w-5 h-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Refresh Data</TooltipContent>
-            </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={refetch}
+                      className="rounded-full"
+                    >
+                      <HiRefresh className="w-5 h-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Refresh Data</TooltipContent>
+                </Tooltip>
+              </>
+            )}
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -166,28 +183,32 @@ const GraphHeader: React.FC<GraphHeaderProps> = ({
               <TooltipContent>Toggle Controls</TooltipContent>
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleFullscreen}
-                  className="rounded-full"
-                >
-                  {isFullscreen ? (
-                    <HiX className="w-5 h-5" />
-                  ) : (
-                    <HiArrowsExpand className="w-5 h-5" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-              </TooltipContent>
-            </Tooltip>
+            {!isMobile && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleFullscreen}
+                    className="rounded-full"
+                  >
+                    {isFullscreen ? (
+                      <HiX className="w-5 h-5" />
+                    ) : (
+                      <HiArrowsExpand className="w-5 h-5" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+                </TooltipContent>
+              </Tooltip>
+            )}
           </TooltipProvider>
 
-          <Separator orientation="vertical" className="h-6 mx-1" />
+          {!isMobile && (
+            <Separator orientation="vertical" className="h-6 mx-1" />
+          )}
 
           <ModeToggle />
 
