@@ -39,8 +39,8 @@ RETRY_BACKOFF_MAX = 300  # cap 5 min
 )
 def websocket_start(_self, user_id: int) -> None:
     """
-    Single‑shot task that owns ONE websocket session.
-    It will autoretry on any uncaught error with exponential back‑off.
+    Single-shot task that owns ONE websocket session.
+    It will autoretry on any uncaught error with exponential back-off.
     """
 
     lock_key = f"ws:{user_id}:lock"
@@ -112,7 +112,7 @@ def _run_session_loop(user_id: int) -> None:
             if "Session key is expired" in str(e):
                 logger.warning("Breeze session expired — will retry in 5 min")
                 PythonTime.sleep(5)
-                raise  # let Celery back‑off
+                raise  # let Celery back-off
             logger.exception("Unhandled WS error")
             raise
 
