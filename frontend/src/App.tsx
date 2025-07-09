@@ -44,8 +44,11 @@ export default function App() {
 
   useEffect(() => {
     checkEnvironment();
-    setIsLoadingComplete(true);
-  }, []);
+    
+    if (!isHealthCheckLoading && !isLoadingComplete) {
+      setIsLoadingComplete(true);
+    }
+  }, [isHealthCheckLoading, isLoadingComplete]);
 
   useEffect(() => {
     dispatch(checkHealth());
