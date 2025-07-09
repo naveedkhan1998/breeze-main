@@ -1,173 +1,453 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface LoadingPhase {
+  message: string;
+  minDuration: number;
+  maxDuration: number;
+  progress: number;
+  subTasks?: string[];
+}
+
+const loadingPhases: LoadingPhase[] = [
+  {
+    message: 'Initializing core systems',
+    minDuration: 3000,
+    maxDuration: 8000,
+    progress: 8,
+    subTasks: ['Loading kernel', 'Starting services', 'Checking permissions'],
+  },
+  {
+    message: 'Loading dependencies',
+    minDuration: 5000,
+    maxDuration: 15000,
+    progress: 20,
+    subTasks: [
+      'Fetching modules',
+      'Resolving conflicts',
+      'Installing packages',
+    ],
+  },
+  {
+    message: 'Establishing connections',
+    minDuration: 4000,
+    maxDuration: 20000,
+    progress: 35,
+    subTasks: ['Connecting to database', 'Authenticating', 'Syncing data'],
+  },
+  {
+    message: 'Processing data',
+    minDuration: 8000,
+    maxDuration: 30000,
+    progress: 55,
+    subTasks: ['Analyzing content', 'Building indexes', 'Optimizing cache'],
+  },
+  {
+    message: 'Configuring environment',
+    minDuration: 6000,
+    maxDuration: 25000,
+    progress: 70,
+    subTasks: [
+      'Setting up workspace',
+      'Loading preferences',
+      'Applying themes',
+    ],
+  },
+  {
+    message: 'Optimizing performance',
+    minDuration: 4000,
+    maxDuration: 20000,
+    progress: 85,
+    subTasks: ['Warming up cache', 'Preloading assets', 'Running diagnostics'],
+  },
+  {
+    message: 'Finalizing setup',
+    minDuration: 2000,
+    maxDuration: 8000,
+    progress: 95,
+    subTasks: ['Cleaning up', 'Validating', 'Preparing launch'],
+  },
+  {
+    message: 'Ready to launch',
+    minDuration: 1000,
+    maxDuration: 3000,
+    progress: 100,
+    subTasks: ['All systems ready'],
+  },
+];
 
 const LoadingScreen = () => {
   const [progress, setProgress] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState(0);
   const [dots, setDots] = useState('');
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; delay: number }>
+  >([]);
 
+  // Generate particles
   useEffect(() => {
-    const progressInterval = setInterval(() => {
-      setProgress(prev => (prev >= 100 ? 100 : prev + 1));
-    }, 900);
+    const newParticles = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x:
+        Math.random() *
+        (typeof window !== 'undefined' ? window.innerWidth : 1200),
+      y:
+        Math.random() *
+        (typeof window !== 'undefined' ? window.innerHeight : 800),
+      delay: Math.random() * 2,
+    }));
+    setParticles(newParticles);
+  }, []);
 
-    const dotsInterval = setInterval(() => {
+  // Animated dots
+  useEffect(() => {
+    const interval = setInterval(() => {
       setDots(prev => (prev.length >= 3 ? '' : prev + '.'));
     }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
-    return () => {
-      clearInterval(progressInterval);
-      clearInterval(dotsInterval);
+  // Realistic progress simulation for long loading times
+  useEffect(() => {
+    let phaseIndex = 0;
+    let phaseStartTime = Date.now();
+    let phaseDuration =
+      Math.random() *
+        (loadingPhases[0].maxDuration - loadingPhases[0].minDuration) +
+      loadingPhases[0].minDuration;
+    let lastProgress = 0;
+
+    const updateProgress = () => {
+      if (phaseIndex >= loadingPhases.length) return;
+
+      const currentPhaseData = loadingPhases[phaseIndex];
+      const elapsed = Date.now() - phaseStartTime;
+      const phaseProgress = Math.min(elapsed / phaseDuration, 1);
+
+      // Add some randomness and stuttering for realism
+      const jitter = (Math.random() - 0.5) * 0.5;
+      const targetProgress =
+        lastProgress +
+        (currentPhaseData.progress - lastProgress) * phaseProgress;
+      const newProgress = Math.min(
+        Math.max(targetProgress + jitter, lastProgress),
+        currentPhaseData.progress
+      );
+
+      setProgress(newProgress);
+      setCurrentPhase(phaseIndex);
+
+      // Move to next phase
+      if (phaseProgress >= 1) {
+        lastProgress = currentPhaseData.progress;
+        phaseIndex++;
+        if (phaseIndex < loadingPhases.length) {
+          phaseStartTime = Date.now();
+          phaseDuration =
+            Math.random() *
+              (loadingPhases[phaseIndex].maxDuration -
+                loadingPhases[phaseIndex].minDuration) +
+            loadingPhases[phaseIndex].minDuration;
+        }
+      }
     };
+
+    const interval = setInterval(updateProgress, 100);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gray-900">
-      {/* Grid Background */}
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Enhanced Grid Background */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-30"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            linear-gradient(rgba(139,92,246,0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139,92,246,0.3) 1px, transparent 1px)
           `,
           backgroundSize: '60px 60px',
         }}
       />
 
-      {/* Brand Text */}
-      <div className="absolute z-50 text-white top-8 left-8">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-white rounded-full"></div>
-          <span className="text-lg font-medium">System</span>
+      {/* Floating Particles */}
+      {particles.map(particle => (
+        <motion.div
+          key={particle.id}
+          className="absolute w-1 h-1 bg-purple-400 rounded-full opacity-60"
+          initial={{ x: particle.x, y: particle.y, scale: 0 }}
+          animate={{
+            y: particle.y - 100,
+            scale: [0, 1, 0],
+            opacity: [0, 0.6, 0],
+          }}
+          transition={{
+            duration: 3,
+            delay: particle.delay,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+
+      {/* Brand Section */}
+      <motion.div
+        className="absolute z-50 text-white top-8 left-8"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="flex items-center gap-3">
+          <motion.div
+            className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-400 to-blue-400"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+          />
+          <span className="text-xl font-semibold tracking-wide">System</span>
         </div>
         <div className="max-w-sm mt-8">
-          <h2 className="mb-2 text-xl font-semibold">
+          <h2 className="mb-3 text-2xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text">
             Initializing Application
           </h2>
-          <p className="text-sm text-gray-400">
-            Please wait while we prepare everything →
+          <p className="text-sm leading-relaxed text-gray-300">
+            Please wait while we prepare everything for you →
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Loading Text */}
-      <div className="absolute text-sm tracking-wider text-gray-400 top-8 right-8">
-        → APPLICATION LOADING
-      </div>
+      {/* Status Indicator */}
+      <motion.div
+        className="absolute text-sm tracking-wider text-purple-300 top-8 right-8"
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+      >
+        → SYSTEM ONLINE
+      </motion.div>
 
-      {/* Animated Blocks */}
-      <AnimatedBlock
+      {/* Enhanced Animated Blocks */}
+      <EnhancedAnimatedBlock
         initialX={-200}
         y={80}
         width={120}
         height={80}
         colors={['#8B5CF6', '#A855F7', '#C084FC']}
-        pattern="solid"
+        pattern="wave"
         duration={8}
         delay={0}
       />
-
-      <AnimatedBlock
+      <EnhancedAnimatedBlock
         initialX={-150}
         y={300}
         width={100}
         height={100}
         colors={['#8B5CF6', '#10B981', '#06D6A0']}
-        pattern="pixelated"
+        pattern="pulse"
         duration={10}
         delay={1}
       />
-
-      <AnimatedBlock
+      <EnhancedAnimatedBlock
         initialX={-180}
         y={500}
         width={140}
         height={60}
         colors={['#8B5CF6', '#A855F7']}
-        pattern="striped"
+        pattern="flow"
         duration={9}
         delay={2}
       />
-
-      <AnimatedBlock
+      <EnhancedAnimatedBlock
         initialX={-160}
         y={200}
         width={80}
         height={120}
         colors={['#8B5CF6', '#C084FC', '#DDD6FE']}
-        pattern="blocks"
+        pattern="matrix"
         duration={7}
         delay={0.5}
       />
-
-      <AnimatedBlock
+      <EnhancedAnimatedBlock
         initialX={-220}
         y={400}
         width={110}
         height={90}
         colors={['#8B5CF6', '#10B981']}
-        pattern="mixed"
+        pattern="spiral"
         duration={11}
         delay={1.5}
       />
 
-      <AnimatedBlock
-        initialX={-140}
-        y={600}
-        width={90}
-        height={70}
-        colors={['#A855F7', '#C084FC', '#10B981']}
-        pattern="gradient"
-        duration={8.5}
-        delay={2.5}
-      />
+      {/* Enhanced Progress Card - Properly Centered */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none">
+        <motion.div
+          className="pointer-events-auto"
+          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
+          <Card className="w-full max-w-lg mx-4 border shadow-2xl border-purple-500/30 bg-slate-900/95 backdrop-blur-xl shadow-purple-500/20">
+            <div className="p-8 space-y-6 h-80">
+              {' '}
+              {/* Fixed height container */}
+              {/* Phase Message - Fixed height */}
+              <div className="flex flex-col justify-center h-20 space-y-4 text-center">
+                <AnimatePresence mode="wait">
+                  <motion.h2
+                    key={currentPhase}
+                    className="flex items-center justify-center h-8 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {loadingPhases[currentPhase]?.message || 'Initializing'}
+                    {dots}
+                  </motion.h2>
+                </AnimatePresence>
 
-      {/* Progress Card */}
-      <div className="absolute z-10 transform -translate-x-1/2 bottom-8 left-1/2">
-        <Card className="w-full max-w-md mx-4 border border-gray-700 bg-gray-900/80 backdrop-blur-xl">
-          <div className="p-6 space-y-4">
-            {/* Text and progress */}
-            <div className="space-y-4 text-center">
-              <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-                Initializing System{dots}
-              </h2>
-              <div className="space-y-2">
-                <div className="relative w-full h-2 overflow-hidden bg-gray-800 rounded-full">
-                  <div
-                    className="absolute top-0 left-0 h-full transition-all duration-300 rounded-full bg-gradient-to-r from-purple-500 to-blue-500"
-                    style={{ width: `${progress}%` }}
-                  />
+                {/* Sub-task indicator - Fixed height */}
+                <div className="flex items-center justify-center h-5">
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={`${currentPhase}-subtask`}
+                      className="text-sm text-slate-400"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {loadingPhases[currentPhase]?.subTasks?.[
+                        Math.floor(Date.now() / 2000) %
+                          (loadingPhases[currentPhase]?.subTasks?.length || 1)
+                      ] || 'Processing...'}
+                    </motion.p>
+                  </AnimatePresence>
                 </div>
-                <p className="text-sm text-gray-400">{progress}% Complete</p>
+              </div>
+              {/* Enhanced Progress Bar - Fixed height */}
+              <div className="h-20 space-y-4">
+                <div className="relative w-full h-4 overflow-hidden rounded-full bg-slate-800">
+                  <motion.div
+                    className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-purple-500 via-blue-500 to-purple-600"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                  />
+                  <motion.div
+                    className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-white/40 to-transparent"
+                    animate={{
+                      x: [`-100%`, `${Math.min(progress + 15, 100)}%`],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: 'easeInOut',
+                    }}
+                    style={{ width: '30%' }}
+                  />
+                  {/* Progress segments */}
+                  <div className="absolute inset-0 flex">
+                    {loadingPhases.map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 border-r border-slate-700 last:border-r-0"
+                        style={{ opacity: i <= currentPhase ? 0.3 : 0.1 }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between h-8">
+                  <motion.p
+                    className="text-lg font-semibold text-purple-300"
+                    animate={{ opacity: [0.7, 1, 0.7] }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                    }}
+                  >
+                    {Math.round(progress)}%
+                  </motion.p>
+                  <div className="flex space-x-1">
+                    {[0, 1, 2].map(i => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-purple-400 rounded-full"
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Number.POSITIVE_INFINITY,
+                          delay: i * 0.2,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Enhanced Status Info - Fixed height */}
+              <div className="flex flex-col justify-center h-24 space-y-3 text-center">
+                <motion.p
+                  className="flex items-center justify-center h-5 text-sm text-slate-400"
+                  animate={{ opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+                >
+                  This may take a few moments...
+                </motion.p>
+                <div className="flex justify-center h-4 space-x-6 text-xs text-slate-500">
+                  <span>
+                    Phase {currentPhase + 1}/{loadingPhases.length}
+                  </span>
+                  <span>•</span>
+                  <span>
+                    {progress < 50
+                      ? 'Initializing'
+                      : progress < 90
+                        ? 'Almost ready'
+                        : 'Finishing up'}
+                  </span>
+                </div>
+              </div>
+              {/* Long loading encouragement - Fixed height area */}
+              <div className="flex items-center justify-center h-16">
+                {progress > 30 && progress < 95 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full p-3 border rounded-lg bg-slate-800/50 border-slate-700"
+                  >
+                    <p className="text-xs leading-relaxed text-center text-slate-400">
+                      {progress < 60
+                        ? 'Setting up your personalized experience...'
+                        : progress < 80
+                          ? 'Optimizing performance for the best experience...'
+                          : 'Putting the finishing touches...'}
+                    </p>
+                  </motion.div>
+                )}
               </div>
             </div>
-            {/* Status messages */}
-            <div className="text-center">
-              <p className="text-sm text-gray-500">
-                Estimated time remaining: {Math.ceil((100 - progress) * 0.9)}{' '}
-                seconds
-              </p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
 };
 
-interface AnimatedBlockProps {
+interface EnhancedAnimatedBlockProps {
   initialX: number;
   y: number;
   width: number;
   height: number;
   colors: string[];
-  pattern: 'solid' | 'striped' | 'pixelated' | 'blocks' | 'mixed' | 'gradient';
+  pattern: 'wave' | 'pulse' | 'flow' | 'matrix' | 'spiral';
   duration: number;
   delay: number;
 }
 
-function AnimatedBlock({
+function EnhancedAnimatedBlock({
   initialX,
   y,
   width,
@@ -176,90 +456,109 @@ function AnimatedBlock({
   pattern,
   duration,
   delay,
-}: AnimatedBlockProps) {
+}: EnhancedAnimatedBlockProps) {
   const renderPattern = () => {
     switch (pattern) {
-      case 'solid':
+      case 'wave':
         return (
-          <div
-            className="w-full h-full"
-            style={{ backgroundColor: colors[0] }}
-          />
-        );
-
-      case 'striped':
-        return (
-          <div className="flex flex-col w-full h-full">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex-1"
-                style={{ backgroundColor: colors[i % colors.length] }}
-              />
-            ))}
+          <div className="relative w-full h-full overflow-hidden rounded-lg">
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`,
+              }}
+              animate={{
+                background: [
+                  `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`,
+                  `linear-gradient(135deg, ${colors[1]}, ${colors[0]})`,
+                  `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`,
+                ],
+              }}
+              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+            />
           </div>
         );
-
-      case 'pixelated':
+      case 'pulse':
         return (
-          <div className="grid w-full h-full grid-cols-4 grid-rows-4 gap-0">
-            {Array.from({ length: 16 }).map((_, i) => (
-              <div
+          <motion.div
+            className="w-full h-full rounded-lg"
+            style={{ backgroundColor: colors[0] }}
+            animate={{
+              scale: [1, 1.1, 1],
+              backgroundColor: colors,
+            }}
+            transition={{
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: 'easeInOut',
+            }}
+          />
+        );
+      case 'flow':
+        return (
+          <div className="relative w-full h-full overflow-hidden rounded-lg">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <motion.div
                 key={i}
-                className="w-full h-full"
+                className="absolute inset-0"
                 style={{
-                  backgroundColor:
-                    Math.random() > 0.3
-                      ? colors[i % colors.length]
-                      : 'transparent',
+                  background: `linear-gradient(90deg, transparent, ${colors[i % colors.length]}, transparent)`,
+                }}
+                animate={{
+                  x: ['-100%', '100%'],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: i * 0.7,
+                  ease: 'linear',
                 }}
               />
             ))}
           </div>
         );
-
-      case 'blocks':
+      case 'matrix':
         return (
-          <div className="grid w-full h-full grid-cols-2 grid-rows-3 gap-1 p-1">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
+          <div className="grid w-full h-full grid-cols-4 grid-rows-4 gap-1 p-1 overflow-hidden rounded-lg">
+            {Array.from({ length: 16 }).map((_, i) => (
+              <motion.div
                 key={i}
-                className="w-full h-full"
+                className="w-full h-full rounded-sm"
                 style={{ backgroundColor: colors[i % colors.length] }}
+                animate={{
+                  opacity: [0.3, 1, 0.3],
+                  scale: [0.8, 1, 0.8],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: i * 0.1,
+                }}
               />
             ))}
           </div>
         );
-
-      case 'mixed':
+      case 'spiral':
         return (
-          <div className="flex w-full h-full">
-            <div
-              className="w-1/2 h-full"
-              style={{ backgroundColor: colors[0] }}
+          <div className="relative w-full h-full overflow-hidden rounded-lg">
+            <motion.div
+              className="absolute inset-0 rounded-lg"
+              style={{
+                background: `conic-gradient(from 0deg, ${colors[0]}, ${colors[1]}, ${colors[0]})`,
+              }}
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 4,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: 'linear',
+              }}
             />
-            <div className="flex flex-col w-1/2 h-full">
-              <div className="h-1/3" style={{ backgroundColor: colors[1] }} />
-              <div className="h-1/3" style={{ backgroundColor: colors[0] }} />
-              <div className="h-1/3" style={{ backgroundColor: colors[1] }} />
-            </div>
           </div>
         );
-
-      case 'gradient':
-        return (
-          <div
-            className="w-full h-full"
-            style={{
-              background: `linear-gradient(45deg, ${colors[0]}, ${colors[1]}, ${colors[2] || colors[0]})`,
-            }}
-          />
-        );
-
       default:
         return (
           <div
-            className="w-full h-full"
+            className="w-full h-full rounded-lg"
             style={{ backgroundColor: colors[0] }}
           />
         );
@@ -268,21 +567,22 @@ function AnimatedBlock({
 
   return (
     <motion.div
-      className="absolute"
+      className="absolute shadow-lg"
       style={{
         width,
         height,
         top: y,
       }}
-      initial={{ x: initialX }}
+      initial={{ x: initialX, opacity: 0 }}
       animate={{
         x: typeof window !== 'undefined' ? window.innerWidth + 200 : 1400,
+        opacity: [0, 1, 1, 0],
       }}
       transition={{
         duration,
         delay,
         repeat: Number.POSITIVE_INFINITY,
-        ease: 'linear',
+        ease: 'easeInOut',
       }}
     >
       {renderPattern()}
