@@ -1,16 +1,16 @@
+from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes, smart_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.contrib.auth import authenticate
-from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from apps.account.utils import Util
+from main import const
 from main.settings.local import BASE_DIR, MAIN_URL_2
 
 from .models import User
-from main import const
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

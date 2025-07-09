@@ -1,5 +1,5 @@
 WEBSOCKET_HEARTBEAT_KEY = "ticks_received"
-WEBSOCKET_HEARTBEAT_TTL = 10
+WEBSOCKET_HEARTBEAT_TTL = 100
 
 
 AUTH_PROVIDERS = {
@@ -8,3 +8,10 @@ AUTH_PROVIDERS = {
     "facebook": "facebook",
     "twitter": "twitter",
 }
+
+
+def websocket_user_lock(user_id: int) -> str:
+    """
+    Generate a unique lock key for a user to prevent multiple WebSocket connections.
+    """
+    return f"websocket_start-user-{user_id}"

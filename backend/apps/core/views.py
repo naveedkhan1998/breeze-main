@@ -30,7 +30,12 @@ from apps.core.serializers import (
     InstrumentSerializer,
     SubscribedSerializer,
 )
-from apps.core.tasks import load_instrument_candles, resample_candles, websocket_start
+from apps.core.tasks import (
+    load_instrument_candles,
+    manual_start_websocket,
+    resample_candles,
+    websocket_start,
+)
 from apps.core.utils import resample_qs
 from main import const
 
@@ -83,6 +88,8 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
                 logger.info(
                     f"Cleared cached session for user {request.user.id} due to credential update."
                 )
+                # Start a new WebSocket session if credentials were updated
+                manual_start_websocket.delay(request.user.id)
 
             return Response(
                 {"msg": "Account updated successfully", "data": serializer.data},
@@ -106,7 +113,6 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
 
             # Check session status by fetching funds
             check_breeze_session = session.get_funds()
-
             # Check if ticks have been received in the last 10 seconds
             websocket_status = bool(cache.get(const.WEBSOCKET_HEARTBEAT_KEY, False))
 
@@ -162,7 +168,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
     def start_websocket(self, request):
         try:
             user = self.request.user
-            websocket_start.delay(user.id)
+            websocket_start.apply_async(args=[user.id])
             return Response(
                 {"msg": "WebSocket Started successfully", "data": "WebSocket Started"},
                 status=status.HTTP_201_CREATED,
