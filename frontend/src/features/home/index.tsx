@@ -30,14 +30,12 @@ import { useStartWebsocketMutation } from '@/api/breezeServices';
 import type { Instrument } from '@/types/common-types';
 import BreezeStatusCard from '../../shared/components/BreezeStatusCard';
 import InstrumentCard from './components/InstrumentCard';
-import { getCeleryWorkerUrls, isDevelopment } from '@/lib/environment';
 
 const HomePage: React.FC = () => {
   const { data, refetch } = useGetSubscribedInstrumentsQuery('');
   const [deleteInstrument] = useDeleteInstrumentMutation();
   const [startWebsocket] = useStartWebsocketMutation();
   const [deletingRowIds, setDeletingRowIds] = useState<number[]>([]);
-  const [isHealthChecking, setIsHealthChecking] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState<'percentage' | 'name'>(
     'percentage'
@@ -78,62 +76,6 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const performHealthCheck = async () => {
-    setIsHealthChecking(true);
-    const workers = getCeleryWorkerUrls();
-
-    const toastIds = workers.map(worker =>
-      toast.loading(`Checking ${worker.name}...`, { position: 'bottom-right' })
-    );
-
-    try {
-      const responses = await Promise.all(
-        workers.map(worker =>
-          fetch(worker.url)
-            .then(response => ({
-              worker,
-              status: response.ok ? 'Healthy' : 'Unhealthy',
-            }))
-            .catch(() => ({ worker, status: 'Error' }))
-        )
-      );
-
-      responses.forEach(({ worker, status }, index) => {
-        toast.dismiss(toastIds[index]);
-        if (status === 'Healthy') {
-          toast.success(`${worker.name}: ${status}`, {
-            position: 'bottom-right',
-            duration: 1000,
-          });
-        } else {
-          toast.error(`${worker.name}: ${status}`, {
-            position: 'bottom-right',
-            duration: 1000,
-          });
-        }
-      });
-    } catch (error) {
-      console.error('Error during health checks:', error);
-      workers.forEach((worker, index) => {
-        toast.dismiss(toastIds[index]);
-        toast.error(`${worker.name}: Check failed`, {
-          position: 'bottom-right',
-          duration: 1000,
-        });
-      });
-    } finally {
-      setIsHealthChecking(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!isDevelopment) {
-      performHealthCheck();
-      const interval = setInterval(performHealthCheck, 120000);
-      return () => clearInterval(interval);
-    }
-  }, []);
-
   useEffect(() => {
     const interval = setInterval(() => {
       if (
@@ -165,21 +107,6 @@ const HomePage: React.FC = () => {
       }
       actions={
         <PageActions>
-          {!isDevelopment && (
-            <Button
-              onClick={performHealthCheck}
-              disabled={isHealthChecking}
-              variant="outline"
-              size="sm"
-            >
-              <HiRefresh
-                className={`mr-2 h-4 w-4 ${
-                  isHealthChecking ? 'animate-spin' : ''
-                }`}
-              />
-              {isHealthChecking ? 'Checking...' : 'Health Check'}
-            </Button>
-          )}
           <Button onClick={refetch} variant="outline" size="sm">
             <HiRefresh className="w-4 h-4 mr-2" />
             Refresh
