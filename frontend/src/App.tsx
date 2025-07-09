@@ -18,12 +18,13 @@ import AnnouncementBanner from './shared/components/AnnouncementBanner';
 import ProfilePage from './features/profile';
 import DashBoardPage from './features/dashboard';
 
-import { checkEnvironment } from './shared/lib/environment';
+import { checkEnvironment, GOOGLE_CLIENT_ID } from './shared/lib/environment';
 import { ThemeProvider } from './shared/components/ThemeProvider';
 import { Toaster } from 'sonner';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
-
+const clientId = GOOGLE_CLIENT_ID || '';
 // PrivateRoute Component
 const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({
   element,
@@ -69,20 +70,24 @@ export default function App() {
   return (
     <BrowserRouter>
       <Analytics />
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <AnnouncementBanner />
-        <Routes>
-          {routes.map(({ path, element, private: isPrivate }) => (
-            <Route
-              key={path}
-              path={path}
-              element={isPrivate ? <PrivateRoute element={element} /> : element}
-            />
-          ))}
-        </Routes>
+      <GoogleOAuthProvider clientId={clientId}>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <AnnouncementBanner />
+          <Routes>
+            {routes.map(({ path, element, private: isPrivate }) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  isPrivate ? <PrivateRoute element={element} /> : element
+                }
+              />
+            ))}
+          </Routes>
 
-        <Toaster />
-      </ThemeProvider>
+          <Toaster />
+        </ThemeProvider>
+      </GoogleOAuthProvider>
     </BrowserRouter>
   );
 }

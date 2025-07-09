@@ -57,3 +57,12 @@ export interface Indicator {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
 }
+
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  avatar: string;
+  is_admin: boolean;
+  auth_provider: string;
+}

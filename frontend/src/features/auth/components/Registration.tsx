@@ -1,235 +1,286 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { motion } from 'framer-motion';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import {
+  useRegisterUserMutation,
+  useGoogleLoginMutation,
+  useGetLoggedUserQuery,
+} from '@/api/userAuthService';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppDispatch } from 'src/app/hooks';
-import { useRegisterUserMutation } from '@/api/userAuthService';
-import { setToken } from '@/api/auth';
-import { storeToken } from '@/api/localStorageService';
 import { setCredentials } from '../authSlice';
-import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { storeToken } from '@/api/localStorageService';
+import { setToken } from '@/api/auth';
 
-interface FormData {
-  name: string;
-  email: string;
-  password: string;
-  password2: string;
-  tc: boolean;
-}
-
-interface Token {
-  access: string;
-  refresh: string;
-}
-
-const PasswordStrength = ({ password }: { password: string }) => {
-  const getStrength = () => {
-    let strength = 0;
-    if (password.length < 1) return 0;
-    if (password.length >= 8) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-    return strength;
-  };
-
-  const strength = getStrength();
-
-  return (
-    <div className="flex items-center w-full gap-2">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div
-          key={i}
-          className={cn(
-            'h-1 rounded-full flex-1 transition-colors',
-            i < strength
-              ? strength === 1
-                ? 'bg-red-500'
-                : strength === 2
-                  ? 'bg-yellow-500'
-                  : 'bg-green-500'
-              : 'bg-muted'
-          )}
-        />
-      ))}
-    </div>
-  );
-};
-
-const Registration: React.FC = () => {
+export default function Registration() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [registerUser, { isLoading }] = useRegisterUserMutation();
 
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    password: '',
-    password2: '',
-    tc: false,
-  });
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [registerPassword2, setRegisterPassword2] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [registerError, setRegisterError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const [error, setError] = useState<string | null>(null);
+  const [register, { isLoading: isRegisterLoading }] =
+    useRegisterUserMutation();
+  const [googleLogin, { isLoading: isGoogleLoginLoading }] =
+    useGoogleLoginMutation();
 
-  const passwordsMatch = formData.password === formData.password2;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: type === 'checkbox' ? checked : value,
-    }));
-    setError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setRegisterError('');
+    setSuccessMessage('');
 
-    if (formData.password !== formData.password2) {
-      setError('Passwords do not match.');
+    if (registerPassword !== registerPassword2) {
+      setRegisterError("Passwords don't match.");
       return;
     }
-    if (!formData.tc) {
-      setError('You must agree to the terms and conditions.');
+
+    if (!acceptTerms) {
+      setRegisterError('You must accept the terms and conditions.');
       return;
     }
 
     try {
-      const { name, email, password, password2, tc } = formData;
-      const res = await registerUser({
-        name,
-        email,
-        password,
-        password2,
-        tc,
+      const userData = await register({
+        email: registerEmail,
+        name: registerName,
+        password: registerPassword,
+        password2: registerPassword2,
+        tc: acceptTerms,
       }).unwrap();
-      const token: Token = res.token;
-      setToken(token.access);
-      storeToken({ value: { access: token.access } });
-      dispatch(setCredentials({ access: token.access }));
-      toast.success('Account created successfully!');
-      navigate('/');
+
+      handleAuthSuccess(userData);
+      setSuccessMessage('Registration successful!');
     } catch (error: unknown) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'data' in error &&
-        typeof error.data === 'object' &&
-        error.data !== null &&
-        'detail' in error.data
-      ) {
-        setError(error.data.detail as string);
-        toast.error(error.data.detail as string);
-      } else {
-        setError('Registration failed. Please try again.');
-        toast.error(
-          'Registration failed. An account with this email may already exist.'
-        );
-      }
+      handleAuthError(error, setRegisterError);
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
-        <Input
-          id="name"
-          type="text"
-          placeholder="John Doe"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="name@company.com"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-        />
-        <PasswordStrength password={formData.password} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password2">Confirm Password</Label>
-        <Input
-          id="password2"
-          type="password"
-          placeholder="••••••••"
-          value={formData.password2}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-          className={cn(
-            !passwordsMatch && formData.password2 ? 'border-destructive' : ''
-          )}
-        />
-        {!passwordsMatch && formData.password2 ? (
-          <p className="text-sm text-destructive">Passwords do not match.</p>
-        ) : null}
-      </div>
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="tc"
-          checked={formData.tc}
-          onCheckedChange={(checked: boolean) =>
-            setFormData(prev => ({ ...prev, tc: checked }))
-          }
-          disabled={isLoading}
-        />
-        <Label htmlFor="tc" className="text-sm font-normal">
-          I agree to the{' '}
-          <Button
-            variant="link"
-            className="h-auto p-0 text-sm"
-            onClick={() => navigate('/terms')}
-            type="button"
-          >
-            terms and conditions
-          </Button>
-        </Label>
-      </div>
-      <Button
-        type="submit"
-        disabled={
-          isLoading || !passwordsMatch || !formData.tc || !formData.password
-        }
-        className="w-full"
-      >
-        {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-        Create account
-      </Button>
-    </form>
-  );
-};
+  const handleGoogleSuccess = async (response: CredentialResponse) => {
+    if (response.credential) {
+      setRegisterError('');
+      setSuccessMessage('');
 
-export default Registration;
+      try {
+        const userData = await googleLogin({
+          token: response.credential,
+        }).unwrap();
+        handleAuthSuccess(userData);
+        setSuccessMessage('Google registration successful!');
+      } catch (error: unknown) {
+        handleAuthError(error, setRegisterError);
+      }
+    } else {
+      setRegisterError('No credential received from Google.');
+    }
+  };
+
+  const { refetch: getLoggedUser } = useGetLoggedUserQuery({});
+
+  const handleAuthSuccess = async (userData: any) => {
+    // Use your existing token storage system
+    storeToken(userData.token);
+    setToken(userData.token.access);
+
+    // Fetch logged in user data
+    const { data: user } = await getLoggedUser();
+
+    // Update Redux state with access token and user data
+    dispatch(
+      setCredentials({
+        access: userData.token.access,
+        user: user,
+      })
+    );
+
+    navigate('/');
+  };
+
+  const handleAuthError = (error: any, setError: (message: string) => void) => {
+    console.error('Authentication error:', error);
+    if (error.data && error.data.errors) {
+      setError(
+        error.data.errors.non_field_errors?.[0] ||
+          'An error occurred during authentication.'
+      );
+    } else {
+      setError('An error occurred during authentication.');
+    }
+  };
+
+  const handleGoogleFailure = () => {
+    setRegisterError('Google registration failed.');
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div className="space-y-2 text-center">
+        <h2 className="text-2xl font-bold">Create your account</h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Join us and start trading with confidence
+        </p>
+      </div>
+
+      <form onSubmit={handleRegisterSubmit} className="space-y-4">
+        {registerError && (
+          <Alert variant="destructive">
+            <AlertCircle className="w-4 h-4" />
+            <AlertDescription>{registerError}</AlertDescription>
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert className="text-green-800 border-green-200 bg-green-50">
+            <AlertDescription>{successMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="registerName">Full Name</Label>
+          <div className="relative">
+            <User className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+            <Input
+              id="registerName"
+              placeholder="Enter your full name"
+              value={registerName}
+              onChange={e => setRegisterName(e.target.value)}
+              required
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="registerEmail">Email</Label>
+          <div className="relative">
+            <Mail className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+            <Input
+              id="registerEmail"
+              type="email"
+              placeholder="Enter your email"
+              value={registerEmail}
+              onChange={e => setRegisterEmail(e.target.value)}
+              required
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="registerPassword">Password</Label>
+          <div className="relative">
+            <Lock className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+            <Input
+              id="registerPassword"
+              type="password"
+              placeholder="Choose a strong password"
+              value={registerPassword}
+              onChange={e => setRegisterPassword(e.target.value)}
+              required
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="registerPassword2">Confirm Password</Label>
+          <div className="relative">
+            <Lock className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+            <Input
+              id="registerPassword2"
+              type="password"
+              placeholder="Confirm your password"
+              value={registerPassword2}
+              onChange={e => setRegisterPassword2(e.target.value)}
+              required
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="terms"
+            checked={acceptTerms}
+            onCheckedChange={checked => setAcceptTerms(checked as boolean)}
+            required
+          />
+          <Label
+            htmlFor="terms"
+            className="text-sm text-gray-600 dark:text-gray-400"
+          >
+            I accept the{' '}
+            <a href="#" className="text-indigo-600 hover:underline">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="#" className="text-indigo-600 hover:underline">
+              Privacy Policy
+            </a>
+          </Label>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full bg-indigo-600 hover:bg-indigo-700"
+          disabled={isRegisterLoading}
+        >
+          {isRegisterLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Creating Account...
+            </>
+          ) : (
+            'Create Account'
+          )}
+        </Button>
+      </form>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="px-2 bg-background text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      <div className="w-full">
+        {isGoogleLoginLoading ? (
+          <div className="flex items-center justify-center p-4">
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <span>Loading...</span>
+          </div>
+        ) : (
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleFailure}
+            useOneTap
+            type="standard"
+            theme="filled_black"
+            size="large"
+            shape="rectangular"
+          />
+        )}
+      </div>
+    </motion.div>
+  );
+}
