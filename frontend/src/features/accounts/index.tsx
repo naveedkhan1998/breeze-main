@@ -9,11 +9,14 @@ import {
   PageSubHeader,
   PageContent,
 } from '@/components/PageLayout';
-import {
-  useGetBreezeQuery,
-  useUpdateBreezeMutation,
-} from '@/api/breezeServices';
+import { useUpdateBreezeMutation } from '@/api/breezeServices';
 import type { BreezeAccount } from '@/types/common-types';
+import { useAppSelector } from 'src/app/hooks';
+import {
+  getBreezeAccountFromState,
+  getIsBreezeAccountLoading,
+  getHasBreezeAccount,
+} from '../auth/authSlice';
 
 import CreateBreezeForm from './components/CreateBreezeForm';
 import AccountDashboard from './components/AccountDashboard';
@@ -21,11 +24,10 @@ import UpdateSessionTokenDialog from './components/UpdateSessionTokenDialog';
 import BreezeStatusCard from '../../shared/components/BreezeStatusCard';
 
 const AccountsPage = () => {
-  const { data, isSuccess, refetch, isLoading } = useGetBreezeQuery('', {
-    refetchOnMountOrArgChange: true,
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
-  });
+  const breezeAccount = useAppSelector(getBreezeAccountFromState);
+  const isBreezeAccountLoading = useAppSelector(getIsBreezeAccountLoading);
+  const hasBreezeAccount = useAppSelector(getHasBreezeAccount);
+
   const [lastUpdatedHours, setLastUpdatedHours] = useState<number | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<BreezeAccount | null>(
@@ -55,26 +57,26 @@ const AccountsPage = () => {
       try {
         await updateBreeze({ data: updatedAccount }).unwrap();
         toast.success('Session token updated successfully');
-        refetch();
+        // The useBreezeAccount hook will automatically refetch on state change
         setOpenModal(false);
         setSessionToken('');
       } catch {
         toast.error('Failed to update session token');
       }
     }
-  }, [selectedAccount, sessionToken, updateBreeze, refetch]);
+  }, [selectedAccount, sessionToken, updateBreeze]);
 
   useEffect(() => {
-    if (isSuccess && data.data.length > 0) {
-      const lastUpdatedTime = new Date(data.data[0].last_updated);
+    if (breezeAccount && breezeAccount.last_updated) {
+      const lastUpdatedTime = new Date(breezeAccount.last_updated);
       const currentTime = new Date();
       const timeDifferenceInHours =
         (currentTime.getTime() - lastUpdatedTime.getTime()) / (1000 * 60 * 60);
       setLastUpdatedHours(timeDifferenceInHours);
     }
-  }, [isSuccess, data]);
+  }, [breezeAccount]);
 
-  if (isLoading) {
+  if (isBreezeAccountLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="space-y-4 text-center">
@@ -87,11 +89,10 @@ const AccountsPage = () => {
     );
   }
 
-  if (!isSuccess || !data || data.data.length === 0) {
+  // Show create form if no account exists (using persisted boolean)
+  if (!hasBreezeAccount || !breezeAccount) {
     return <CreateBreezeForm />;
   }
-
-  const account = data.data[0];
 
   return (
     <PageLayout
@@ -117,10 +118,10 @@ const AccountsPage = () => {
           </motion.div>
 
           <AccountDashboard
-            account={account}
+            account={breezeAccount}
             lastUpdatedHours={lastUpdatedHours}
             onUpdateSession={() => {
-              setSelectedAccount(account);
+              setSelectedAccount(breezeAccount);
               setOpenModal(true);
             }}
             onOpenLink={handleOpenLink}

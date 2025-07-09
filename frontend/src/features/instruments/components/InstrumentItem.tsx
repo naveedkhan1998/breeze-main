@@ -13,10 +13,30 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 
 import type { Instrument as InstrumentType } from '@/types/common-types';
 import { Spinner } from '@/components/ui/spinner';
 import DurationSelector from './DurationSelector';
+import { useAppSelector } from 'src/app/hooks';
+import {
+  getHasBreezeAccount,
+  getIsBreezeAccountLoading,
+} from 'src/features/auth/authSlice';
+import { useIsMobile } from '@/hooks/useMobile';
 
 interface InstrumentItemProps {
   instrument: InstrumentType;
@@ -34,7 +54,11 @@ const fadeInUp = {
 
 const InstrumentItem: React.FC<InstrumentItemProps> = memo(
   ({ instrument, onSubscribe, isSubscribing }) => {
+    const hasBreezeAccount = useAppSelector(getHasBreezeAccount);
+    const isBreezeAccountLoading = useAppSelector(getIsBreezeAccountLoading);
     const [duration, setDuration] = useState<number>(4);
+    const [showAccountDialog, setShowAccountDialog] = useState(false);
+    const isMobile = useIsMobile();
 
     const getTypeConfig = useCallback((series: string) => {
       const configs = {
@@ -67,8 +91,18 @@ const InstrumentItem: React.FC<InstrumentItemProps> = memo(
     }, []);
 
     const handleSubscribeClick = useCallback(() => {
+      if (!hasBreezeAccount && !isBreezeAccountLoading) {
+        setShowAccountDialog(true);
+        return;
+      }
       onSubscribe(instrument.id, duration);
-    }, [onSubscribe, instrument.id, duration]);
+    }, [
+      onSubscribe,
+      instrument.id,
+      duration,
+      hasBreezeAccount,
+      isBreezeAccountLoading,
+    ]);
 
     const formatDate = useCallback((dateString?: string) => {
       if (!dateString) return '';
@@ -82,6 +116,26 @@ const InstrumentItem: React.FC<InstrumentItemProps> = memo(
 
     const config = getTypeConfig(instrument.series || 'EQ');
     const TypeIcon = config.icon;
+
+    const AccountRequiredContent = () => (
+      <>
+        <DialogHeader className="text-center">
+          <DialogTitle>Breeze Account Required</DialogTitle>
+          <DialogDescription className="text-center">
+            You need to create and connect a Breeze account to load instrument
+            data. Please set up your Breeze account in the settings to continue.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center pt-4">
+          <Button
+            onClick={() => setShowAccountDialog(false)}
+            className="w-full max-w-xs"
+          >
+            Got it
+          </Button>
+        </div>
+      </>
+    );
 
     return (
       <motion.div {...fadeInUp} className="w-full">
@@ -156,7 +210,7 @@ const InstrumentItem: React.FC<InstrumentItemProps> = memo(
                 variant="default"
                 size="sm"
                 onClick={handleSubscribeClick}
-                disabled={isSubscribing}
+                disabled={isSubscribing || isBreezeAccountLoading}
                 className="w-full transition-all duration-200 shadow-md bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-lg "
               >
                 {isSubscribing ? (
@@ -174,6 +228,39 @@ const InstrumentItem: React.FC<InstrumentItemProps> = memo(
             </div>
           </CardContent>
         </Card>
+
+        {/* Desktop Dialog */}
+        {!isMobile && (
+          <Dialog open={showAccountDialog} onOpenChange={setShowAccountDialog}>
+            <DialogContent className="sm:max-w-md">
+              <AccountRequiredContent />
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Mobile Drawer */}
+        {isMobile && (
+          <Drawer open={showAccountDialog} onOpenChange={setShowAccountDialog}>
+            <DrawerContent className="p-6">
+              <DrawerHeader className="text-center">
+                <DrawerTitle>Breeze Account Required</DrawerTitle>
+                <DrawerDescription className="text-center">
+                  You need to create and connect a Breeze account to load
+                  instrument data. Please set up your Breeze account in the
+                  settings to continue.
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="flex justify-center pt-4">
+                <Button
+                  onClick={() => setShowAccountDialog(false)}
+                  className="w-full max-w-xs"
+                >
+                  Got it
+                </Button>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
       </motion.div>
     );
   }

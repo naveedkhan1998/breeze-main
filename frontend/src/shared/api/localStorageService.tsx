@@ -35,4 +35,27 @@ const removeUser = () => {
   localStorage.removeItem('breeze_user');
 };
 
-export { storeToken, getToken, removeToken, storeUser, getUser, removeUser };
+const storeBreezeAccountExists = (exists: boolean) => {
+  localStorage.setItem('has_breeze_account', JSON.stringify(exists));
+};
+
+const getBreezeAccountExists = (): boolean => {
+  const exists = localStorage.getItem('has_breeze_account');
+  return exists ? JSON.parse(exists) : false;
+};
+
+const removeBreezeAccountExists = () => {
+  localStorage.removeItem('has_breeze_account');
+};
+
+export {
+  storeToken,
+  getToken,
+  removeToken,
+  storeUser,
+  getUser,
+  removeUser,
+  storeBreezeAccountExists,
+  getBreezeAccountExists,
+  removeBreezeAccountExists,
+};

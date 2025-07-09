@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { getCurrentToken } from './features/auth/authSlice';
+import { useBreezeAccount } from './features/auth/hooks/useBreezeAccount';
 import { checkHealth, setServiceStatus } from './features/health/healthSlice';
 import { useHealthCheckQuery } from './shared/api/baseApi';
 import LoadingScreen from './shared/components/LoadingScreen';
@@ -37,18 +38,36 @@ const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({
 export default function App() {
   const [isLoadingComplete, setIsLoadingComplete] = useState(false);
   const dispatch = useAppDispatch();
-  const { data: healthCheckData, isLoading: isHealthCheckLoading, error: healthCheckError } =
-    useHealthCheckQuery('', {
-      pollingInterval: HEALTH_CHECK_INTERVAL,
-    });
+  const accessToken = useAppSelector(getCurrentToken);
+
+  // Initialize Breeze account when user is logged in
+  const { isBreezeAccountLoading } = useBreezeAccount();
+
+  const {
+    data: healthCheckData,
+    isLoading: isHealthCheckLoading,
+    error: healthCheckError,
+  } = useHealthCheckQuery('', {
+    pollingInterval: HEALTH_CHECK_INTERVAL,
+  });
 
   useEffect(() => {
     checkEnvironment();
-    
-    if (!isHealthCheckLoading && !isLoadingComplete) {
+
+    // Only mark loading as complete when both health check and breeze account (if user is logged in) are done
+    if (
+      !isHealthCheckLoading &&
+      !isLoadingComplete &&
+      (!accessToken || !isBreezeAccountLoading)
+    ) {
       setIsLoadingComplete(true);
     }
-  }, [isHealthCheckLoading, isLoadingComplete]);
+  }, [
+    isHealthCheckLoading,
+    isLoadingComplete,
+    accessToken,
+    isBreezeAccountLoading,
+  ]);
 
   useEffect(() => {
     dispatch(checkHealth());
