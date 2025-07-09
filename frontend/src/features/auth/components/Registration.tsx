@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
@@ -95,13 +96,10 @@ export default function Registration() {
       })
     );
 
-    navigate('/dashboard');
+    navigate('/');
   };
 
-  const handleAuthError = (
-    error: unknown,
-    setError: (message: string) => void
-  ) => {
+  const handleAuthError = (error: any, setError: (message: string) => void) => {
     console.error('Authentication error:', error);
     if (error.data && error.data.errors) {
       setError(

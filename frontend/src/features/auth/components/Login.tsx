@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
@@ -91,7 +92,7 @@ const Login: React.FC = () => {
       })
     );
 
-    navigate('/dashboard');
+    navigate('/');
   };
 
   const handleAuthError = (error: any, setError: (message: string) => void) => {
