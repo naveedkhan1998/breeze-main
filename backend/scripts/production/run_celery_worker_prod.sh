@@ -6,10 +6,12 @@
 echo "STARTING HTTP SERVER..."
 python3 http_server.py & # Run HTTP server in background
 
+echo "Purging existing Celery tasks..."
+celery -A main purge --force || true
+
 echo "STARTING CELERY WORKER WITH MEMORY LIMIT..."
 celery -A main worker \
-    --loglevel=error \
+    --loglevel=info \
     --time-limit=0 \
-    --concurrency=1 \
-    --pool=solo
+    --concurrency=1
 #celery multi start w1 w2 -A main --loglevel=INFO
