@@ -32,9 +32,9 @@ from apps.core.serializers import (
 )
 from apps.core.tasks import (
     load_instrument_candles,
+    manual_start_websocket,
     resample_candles,
     websocket_start,
-    manual_start_websocket,
 )
 from apps.core.utils import resample_qs
 from main import const

@@ -2,12 +2,10 @@ from datetime import datetime, time, timedelta
 import json
 import time as PythonTime
 
-from celery import shared_task, Task
+from celery import Task, shared_task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
-from django.db import close_old_connections
 from pytz import timezone
-from redis.exceptions import RedisError
 
 from apps.account.models import User
 from apps.core.breeze import breeze_session_manager
@@ -77,7 +75,7 @@ def manual_start_websocket(user_id: int) -> None:
 
 
 @shared_task(bind=True, base=SingleInstanceTask, name="websocket_start")
-def websocket_start(self, user_id: int):
+def websocket_start(_self, user_id: int):
     """
     Initializes the WebSocket connection for the user and subscribes to feeds
     for instruments. Listens for new subscription requests and subscribes dynamically.

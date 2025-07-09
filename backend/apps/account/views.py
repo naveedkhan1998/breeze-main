@@ -1,17 +1,20 @@
 from django.contrib.auth import authenticate
-from rest_framework import status, generics
+from django.core.cache import cache
+from django.core.files.base import ContentFile
+from google.auth.transport import requests
+from google.oauth2 import id_token
+import requests as NormalRequests
+from rest_framework import generics, status
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-import requests as NormalRequests
-from django.core.files.base import ContentFile
-from google.oauth2 import id_token
-from google.auth.transport import requests
-from main.settings.base import GOOGLE_OAUTH_CLIENT_ID
-from django.core.cache import cache
 
+from main import const
+from main.settings.base import GOOGLE_OAUTH_CLIENT_ID
+
+from .models import User
 from .renderers import UserRenderer
 from .serializers import (
     SendPasswordResetEmailSerializer,
@@ -22,9 +25,6 @@ from .serializers import (
     UserRegistrationSerializer,
     UserSerializer,
 )
-from .models import User
-
-from main import const
 
 # Create your views here.
 
