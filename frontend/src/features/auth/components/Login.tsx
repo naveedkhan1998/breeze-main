@@ -1,39 +1,39 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { motion } from 'framer-motion';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import {
+  useLoginUserMutation,
+  useGoogleLoginMutation,
+} from '@/api/userAuthService';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppDispatch } from 'src/app/hooks';
-import { useLoginUserMutation } from '@/api/userAuthService';
-import { setToken } from '@/api/auth';
-import { storeToken } from '@/api/localStorageService';
 import { setCredentials } from '../authSlice';
-import { Loader2 } from 'lucide-react';
+import { storeToken } from '@/api/localStorageService';
+import { setToken } from '@/api/auth';
 
 interface FormData {
   email: string;
   password: string;
 }
 
-interface Token {
-  access: string;
-  refresh: string;
-}
-
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [loginUser, { isLoading }] = useLoginUserMutation();
+  const [loginUser, { isLoading: isLoginLoading }] = useLoginUserMutation();
+  const [googleLogin, { isLoading: isGoogleLoginLoading }] =
+    useGoogleLoginMutation();
 
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -44,6 +44,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage('');
 
     if (!formData.email || !formData.password) {
       setError('Please fill in both fields.');
@@ -51,92 +52,172 @@ const Login: React.FC = () => {
     }
 
     try {
-      const res = await loginUser(formData).unwrap();
-      const token: Token = res.token;
-
-      setToken(token.access);
-      if (rememberMe) {
-        storeToken({ value: { access: token.access } });
-      }
-      dispatch(setCredentials({ access: token.access }));
-
-      toast.success('Welcome back!');
-      navigate('/');
-    } catch (error: unknown) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'data' in error &&
-        typeof error.data === 'object' &&
-        error.data !== null &&
-        'detail' in error.data
-      ) {
-        setError(error.data.detail as string);
-        toast.error(error.data.detail as string);
-      } else {
-        setError('Invalid credentials. Please try again.');
-        toast.error('Login failed. Please check your credentials.');
-      }
+      const userData = await loginUser(formData).unwrap();
+      handleAuthSuccess(userData);
+      setSuccessMessage('Login successful!');
+    } catch (error: any) {
+      handleAuthError(error, setError);
     }
   };
 
+  const handleGoogleSuccess = async (response: CredentialResponse) => {
+    if (response.credential) {
+      setError('');
+      setSuccessMessage('');
+
+      try {
+        const userData = await googleLogin({
+          token: response.credential,
+        }).unwrap();
+        handleAuthSuccess(userData);
+        setSuccessMessage('Google login successful!');
+      } catch (error: any) {
+        handleAuthError(error, setError);
+      }
+    } else {
+      setError('No credential received from Google.');
+    }
+  };
+
+  const handleAuthSuccess = (userData: any) => {
+    // Use your existing token storage system
+    storeToken(userData.token);
+    setToken(userData.token.access);
+
+    // Update Redux state with just the access token (matching your existing pattern)
+    dispatch(
+      setCredentials({
+        access: userData.token.access,
+      })
+    );
+
+    navigate('/dashboard');
+  };
+
+  const handleAuthError = (error: any, setError: (message: string) => void) => {
+    console.error('Authentication error:', error);
+    if (error.data && error.data.errors) {
+      setError(
+        error.data.errors.non_field_errors?.[0] ||
+          'An error occurred during authentication.'
+      );
+    } else {
+      setError('An error occurred during authentication.');
+    }
+  };
+
+  const handleGoogleFailure = () => {
+    setError('Google login failed.');
+  };
+
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="name@company.com"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-        />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div className="space-y-2 text-center">
+        <h2 className="text-2xl font-bold">Welcome back</h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Sign in to your account to continue
+        </p>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-        />
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="remember-me"
-            checked={rememberMe}
-            onCheckedChange={checked => setRememberMe(checked as boolean)}
-            disabled={isLoading}
-          />
-          <Label htmlFor="remember-me" className="text-sm font-normal">
-            Remember me
-          </Label>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="w-4 h-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert className="text-green-800 border-green-200 bg-green-50">
+            <AlertDescription>{successMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <div className="relative">
+            <Mail className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="pl-10"
+              disabled={isLoginLoading}
+            />
+          </div>
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <div className="relative">
+            <Lock className="absolute w-4 h-4 left-3 top-3 text-muted-foreground" />
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="pl-10"
+              disabled={isLoginLoading}
+            />
+          </div>
+        </div>
+
         <Button
-          variant="link"
-          className="h-auto p-0 text-sm"
-          onClick={() => navigate('/forgot-password')}
-          type="button"
+          type="submit"
+          className="w-full bg-indigo-600 hover:bg-indigo-700"
+          disabled={isLoginLoading}
         >
-          Forgot password?
+          {isLoginLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Signing In...
+            </>
+          ) : (
+            'Sign In'
+          )}
         </Button>
+      </form>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="px-2 bg-background text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
       </div>
-      <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-        Log in
-      </Button>
-    </form>
+
+      <div className="w-full">
+        {isGoogleLoginLoading ? (
+          <div className="flex items-center justify-center p-4">
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <span>Loading...</span>
+          </div>
+        ) : (
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleFailure}
+            useOneTap
+            type="standard"
+            theme="filled_black"
+            size="large"
+            shape="rectangular"
+          />
+        )}
+      </div>
+    </motion.div>
   );
 };
 
