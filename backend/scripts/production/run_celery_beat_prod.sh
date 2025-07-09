@@ -18,4 +18,4 @@ rm -f /var/run/celery/beat.pid
 # Start Celery Beat scheduler detached
 celery -A main beat \
     --pidfile=/var/run/celery/beat.pid \
-    --loglevel=INFO
+    --loglevel=ERROR
