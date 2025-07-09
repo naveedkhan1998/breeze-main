@@ -14,4 +14,4 @@ def websocket_user_lock(user_id: int) -> str:
     """
     Generate a unique lock key for a user to prevent multiple WebSocket connections.
     """
-    return f"websocket_lock_{user_id}"
+    return f"websocket_start-user-{user_id}"

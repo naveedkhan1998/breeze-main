@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 import json
 import time as PythonTime
 
-from celery import shared_task
+from celery import shared_task, Task
 from celery.utils.log import get_task_logger
 from django.core.cache import cache
 from django.db import close_old_connections
@@ -29,6 +29,32 @@ RETRY_BACKOFF = True
 RETRY_BACKOFF_MAX = 300  # cap 5 min
 
 
+class SingleInstanceTask(Task):
+    """Custom task class that prevents multiple instances of the same task"""
+
+    def apply_async(self, args=None, kwargs=None, task_id=None, **options):
+        # Generate a unique task_id based on the task name and user_id
+        if args and len(args) > 0:
+            user_id = args[0]
+            task_id = f"{self.name}-user-{user_id}"
+
+        # Check if task is already running
+        from celery import current_app
+
+        active_tasks = current_app.control.inspect().active()
+
+        if active_tasks:
+            for worker, tasks in active_tasks.items():
+                for task in tasks:
+                    if task.get("id") == task_id:
+                        logger.info(
+                            f"Task {task_id} is already running on worker {worker}. Skipping new instance."
+                        )
+                        return None
+
+        return super().apply_async(args, kwargs, task_id=task_id, **options)
+
+
 @shared_task(name="manual_start_websocket")
 def manual_start_websocket(user_id: int) -> None:
     """
@@ -42,25 +68,21 @@ def manual_start_websocket(user_id: int) -> None:
     check_breeze_session = session.get_funds()
     if check_breeze_session.get("Status") == 200:
         logger.info("Starting websocket session for user %s", user_id)
-        # Trigger the websocket task
-        websocket_start.delay(user_id)
+        # Trigger the websocket task with deduplication
+        result = websocket_start.apply_async(args=[user_id])
+        if result is None:
+            logger.info(
+                f"WebSocket task for user {user_id} is already running. Skipping."
+            )
 
 
-@shared_task(name="websocket_start")
-def websocket_start(user_id: int):
+@shared_task(bind=True, base=SingleInstanceTask, name="websocket_start")
+def websocket_start(self, user_id: int):
     """
     Initializes the WebSocket connection for the user and subscribes to feeds
     for instruments. Listens for new subscription requests and subscribes dynamically.
+    Only one instance per user is allowed to run at a time.
     """
-    # Define a unique lock key for the user to prevent multiple task instances
-    lock_key = const.websocket_user_lock(user_id)
-
-    # lock = cache.add(lock_key, "true", timeout=3600)  # 1-hour lock
-
-    # if not lock:
-    #     # Task is already running for this user
-    #     logger.error(f"WebSocket task already running for user {user_id}.")
-    #     return
 
     try:
         # Retrieve the user
@@ -127,7 +149,6 @@ def websocket_start(user_id: int):
 
     except Exception as e:
         logger.error(f"Error in websocket_start: {e}", exc_info=True)
-        cache.delete(lock_key)
     finally:
         # Clean up: Disconnect WebSocket and release the lock
         try:
@@ -135,8 +156,6 @@ def websocket_start(user_id: int):
             logger.info("WebSocket connection closed.")
         except Exception as e:
             logger.error(f"Error while disconnecting WebSocket: {e}", exc_info=True)
-
-        cache.delete(lock_key)
 
 
 @shared_task(name="tick_handler")

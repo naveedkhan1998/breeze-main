@@ -168,7 +168,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
     def start_websocket(self, request):
         try:
             user = self.request.user
-            websocket_start.delay(user.id)
+            websocket_start.apply_async(args=[user.id])
             return Response(
                 {"msg": "WebSocket Started successfully", "data": "WebSocket Started"},
                 status=status.HTTP_201_CREATED,

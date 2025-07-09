@@ -14,4 +14,5 @@ rm -f /var/run/celery/beat.pid
 echo "Starting Celery Beat with ERROR logging..."
 celery -A main beat \
     --pidfile=/var/run/celery/beat.pid \
-    --loglevel=ERROR
+    --loglevel=error \
+    --max-interval=60
