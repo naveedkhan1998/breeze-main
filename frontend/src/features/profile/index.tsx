@@ -12,19 +12,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Loader2 } from 'lucide-react';
-import { useGetLoggedUserQuery } from '@/api/userAuthService';
+import { useAppSelector } from 'src/app/hooks';
+import { getLoggedInUser } from '../auth/authSlice';
 
 const ProfilePage = () => {
-  const { data, isLoading } = useGetLoggedUserQuery('');
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    );
-  }
+  const user = useAppSelector(getLoggedInUser);
 
   return (
     <PageLayout
@@ -57,19 +49,19 @@ const ProfilePage = () => {
               <CardContent className="space-y-6">
                 <div className="flex flex-col items-center gap-4 sm:flex-row">
                   <Avatar className="w-24 h-24">
-                    <AvatarImage src={data?.avatar} />
+                    <AvatarImage src={user?.avatar} />
                     <AvatarFallback>
-                      {data?.name
+                      {user?.name
                         ?.split(' ')
                         .map((n: string) => n[0])
                         .join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-1 text-center sm:text-left">
-                    <h3 className="text-2xl font-semibold">{data?.name}</h3>
-                    <p className="text-muted-foreground">{data?.email}</p>
-                    <Badge variant={data?.is_admin ? 'default' : 'secondary'}>
-                      {data?.is_admin ? 'Admin' : 'User'}
+                    <h3 className="text-2xl font-semibold">{user?.name}</h3>
+                    <p className="text-muted-foreground">{user?.email}</p>
+                    <Badge variant={user?.is_admin ? 'default' : 'secondary'}>
+                      {user?.is_admin ? 'Admin' : 'User'}
                     </Badge>
                   </div>
                 </div>
@@ -77,11 +69,11 @@ const ProfilePage = () => {
                 <div className="grid gap-4 pt-4 mt-4 border-t">
                   <div className="grid gap-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" defaultValue={data?.name} />
+                    <Input id="name" defaultValue={user?.name} />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" defaultValue={data?.email} />
+                    <Input id="email" defaultValue={user?.email} />
                   </div>
                   <Button>Save Changes</Button>
                 </div>

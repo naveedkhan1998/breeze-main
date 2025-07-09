@@ -5,6 +5,7 @@ import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import {
   useRegisterUserMutation,
   useGoogleLoginMutation,
+  useGetLoggedUserQuery,
 } from '@/api/userAuthService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,14 +86,21 @@ export default function Registration() {
     }
   };
 
-  const handleAuthSuccess = (userData: any) => {
+  const { refetch: getLoggedUser } = useGetLoggedUserQuery({});
+
+  const handleAuthSuccess = async (userData: any) => {
     // Use your existing token storage system
     storeToken(userData.token);
     setToken(userData.token.access);
-    // Update Redux state with just the access token (matching your existing pattern)
+
+    // Fetch logged in user data
+    const { data: user } = await getLoggedUser();
+
+    // Update Redux state with access token and user data
     dispatch(
       setCredentials({
         access: userData.token.access,
+        user: user,
       })
     );
 
