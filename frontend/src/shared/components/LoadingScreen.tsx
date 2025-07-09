@@ -231,9 +231,9 @@ const LoadingScreen = () => {
       {/* Enhanced Animated Blocks */}
       <EnhancedAnimatedBlock
         initialX={-200}
-        y={80}
-        width={100}
-        height={100}
+        y={120}
+        width={120}
+        height={120}
         colors={['#FF6B6B', '#FFE66D', '#4ECDC4']}
         pattern="wave"
         duration={8}
@@ -241,9 +241,9 @@ const LoadingScreen = () => {
       />
       <EnhancedAnimatedBlock
         initialX={-150}
-        y={230}
-        width={100}
-        height={100}
+        y={240}
+        width={120}
+        height={120}
         colors={['#C7F0BD', '#A0CED9', '#83B5D1']}
         pattern="pulse"
         duration={10}
@@ -251,9 +251,9 @@ const LoadingScreen = () => {
       />
       <EnhancedAnimatedBlock
         initialX={-180}
-        y={380}
-        width={100}
-        height={100}
+        y={360}
+        width={120}
+        height={120}
         colors={['#F7B2BD', '#B2F7EF']}
         pattern="flow"
         duration={9}
@@ -261,9 +261,9 @@ const LoadingScreen = () => {
       />
       <EnhancedAnimatedBlock
         initialX={-160}
-        y={530}
-        width={100}
-        height={100}
+        y={540}
+        width={120}
+        height={120}
         colors={['#D4A5A5', '#A5D4D4', '#D4D4A5']}
         pattern="matrix"
         duration={7}
@@ -271,9 +271,9 @@ const LoadingScreen = () => {
       />
       <EnhancedAnimatedBlock
         initialX={-220}
-        y={680}
-        width={100}
-        height={100}
+        y={720}
+        width={120}
+        height={120}
         colors={['#A8DADC', '#C3F0CA']}
         pattern="spiral"
         duration={11}
@@ -281,9 +281,9 @@ const LoadingScreen = () => {
       />
       <EnhancedAnimatedBlock
         initialX={-250}
-        y={830}
-        width={100}
-        height={100}
+        y={960}
+        width={120}
+        height={120}
         colors={['#FFD1BA', '#BAE1FF', '#FFBAE1']}
         pattern="matrix"
         duration={12}
@@ -298,7 +298,7 @@ const LoadingScreen = () => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <Card className="w-full max-w-lg mx-4 border shadow-2xl border-purple-500/30 bg-slate-900/95 backdrop-blur-xl shadow-purple-500/20">
+          <Card className="w-[400px] mx-4 border shadow-2xl border-purple-500/30 bg-slate-900/95 backdrop-blur-xl shadow-purple-500/20">
             <div className="p-8 space-y-6 h-80">
               {' '}
               {/* Fixed height container */}
