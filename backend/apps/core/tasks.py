@@ -29,124 +29,114 @@ RETRY_BACKOFF = True
 RETRY_BACKOFF_MAX = 300  # cap 5 min
 
 
-@shared_task(
-    bind=True,
-    name="websocket_start",
-    autoretry_for=(Exception,),
-    retry_backoff=RETRY_BACKOFF,
-    retry_backoff_max=RETRY_BACKOFF_MAX,
-    max_retries=RETRY_MAX,
-)
-def websocket_start(_self, user_id: int) -> None:
+@shared_task(name="manual_start_websocket")
+def manual_start_websocket(user_id: int) -> None:
     """
-    Single-shot task that owns ONE websocket session.
-    It will autoretry on any uncaught error with exponential back-off.
+    Starts a websocket session for the given user ID.
+    This task is intended to be called manually, for example, from a Django view.
+    It will create a Celery task that manages the websocket session.
     """
 
-    lock_key = f"ws:{user_id}:lock"
+    # Check if the user has a valid Breeze session
+    session = breeze_session_manager.initialize_session(user_id)
+    check_breeze_session = session.get_funds()
+    if check_breeze_session.get("Status") == 200:
+        logger.info("Starting websocket session for user %s", user_id)
+        # Trigger the websocket task
+        websocket_start.delay(user_id)
+
+
+@shared_task(name="websocket_start")
+def websocket_start(user_id: int):
+    """
+    Initializes the WebSocket connection for the user and subscribes to feeds
+    for instruments. Listens for new subscription requests and subscribes dynamically.
+    """
+    # Define a unique lock key for the user to prevent multiple task instances
+    lock_key = const.websocket_user_lock(user_id)
+
+    # lock = cache.add(lock_key, "true", timeout=3600)  # 1-hour lock
+
+    # if not lock:
+    #     # Task is already running for this user
+    #     logger.error(f"WebSocket task already running for user {user_id}.")
+    #     return
+
     try:
-        # Robust redis lock: cleared automatically after LOCK_TTL
-        with cache.lock(
-            lock_key, timeout=LOCK_TTL, blocking_timeout=LOCK_WAIT
-        ) as acquired:
-            if not acquired:
-                logger.info("Another websocket task is active for user %s", user_id)
-                return
-
-            logger.info("Acquired lock for user %s, starting websocket loop", user_id)
-            _run_session_loop(user_id)
-
-    except Exception as exc:
-        logger.exception("websocket_start blew up, will retry: %s", exc)
-        raise  # triggers Celery autoretry
-
-
-# ------------------------------------------------------------------------- #
-
-
-def _run_session_loop(user_id: int) -> None:
-    redis_client = cache.client.get_client("default")
-    sub_queue = f"user:{user_id}:subscriptions"
-    first_run = True
-    while True:
+        # Retrieve the user
         try:
-            close_old_connections()
             user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            logger.warning(f"No user found with id {user_id}.")
+            return
 
-            sess = breeze_session_manager.initialize_session(user_id)
-            sess.ws_connect()
-            logger.info("WS connected for %s", user.email)
+        # Initialize WebSocket session
+        sess = breeze_session_manager.initialize_session(user_id)
+        sess.ws_connect()
 
-            if first_run:
-                try:
-                    load_candles.delay(user.pk)
-                    logger.info("Triggered async candle load")
-                except Exception as c_err:
-                    logger.warning("Could not queue candle load: %s", c_err)
-                first_run = False
+        # Subscribe to initial instruments
+        sub_ins = SubscribedInstruments.objects.all()
+        load_candles.delay(user.pk)  # Asynchronously load candle data
 
-            # --- heartbeat callback -------------------------------------
-            def on_ticks(ticks):
-                # 1 push downstream work
-                tick_handler.delay(ticks)
+        def on_ticks(ticks):
+            tick_handler.delay(ticks)
 
-                # 2 heartbeat
-                try:
-                    redis_client.set(
+        if sub_ins.exists():
+            for ins in sub_ins:
+                if ins.percentage.is_loading:
+                    ins.percentage.percentage = 0
+                    ins.percentage.is_loading = False
+                    ins.percentage.save()
+                    sess.subscribe_feeds(stock_token=ins.stock_token)
+
+        sess.on_ticks = on_ticks
+        logger.info("WebSocket connection established and initial subscriptions set.")
+
+        # Access Redis via Django's cache
+        redis_client = cache.client.get_client("default")
+        subscription_queue = f"user:{user_id}:subscriptions"
+
+        count = 0
+        while True:
+            try:
+                if count >= 10:
+                    cache.set(
                         const.WEBSOCKET_HEARTBEAT_KEY,
-                        1,
-                        ex=const.WEBSOCKET_HEARTBEAT_TTL,
+                        True,
+                        timeout=const.WEBSOCKET_HEARTBEAT_TTL,
                     )
-                except RedisError as rerr:
-                    logger.warning("Redis heartbeat failed: %s", rerr)
+                    count = 0
+                count += 1
+                # Attempt to pop a new subscription from the queue with a timeout
+                subscription = redis_client.blpop(subscription_queue, timeout=5)
+                if subscription:
+                    _, data = subscription
+                    subscription_data = json.loads(data)
+                    stock_token = subscription_data.get("stock_token")
 
-            sess.on_ticks = on_ticks
+                    if stock_token:
+                        # Subscribe to the new instrument
+                        sess.subscribe_feeds(stock_token=stock_token)
+                        logger.info(f"Subscribed to new instrument: {stock_token}")
 
-            _prime_subscriptions(sess)
+            except Exception as e:
+                logger.error(f"Error while processing subscription: {e}", exc_info=True)
 
-            while True:
-                _pump_sub_queue(redis_client, sub_queue, sess)
-                PythonTime.sleep(0.5)
+            # Implement a short sleep to prevent tight looping
+            PythonTime.sleep(1)
 
-        except Exception as e:
-            if "Session key is expired" in str(e):
-                logger.warning("Breeze session expired — will retry in 5 min")
-                PythonTime.sleep(5)
-                raise  # let Celery back-off
-            logger.exception("Unhandled WS error")
-            raise
-
-
-def _prime_subscriptions(sess):
-    subs = SubscribedInstruments.objects.all()
-    for ins in subs:
-        if ins.percentage.is_loading:
-            ins.percentage.percentage = 0
-            ins.percentage.is_loading = False
-            ins.percentage.save(update_fields=["percentage", "is_loading"])
-        sess.subscribe_feeds(stock_token=ins.stock_token)
-    logger.info("Initial %d instruments subscribed", subs.count())
-
-
-def _pump_sub_queue(rds, queue_key, sess):
-    """
-    Non-blocking pop from Redis list; if something is there subscribe on WS.
-    """
-    try:
-        popped = rds.blpop(queue_key, timeout=0)
-    except RedisError as rerr:
-        logger.warning("Redis BLPOP failed: %s", rerr)
-        return
-    if popped:
-        _, raw = popped
+    except Exception as e:
+        logger.error(f"Error in websocket_start: {e}", exc_info=True)
+        cache.delete(lock_key)
+    finally:
+        # Clean up: Disconnect WebSocket and release the lock
         try:
-            data = json.loads(raw)
-            token = data.get("stock_token")
-            if token:
-                sess.subscribe_feeds(stock_token=token)
-                logger.info("Subscribed to %s", token)
+            sess.ws_disconnect()
+            logger.info("WebSocket connection closed.")
         except Exception as e:
-            logger.warning("Bad subscription payload: %s", e)
+            logger.error(f"Error while disconnecting WebSocket: {e}", exc_info=True)
+
+        cache.delete(lock_key)
 
 
 @shared_task(name="tick_handler")
