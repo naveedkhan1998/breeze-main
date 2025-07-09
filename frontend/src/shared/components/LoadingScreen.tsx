@@ -160,7 +160,7 @@ const LoadingScreen = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="relative min-h-[100dvh] overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Enhanced Grid Background */}
       <div
         className="absolute inset-0 opacity-30"
@@ -232,52 +232,62 @@ const LoadingScreen = () => {
       <EnhancedAnimatedBlock
         initialX={-200}
         y={80}
-        width={120}
-        height={80}
-        colors={['#8B5CF6', '#A855F7', '#C084FC']}
+        width={100}
+        height={100}
+        colors={['#FF6B6B', '#FFE66D', '#4ECDC4']}
         pattern="wave"
         duration={8}
         delay={0}
       />
       <EnhancedAnimatedBlock
         initialX={-150}
-        y={300}
+        y={230}
         width={100}
         height={100}
-        colors={['#8B5CF6', '#10B981', '#06D6A0']}
+        colors={['#C7F0BD', '#A0CED9', '#83B5D1']}
         pattern="pulse"
         duration={10}
         delay={1}
       />
       <EnhancedAnimatedBlock
         initialX={-180}
-        y={500}
-        width={140}
-        height={60}
-        colors={['#8B5CF6', '#A855F7']}
+        y={380}
+        width={100}
+        height={100}
+        colors={['#F7B2BD', '#B2F7EF']}
         pattern="flow"
         duration={9}
         delay={2}
       />
       <EnhancedAnimatedBlock
         initialX={-160}
-        y={200}
-        width={80}
-        height={120}
-        colors={['#8B5CF6', '#C084FC', '#DDD6FE']}
+        y={530}
+        width={100}
+        height={100}
+        colors={['#D4A5A5', '#A5D4D4', '#D4D4A5']}
         pattern="matrix"
         duration={7}
         delay={0.5}
       />
       <EnhancedAnimatedBlock
         initialX={-220}
-        y={400}
-        width={110}
-        height={90}
-        colors={['#8B5CF6', '#10B981']}
+        y={680}
+        width={100}
+        height={100}
+        colors={['#A8DADC', '#C3F0CA']}
         pattern="spiral"
         duration={11}
         delay={1.5}
+      />
+      <EnhancedAnimatedBlock
+        initialX={-250}
+        y={830}
+        width={100}
+        height={100}
+        colors={['#FFD1BA', '#BAE1FF', '#FFBAE1']}
+        pattern="matrix"
+        duration={12}
+        delay={0.8}
       />
 
       {/* Enhanced Progress Card - Properly Centered */}
@@ -304,7 +314,7 @@ const LoadingScreen = () => {
                     transition={{ duration: 0.3 }}
                   >
                     {loadingPhases[currentPhase]?.message || 'Initializing'}
-                    {dots}
+                    <span className="inline-block w-6 text-left">{dots}</span>
                   </motion.h2>
                 </AnimatePresence>
 
@@ -555,6 +565,7 @@ function EnhancedAnimatedBlock({
             />
           </div>
         );
+
       default:
         return (
           <div
