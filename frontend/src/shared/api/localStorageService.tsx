@@ -1,4 +1,4 @@
-import { User } from '@/shared/types/common-types';
+import { User } from '@/types/common-types';
 
 type TokenProp = {
   value: {
