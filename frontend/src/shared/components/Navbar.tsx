@@ -44,6 +44,7 @@ import {
   logOut,
 } from 'src/features/auth/authSlice';
 import { ModeToggle } from './ModeToggle';
+import HealthStatus from './HealthStatus';
 
 const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -202,6 +203,7 @@ const Navbar: React.FC = () => {
                 </Button> */}
 
                 <ModeToggle />
+                <HealthStatus />
 
                 {/* User Menu */}
                 <DropdownMenu>
@@ -313,6 +315,7 @@ const Navbar: React.FC = () => {
                 <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full" />
               </Button> */}
               <ModeToggle />
+              <HealthStatus />
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-9 w-9">

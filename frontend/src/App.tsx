@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
-import { useAppSelector } from './app/hooks';
+import { useAppDispatch, useAppSelector } from './app/hooks';
 import { getCurrentToken } from './features/auth/authSlice';
+import { checkHealth, setServiceStatus } from './features/health/healthSlice';
 import { useHealthCheckQuery } from './shared/api/baseApi';
 import LoadingScreen from './shared/components/LoadingScreen';
 
@@ -35,22 +36,52 @@ const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({
 
 export default function App() {
   const [isLoadingComplete, setIsLoadingComplete] = useState(false);
-  const { isLoading, refetch } = useHealthCheckQuery('');
+  const dispatch = useAppDispatch();
+  const { data: healthCheckData, isLoading: isHealthCheckLoading, error: healthCheckError } =
+    useHealthCheckQuery('', {
+      pollingInterval: HEALTH_CHECK_INTERVAL,
+    });
 
   useEffect(() => {
     checkEnvironment();
-
-    if (!isLoading && !isLoadingComplete) {
-      setIsLoadingComplete(true);
-    }
-  }, [isLoading, isLoadingComplete]);
+    setIsLoadingComplete(true);
+  }, []);
 
   useEffect(() => {
-    const intervalId = setInterval(refetch, HEALTH_CHECK_INTERVAL);
+    dispatch(checkHealth());
+    const intervalId = setInterval(
+      () => dispatch(checkHealth()),
+      HEALTH_CHECK_INTERVAL
+    );
     return () => clearInterval(intervalId);
-  }, [refetch]);
+  }, [dispatch]);
 
-  if (isLoading && !isLoadingComplete) {
+  useEffect(() => {
+    if (isHealthCheckLoading) {
+      dispatch(
+        setServiceStatus({
+          name: 'API',
+          status: 'pending',
+        })
+      );
+    } else if (healthCheckError) {
+      dispatch(
+        setServiceStatus({
+          name: 'API',
+          status: 'error',
+        })
+      );
+    } else if (healthCheckData) {
+      dispatch(
+        setServiceStatus({
+          name: 'API',
+          status: 'ok',
+        })
+      );
+    }
+  }, [healthCheckData, isHealthCheckLoading, healthCheckError, dispatch]);
+
+  if (isHealthCheckLoading && !isLoadingComplete) {
     return <LoadingScreen />;
   }
 

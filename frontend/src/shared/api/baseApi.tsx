@@ -22,7 +22,7 @@ export const baseApi = createApi({
   endpoints: builder => ({
     healthCheck: builder.query({
       query: () => ({
-        url: '/',
+        url: '/core/',
         method: 'GET',
         headers: {
           'Content-type': 'application/json',
