@@ -38,7 +38,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { getCurrentToken, logOut } from 'src/features/auth/authSlice';
+import {
+  getCurrentToken,
+  getLoggedInUser,
+  logOut,
+} from 'src/features/auth/authSlice';
 import { ModeToggle } from './ModeToggle';
 
 const Navbar: React.FC = () => {
@@ -48,6 +52,7 @@ const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const user = useAppSelector(getLoggedInUser);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -208,19 +213,22 @@ const Navbar: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <Avatar className="w-8 h-8 transition-all duration-200 hover:scale-105">
                           <AvatarImage
-                            src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
+                            src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
                             alt="Profile"
                           />
                           <AvatarFallback className="font-semibold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
-                            NK
+                            {user?.name
+                              ?.split(' ')
+                              .map((n: string) => n[0])
+                              .join('') || 'NK'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-col items-start hidden xl:flex">
                           <span className="text-sm font-medium">
-                            Naveed Khan
+                            {user?.name || 'Naveed Khan'}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            Premium
+                            {user?.is_admin ? 'Admin' : 'User'}
                           </span>
                         </div>
                       </div>
@@ -232,7 +240,7 @@ const Navbar: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <Avatar className="w-12 h-12">
                           <AvatarImage
-                            src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
+                            src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
                             alt="Profile"
                           />
                           <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
@@ -240,16 +248,16 @@ const Navbar: React.FC = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-semibold">Naveed Khan</p>
+                          <p className="text-sm font-semibold">{user?.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            admin@icici.com
+                            {user?.email || ''}
                           </p>
                           <div className="flex items-center space-x-2">
                             <Badge variant="outline" className="text-xs">
-                              Premium
+                              {user?.is_admin ? 'Admin' : 'User'}
                             </Badge>
                             <Badge variant="secondary" className="text-xs">
-                              Verified
+                              {user?.auth_provider}
                             </Badge>
                           </div>
                         </div>
@@ -316,20 +324,20 @@ const Navbar: React.FC = () => {
                     <SheetTitle className="flex items-center space-x-3">
                       <Avatar className="w-12 h-12">
                         <AvatarImage
-                          src="https://ui-avatars.com/api/?name=Naveed+Khan&background=random"
+                          src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
                           alt="Profile"
                         />
                         <AvatarFallback>NK</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start">
                         <span className="text-base font-semibold">
-                          Naveed Khan
+                          {user?.name || 'Naveed Khan'}
                         </span>
                         <span className="text-sm text-muted-foreground">
-                          admin@icici.com
+                          {user?.email || ''}
                         </span>
                         <Badge variant="outline" className="mt-1 text-xs">
-                          Premium Account
+                          {user?.is_admin ? 'Admin' : 'User'} Account
                         </Badge>
                       </div>
                     </SheetTitle>
