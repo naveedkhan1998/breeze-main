@@ -39,6 +39,18 @@ export const getCeleryWorkerUrls = () => {
       url: import.meta.env.VITE_CELERY_WORKER_3_URL || 'http://localhost:8003/',
     },
     {
+      name: 'Worker 4',
+      url: import.meta.env.VITE_CELERY_WORKER_4_URL || 'http://localhost:8004/',
+    },
+    {
+      name: 'Worker 5',
+      url: import.meta.env.VITE_CELERY_WORKER_5_URL || 'http://localhost:8005/',
+    },
+    {
+      name: 'Worker 6',
+      url: import.meta.env.VITE_CELERY_WORKER_6_URL || 'http://localhost:8006/',
+    },
+    {
       name: 'Beat',
       url: import.meta.env.VITE_CELERY_BEAT_URL || 'http://localhost:8004/',
     },
