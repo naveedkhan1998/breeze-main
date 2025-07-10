@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/useMobile';
 
 interface PageLayoutProps {
   children?: React.ReactNode;
@@ -80,9 +81,14 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   variant = 'default',
 }) => {
   const pageTitle = header ? extractTextContent(header) : 'ICICI Breeze';
+  const isMobile = useIsMobile();
+
+  // Use clean variant on mobile by default
+  const effectiveVariant =
+    variant === 'default' && isMobile ? 'clean' : variant;
 
   const getContainerClasses = () => {
-    switch (variant) {
+    switch (effectiveVariant) {
       case 'clean':
         return 'px-4 py-8 mx-auto sm:px-6 lg:px-8';
       case 'full-width':
@@ -93,7 +99,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   };
 
   const getContentClasses = () => {
-    switch (variant) {
+    switch (effectiveVariant) {
       case 'clean':
         return `${contentClassName}`;
       case 'full-width':
@@ -138,13 +144,13 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
             )}
 
             {/* Content Section */}
-            {variant === 'default' ? (
+            {effectiveVariant === 'default' ? (
               <Card className={getContentClasses()}>
                 <CardContent className="p-8">{children}</CardContent>
               </Card>
             ) : (
               <div className={getContentClasses()}>
-                {variant === 'clean' ? (
+                {effectiveVariant === 'clean' ? (
                   <div className="space-y-6">{children}</div>
                 ) : (
                   children

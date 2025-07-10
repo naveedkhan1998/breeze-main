@@ -25,36 +25,33 @@ export const getApiBaseUrl = () => {
 };
 
 export const getCeleryWorkerUrls = () => {
-  return [
-    {
-      name: 'Worker 1',
-      url: import.meta.env.VITE_CELERY_WORKER_1_URL || 'http://localhost:8001/',
-    },
-    {
-      name: 'Worker 2',
-      url: import.meta.env.VITE_CELERY_WORKER_2_URL || 'http://localhost:8002/',
-    },
-    {
-      name: 'Worker 3',
-      url: import.meta.env.VITE_CELERY_WORKER_3_URL || 'http://localhost:8003/',
-    },
-    {
-      name: 'Worker 4',
-      url: import.meta.env.VITE_CELERY_WORKER_4_URL || 'http://localhost:8004/',
-    },
-    {
-      name: 'Worker 5',
-      url: import.meta.env.VITE_CELERY_WORKER_5_URL || 'http://localhost:8005/',
-    },
-    {
-      name: 'Worker 6',
-      url: import.meta.env.VITE_CELERY_WORKER_6_URL || 'http://localhost:8006/',
-    },
-    {
-      name: 'Beat',
-      url: import.meta.env.VITE_CELERY_BEAT_URL || 'http://localhost:8004/',
-    },
-  ];
+  const workerCount = parseInt(
+    import.meta.env.VITE_CELERY_WORKER_COUNT || '1',
+    10
+  );
+  const baseUrl = import.meta.env.VITE_CELERY_BASE_URL;
+
+  const workers = [];
+
+  // Generate worker URLs dynamically
+  for (let i = 1; i <= workerCount; i++) {
+    const defaultUrl = baseUrl
+      ? `${baseUrl.replace('{worker}', i.toString())}`
+      : `http://localhost:${8000 + i}/`;
+
+    workers.push({
+      name: `Worker ${i}`,
+      url: defaultUrl,
+    });
+  }
+
+  // Add Beat worker
+  workers.push({
+    name: 'Beat',
+    url: import.meta.env.VITE_CELERY_BEAT_URL || 'http://localhost:8888/',
+  });
+
+  return workers;
 };
 
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
