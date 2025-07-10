@@ -1,6 +1,6 @@
 const LoadingScreen = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="flex flex-col items-center justify-center h-[100dvh] bg-gradient-to-br from-background via-background to-muted/20">
       <div className="flex flex-col items-center space-y-6">
         <div className="relative">
           <div className="w-16 h-16 border-4 rounded-full border-chart-1/20 border-t-chart-1 animate-spin"></div>

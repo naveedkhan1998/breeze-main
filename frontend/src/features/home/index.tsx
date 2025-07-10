@@ -170,7 +170,7 @@ const HomePage: React.FC = () => {
             {/* Tabs and Controls */}
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               {/* Enhanced Tabs */}
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col items-start gap-4 md:items-center md:flex-row">
                 <div className="flex items-center gap-2">
                   <Filter className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">

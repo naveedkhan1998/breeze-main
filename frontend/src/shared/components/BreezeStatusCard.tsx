@@ -56,14 +56,15 @@ const BreezeStatusCard: React.FC = () => {
     data: breezeStatusData,
     error,
     isLoading,
+    isFetching,
     refetch,
   } = useCheckBreezeStatusQuery(undefined, {
-    pollingInterval: 5000,
-    refetchOnFocus: true,
+    pollingInterval: 60000,
   }) as {
     data: BreezeStatusData;
     error: { data?: { data: string } };
     isLoading: boolean;
+    isFetching: boolean;
     refetch: () => void;
   };
 
@@ -114,21 +115,15 @@ const BreezeStatusCard: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              {isLoading && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Updating...</span>
-                </div>
-              )}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => refetch()}
-                disabled={isLoading}
+                disabled={isLoading || isFetching}
                 className="transition-all duration-200 bg-background/50 hover:bg-accent/50 border-border/50"
               >
                 <RefreshCw
-                  className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+                  className={`w-4 h-4 mr-2 ${isLoading || isFetching ? 'animate-spin' : ''}`}
                 />
                 Refresh
               </Button>
@@ -139,7 +134,7 @@ const BreezeStatusCard: React.FC = () => {
           <motion.div variants={itemVariants} className="mt-4">
             <OverallStatusIndicator
               status={overallStatus}
-              isLoading={isLoading}
+              isLoading={isLoading || isFetching}
             />
           </motion.div>
         </CardHeader>
@@ -163,14 +158,14 @@ const BreezeStatusCard: React.FC = () => {
                 <StatusItem
                   title="Session Status"
                   status={breezeStatusData?.data.session_status ?? false}
-                  isLoading={isLoading}
+                  isLoading={isLoading || isFetching}
                   icon={Radio}
                   description="Authentication & account access"
                 />
                 <StatusItem
                   title="Live Data Feed"
                   status={breezeStatusData?.data.websocket_status ?? false}
-                  isLoading={isLoading}
+                  isLoading={isLoading || isFetching}
                   icon={Zap}
                   description="Real-time market data stream"
                 />
@@ -181,7 +176,7 @@ const BreezeStatusCard: React.FC = () => {
               {/* Connection metrics */}
               <div className="flex items-center justify-between px-3 py-2 text-xs rounded-md text-muted-foreground bg-muted/20">
                 <span>Last updated: {new Date().toLocaleTimeString()}</span>
-                <span>Auto-refresh: 5s</span>
+                <span>Auto-refresh: 60s</span>
               </div>
             </motion.div>
           )}

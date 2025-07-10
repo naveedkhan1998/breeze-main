@@ -78,7 +78,7 @@ const AccountsPage = () => {
 
   if (isBreezeAccountLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-[100dvh]">
         <div className="space-y-4 text-center">
           <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary" />
           <p className="text-muted-foreground">

@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -16,8 +14,9 @@ import {
   Settings,
   LogOut,
   Search,
+  ChevronRight,
+  Sparkles,
 } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -31,13 +30,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   getCurrentToken,
   getLoggedInUser,
@@ -72,30 +66,35 @@ const Navbar: React.FC = () => {
       label: 'Home',
       icon: Home,
       description: 'Overview & Analytics',
+      color: 'from-blue-500 to-cyan-500',
     },
     {
       path: '/instruments',
       label: 'Instruments',
       icon: BarChart3,
       description: 'Trading Instruments',
+      color: 'from-green-500 to-emerald-500',
     },
     {
       path: '/accounts',
       label: 'Account',
       icon: TrendingUp,
       description: 'Account Management',
+      color: 'from-purple-500 to-pink-500',
     },
     {
       path: '/about',
       label: 'About',
       icon: Info,
       description: 'Developer Information',
+      color: 'from-orange-500 to-red-500',
     },
     {
       path: '/contact',
       label: 'Support',
       icon: Mail,
       description: 'Help & Contact',
+      color: 'from-indigo-500 to-purple-500',
     },
   ];
 
@@ -120,26 +119,19 @@ const Navbar: React.FC = () => {
                   alt="Logo"
                   className="flex items-center justify-center w-10 h-10 transition-all duration-300 shadow-lg rounded-xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 group-hover:shadow-xl group-hover:scale-105"
                 />
-
                 <div className="absolute transition-opacity duration-300 opacity-0 -inset-1 bg-gradient-to-br from-primary/20 to-transparent rounded-xl group-hover:opacity-100 blur-sm" />
               </div>
-              <div className="flex-col hidden sm:flex">
+              <div className="flex-col sm:flex">
                 <span className="text-xl font-bold tracking-tight text-transparent bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70 bg-clip-text">
                   ICICI Breeze
                 </span>
-                <div className="flex items-center space-x-2">
+                <div className="items-center hidden space-x-2 sm:flex">
                   <Badge
                     variant="secondary"
                     className="text-xs px-2 py-0.5 font-medium"
                   >
                     Wrapper
                   </Badge>
-                  {/* <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                    <span className="text-xs font-medium text-muted-foreground">
-                      Live
-                    </span>
-                  </div> */}
                 </div>
               </div>
             </Link>
@@ -183,28 +175,11 @@ const Navbar: React.FC = () => {
                   );
                 })}
               </nav>
-
               <Separator orientation="vertical" className="h-8 mx-4" />
-
               {/* Desktop Actions */}
               <div className="flex items-center space-x-2">
-                {/* Notifications */}
-                {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative w-10 h-10"
-                >
-                  <Bell className="w-4 h-4" />
-                  <div className="absolute flex items-center justify-center w-3 h-3 rounded-full -top-1 -right-1 bg-destructive">
-                    <span className="text-xs font-bold text-destructive-foreground">
-                      3
-                    </span>
-                  </div>
-                </Button> */}
-
                 <ModeToggle />
                 <HealthStatus />
-
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -310,124 +285,180 @@ const Navbar: React.FC = () => {
 
             {/* Mobile Actions */}
             <div className="flex items-center space-x-2 lg:hidden">
-              {/* <Button variant="ghost" size="icon" className="relative h-9 w-9">
-                <Bell className="w-4 h-4" />
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full" />
-              </Button> */}
               <ModeToggle />
               <HealthStatus />
-              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                <SheetTrigger asChild>
+              <Drawer
+                open={isMobileMenuOpen}
+                onOpenChange={setIsMobileMenuOpen}
+              >
+                <DrawerTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-9 w-9">
                     <Menu className="w-5 h-5" />
                   </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="p-0 overflow-auto w-80">
-                  <SheetHeader className="p-6 pb-4 border-b">
-                    <SheetTitle className="flex items-center space-x-3">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage
-                          src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
-                          alt="Profile"
-                        />
-                        <AvatarFallback>NK</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col items-start">
-                        <span className="text-base font-semibold">
-                          {user?.name || 'Naveed Khan'}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {user?.email || ''}
-                        </span>
-                        <Badge variant="outline" className="mt-1 text-xs">
-                          {user?.is_admin ? 'Admin' : 'User'} Account
-                        </Badge>
-                      </div>
-                    </SheetTitle>
-                  </SheetHeader>
+                </DrawerTrigger>
+                <DrawerContent className="h-[95vh] p-0 bg-gradient-to-br from-background/20 via-background/50 to-muted/20 ">
+                  {/* Header with close button */}
+                  <div className="relative p-6 pb-4">
+                    {/* User Profile Card */}
+                    <Card className="mt-6 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-primary/20">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="relative">
+                            <Avatar className="w-16 h-16 ring-2 ring-primary/20">
+                              <AvatarImage
+                                src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+                                alt="Profile"
+                              />
+                              <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                                {user?.name
+                                  ?.split(' ')
+                                  .map((n: string) => n[0])
+                                  .join('') || 'NK'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="absolute flex items-center justify-center w-5 h-5 border-2 rounded-full -bottom-1 -right-1 bg-success border-background">
+                              <Sparkles className="w-2.5 h-2.5 text-white" />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-foreground">
+                              {user?.name || 'Naveed Khan'}
+                            </h3>
+                            <p className="mb-2 text-sm text-muted-foreground">
+                              {user?.email || ''}
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              <Badge
+                                variant="default"
+                                className="text-xs font-medium"
+                              >
+                                {user?.is_admin ? 'Admin' : 'User'}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {user?.auth_provider}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
-                  <div className="flex flex-col h-full">
-                    {/* Mobile Search */}
-                    <div className="p-6 pb-4">
-                      <div className="relative">
-                        <Search className="absolute w-4 h-4 transform -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
-                        <Input
-                          type="text"
-                          placeholder="Search instruments..."
-                          value={searchQuery}
-                          disabled={true}
-                          onChange={e => setSearchQuery(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
+                  {/* Search Bar */}
+                  <div className="px-6 pb-4">
+                    <div className="relative">
+                      <Search className="absolute w-5 h-5 transform -translate-y-1/2 left-4 top-1/2 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Search instruments, symbols..."
+                        value={searchQuery}
+                        disabled={true}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        className="h-12 pl-12 text-base border-0 rounded-2xl bg-muted/50 focus:ring-2 focus:ring-primary/20"
+                      />
                     </div>
+                  </div>
 
-                    {/* Mobile Navigation */}
-                    <div className="flex-1 px-6">
-                      <div className="space-y-2">
-                        {navItems.map(item => {
-                          const isActive = location.pathname === item.path;
-                          return (
-                            <Link
-                              key={item.path}
-                              to={item.path}
-                              className={`flex items-center px-4 py-3.5 text-base font-medium rounded-xl transition-all duration-200 ${
+                  {/* Navigation Grid */}
+                  <div className="flex-1 p-6 space-y-3 overflow-y-auto ">
+                    <h4 className="text-sm font-semibold tracking-wider uppercase text-muted-foreground">
+                      Pages
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      {navItems.map(item => {
+                        const isActive = location.pathname === item.path;
+                        return (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            className={`group relative overflow-hidden rounded-2xl transition-all duration-300 ${
+                              isActive
+                                ? 'ring-2 ring-primary/30 shadow-lg scale-[1.02]'
+                                : 'hover:scale-[1.02] hover:shadow-md'
+                            }`}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            <Card
+                              className={`h-24 border-0 ${
                                 isActive
-                                  ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm'
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'
+                                  ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-transparent'
+                                  : 'bg-gradient-to-br from-muted/50 to-muted/20 hover:from-muted/70 hover:to-muted/30'
                               }`}
-                              onClick={() => setIsMobileMenuOpen(false)}
                             >
-                              <item.icon className="w-5 h-5 mr-4" />
-                              <div className="flex flex-col">
-                                <span className="font-medium">
-                                  {item.label}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {item.description}
-                                </span>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
+                              <CardContent className="flex flex-col justify-between h-full p-4">
+                                <div
+                                  className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg`}
+                                >
+                                  <item.icon className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-semibold text-foreground">
+                                    {item.label}
+                                  </h4>
+                                  <p className="text-xs text-muted-foreground line-clamp-1">
+                                    {item.description}
+                                  </p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        );
+                      })}
                     </div>
 
-                    {/* Mobile Footer Actions */}
-                    <div className="p-6 pt-4 space-y-3 border-t">
+                    {/* Quick Actions */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold tracking-wider uppercase text-muted-foreground">
+                        Quick Actions
+                      </h4>
+
                       <Link
                         to="/profile"
-                        className="flex items-center w-full px-4 py-3 text-sm font-medium transition-colors border rounded-xl hover:bg-accent/60"
+                        className="flex items-center justify-between p-4 transition-all duration-200 rounded-2xl bg-gradient-to-r from-muted/30 to-muted/10 hover:from-muted/50 hover:to-muted/20 group"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <User className="w-4 h-4 mr-3" />
-                        <div className="flex flex-col items-start">
-                          <span>Account Settings</span>
-                          <span className="text-xs text-muted-foreground">
-                            Manage your profile
-                          </span>
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500">
+                            <User className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <span className="font-medium text-foreground">
+                              Account Settings
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              Manage your profile
+                            </p>
+                          </div>
                         </div>
+                        <ChevronRight className="w-5 h-5 transition-colors text-muted-foreground group-hover:text-foreground" />
                       </Link>
-                      <Button
-                        variant="destructive"
-                        className="justify-start w-full h-12"
+
+                      <button
+                        className="flex items-center justify-between w-full p-4 transition-all duration-200 rounded-2xl bg-gradient-to-r from-red-500/10 to-red-500/5 hover:from-red-500/20 hover:to-red-500/10 group"
                         onClick={() => {
                           signOut();
                           setIsMobileMenuOpen(false);
                         }}
                       >
-                        <LogOut className="w-4 h-4 mr-3" />
-                        <div className="flex flex-col items-start">
-                          <span>Sign Out</span>
-                          <span className="text-xs opacity-90">
-                            End your session
-                          </span>
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600">
+                            <LogOut className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="text-left">
+                            <span className="font-medium text-red-600 dark:text-red-400">
+                              Sign Out
+                            </span>
+                            <p className="text-xs text-red-500/70">
+                              End your session
+                            </p>
+                          </div>
                         </div>
-                      </Button>
+                        <ChevronRight className="w-5 h-5 transition-colors text-red-500/70 group-hover:text-red-500" />
+                      </button>
                     </div>
                   </div>
-                </SheetContent>
-              </Sheet>
+                </DrawerContent>
+              </Drawer>
             </div>
           </div>
         </div>

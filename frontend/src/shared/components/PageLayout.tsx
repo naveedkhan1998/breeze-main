@@ -115,7 +115,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         <title>{pageTitle} - ICICI Breeze</title>
       </Helmet>
       <div
-        className={`flex flex-col min-h-screen bg-gradient-to-br from-background via-background to-background/95 ${className}`}
+        className={`flex flex-col min-h-[100dvh] bg-gradient-to-br from-background via-background to-background/95 ${className}`}
       >
         <Navbar />
 
