@@ -296,7 +296,7 @@ const Navbar: React.FC = () => {
                     <Menu className="w-5 h-5" />
                   </Button>
                 </DrawerTrigger>
-                <DrawerContent className="h-[95vh] p-0 bg-gradient-to-br from-background/20 via-background/50 to-muted/20 ">
+                <DrawerContent className="h-[95dvh] p-0 bg-gradient-to-br from-background/20 via-background/50 to-muted/20 ">
                   {/* Header with close button */}
                   <div className="relative p-6 pb-4">
                     {/* User Profile Card */}
