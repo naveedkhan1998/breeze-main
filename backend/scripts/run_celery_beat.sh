@@ -14,6 +14,6 @@ rm -f /var/run/celery/beat.pid
 echo "Starting Celery Beat with ERROR logging..."
 celery -A main beat \
     --pidfile=/var/run/celery/beat.pid \
-    --loglevel=error \
+    --loglevel=info \
     --max-interval=60 \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler

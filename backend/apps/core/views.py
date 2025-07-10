@@ -1,7 +1,7 @@
 # views.py
 
 import logging
-
+import json
 from django.core.cache import cache
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
@@ -37,7 +37,7 @@ from apps.core.tasks import (
     websocket_start,
 )
 from apps.core.utils import resample_qs
-from main import const
+from main import const, utils
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +123,9 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
             else:
                 session_status = False
                 status_code = status.HTTP_200_OK
+                logger.error(
+                    f"Breeze session check failed for user {user_id}: {check_breeze_session}"
+                )
 
             # Construct response data
             response_data = {
@@ -309,6 +312,14 @@ class SubscribedInstrumentsViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, pk=None):
         instrument = get_object_or_404(SubscribedInstruments, pk=pk)
+        redis_client = utils.get_redis_client("default")
+        unsubscription_queue = const.websocket_unsubscription_queue(request.user.id)
+        unsubscribed_instrument = {"stock_token": instrument.stock_token}
+        redis_client.rpush(unsubscription_queue, json.dumps(unsubscribed_instrument))
+        logger.info(
+            f"Enqueued unsubscription for instrument ID {pk} with stock token {instrument.stock_token}."
+        )
+
         instrument.delete()
         return Response({"msg": "success"}, status=status.HTTP_200_OK)
 

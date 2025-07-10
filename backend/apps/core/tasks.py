@@ -15,7 +15,7 @@ from apps.core.models import (
     Tick,
 )
 from apps.core.utils import fetch_historical_data
-from main import const
+from main import const, utils
 
 logger = get_task_logger(__name__)
 
@@ -45,7 +45,7 @@ class SingleInstanceTask(Task):
             for worker, tasks in active_tasks.items():
                 for task in tasks:
                     if task.get("id") == task_id:
-                        logger.info(
+                        logger.warning(
                             f"Task {task_id} is already running on worker {worker}. Skipping new instance."
                         )
                         return None
@@ -95,26 +95,27 @@ def websocket_start(_self, user_id: int):
         sess.ws_connect()
 
         # Subscribe to initial instruments
-        sub_ins = SubscribedInstruments.objects.all()
+        # sub_ins = SubscribedInstruments.objects.all()
         load_candles.delay(user.pk)  # Asynchronously load candle data
 
         def on_ticks(ticks):
             tick_handler.delay(ticks)
 
-        if sub_ins.exists():
-            for ins in sub_ins:
-                if ins.percentage.is_loading:
-                    ins.percentage.percentage = 0
-                    ins.percentage.is_loading = False
-                    ins.percentage.save()
-                    sess.subscribe_feeds(stock_token=ins.stock_token)
+        # if sub_ins.exists():
+        #     for ins in sub_ins:
+        #         if ins.percentage.is_loading:
+        #             ins.percentage.percentage = 0
+        #             ins.percentage.is_loading = False
+        #             ins.percentage.save()
+        #             sess.subscribe_feeds(stock_token=ins.stock_token)
 
         sess.on_ticks = on_ticks
         logger.info("WebSocket connection established and initial subscriptions set.")
 
         # Access Redis via Django's cache
-        redis_client = cache.client.get_client("default")
-        subscription_queue = f"user:{user_id}:subscriptions"
+        redis_client = utils.get_redis_client("default")
+        subscription_queue = const.websocket_subscription_queue(user_id)
+        unsubscription_queue = const.websocket_unsubscription_queue(user_id)
 
         count = 0
         while True:
@@ -138,6 +139,15 @@ def websocket_start(_self, user_id: int):
                         # Subscribe to the new instrument
                         sess.subscribe_feeds(stock_token=stock_token)
                         logger.info(f"Subscribed to new instrument: {stock_token}")
+                unsubscribetion = redis_client.blpop(unsubscription_queue, timeout=5)
+                if unsubscribetion:
+                    _, data = unsubscribetion
+                    unsubscription_data = json.loads(data)
+                    stock_token = unsubscription_data.get("stock_token")
+                    if stock_token:
+                        # Unsubscribe from the instrument
+                        sess.unsubscribe_feeds(stock_token=stock_token)
+                        logger.info(f"Unsubscribed from instrument: {stock_token}")
 
             except Exception as e:
                 logger.error(f"Error while processing subscription: {e}", exc_info=True)
@@ -423,10 +433,14 @@ def load_instrument_candles(ins_id: int, user_id: int, duration: int = 4):
         percentage.save()
 
         # Enqueue the subscription request in Redis cache
-        redis_client = cache.client.get_client("default")
+        #
+        redis_client = utils.get_redis_client("default")
         subscription = {"stock_token": sub_ins.stock_token}
-        subscription_queue = f"user:{user_id}:subscriptions"
+        subscription_queue = const.websocket_subscription_queue(user_id)
         redis_client.rpush(subscription_queue, json.dumps(subscription))
+        logger.info(
+            f"Enqueued subscription for instrument ID {ins_id} with stock token {sub_ins.stock_token}."
+        )
         logger.info(f"Completed loading candles for instrument ID {ins_id}.")
 
     except Exception as e:
