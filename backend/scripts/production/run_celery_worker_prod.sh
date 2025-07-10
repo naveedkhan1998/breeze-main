@@ -11,7 +11,7 @@ celery -A main purge --force || true
 
 echo "STARTING CELERY WORKER WITH MEMORY LIMIT..."
 celery -A main worker \
-    --loglevel=error \
+    --loglevel=info \
     --time-limit=0 \
     --concurrency=1
 #celery multi start w1 w2 -A main --loglevel=INFO

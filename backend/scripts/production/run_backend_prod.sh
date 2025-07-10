@@ -8,4 +8,4 @@ python3 manage.py migrate --noinput --skip-checks
 python3 manage.py initadmin
 
 echo "STARTING GUNICORN SERVER..."
-gunicorn main.wsgi:application -t 1800 --bind :8000
+gunicorn main.wsgi:application -t 1800 --bind :8000 --log-level=info
