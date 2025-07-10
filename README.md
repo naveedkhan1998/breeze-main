@@ -285,3 +285,6 @@ This project wouldn't be possible without these amazing technologies and resourc
 ---
 
 _Happy hacking & good trades! 🚀_
+
+
+docker compose -f docker-compose.yaml -f docker-compose.local.yaml up -d
