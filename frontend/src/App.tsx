@@ -4,7 +4,10 @@ import { Analytics } from '@vercel/analytics/react';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { getCurrentToken } from './features/auth/authSlice';
 import { useBreezeAccount } from './features/auth/hooks/useBreezeAccount';
-import { checkHealth, setServiceStatus } from './features/health/healthSlice';
+import {
+  checkHealth as checkWorkersHealth,
+  setServiceStatus,
+} from './features/health/healthSlice';
 import { useHealthCheckQuery } from './shared/api/baseApi';
 import LoadingScreen from './shared/components/LoadingScreen';
 
@@ -37,6 +40,8 @@ const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({
 
 export default function App() {
   const [isLoadingComplete, setIsLoadingComplete] = useState(false);
+  const [hasInitialApiHealthCheck, setHasInitialApiHealthCheck] =
+    useState(false);
   const dispatch = useAppDispatch();
   const accessToken = useAppSelector(getCurrentToken);
 
@@ -47,36 +52,42 @@ export default function App() {
     data: healthCheckData,
     isLoading: isHealthCheckLoading,
     error: healthCheckError,
+    isSuccess: isHealthCheckSuccess,
   } = useHealthCheckQuery('', {
-    pollingInterval: HEALTH_CHECK_INTERVAL,
+    // Start polling only after initial health check succeeds
+    pollingInterval: hasInitialApiHealthCheck ? HEALTH_CHECK_INTERVAL : 0,
+    skip: false,
   });
 
   useEffect(() => {
     checkEnvironment();
 
-    // Only mark loading as complete when both health check and breeze account (if user is logged in) are done
+    // Only mark loading as complete when initial API health check is done and breeze account (if user is logged in) is done
     if (
-      !isHealthCheckLoading &&
+      hasInitialApiHealthCheck &&
       !isLoadingComplete &&
       (!accessToken || !isBreezeAccountLoading)
     ) {
       setIsLoadingComplete(true);
     }
   }, [
-    isHealthCheckLoading,
+    hasInitialApiHealthCheck,
     isLoadingComplete,
     accessToken,
     isBreezeAccountLoading,
   ]);
 
+  // Start worker health checks only after initial API health check succeeds
   useEffect(() => {
-    dispatch(checkHealth());
-    const intervalId = setInterval(
-      () => dispatch(checkHealth()),
-      HEALTH_CHECK_INTERVAL
-    );
-    return () => clearInterval(intervalId);
-  }, [dispatch]);
+    if (hasInitialApiHealthCheck) {
+      dispatch(checkWorkersHealth());
+      const intervalId = setInterval(
+        () => dispatch(checkWorkersHealth()),
+        HEALTH_CHECK_INTERVAL
+      );
+      return () => clearInterval(intervalId);
+    }
+  }, [dispatch, hasInitialApiHealthCheck]);
 
   useEffect(() => {
     if (isHealthCheckLoading) {
@@ -93,17 +104,31 @@ export default function App() {
           status: 'error',
         })
       );
-    } else if (healthCheckData) {
+      // Set this to true even on error so we don't stay in loading forever
+      if (!hasInitialApiHealthCheck) {
+        setHasInitialApiHealthCheck(true);
+      }
+    } else if (healthCheckData && isHealthCheckSuccess) {
       dispatch(
         setServiceStatus({
           name: 'API',
           status: 'ok',
         })
       );
+      if (!hasInitialApiHealthCheck) {
+        setHasInitialApiHealthCheck(true);
+      }
     }
-  }, [healthCheckData, isHealthCheckLoading, healthCheckError, dispatch]);
+  }, [
+    healthCheckData,
+    isHealthCheckLoading,
+    healthCheckError,
+    isHealthCheckSuccess,
+    dispatch,
+    hasInitialApiHealthCheck,
+  ]);
 
-  if (isHealthCheckLoading && !isLoadingComplete) {
+  if (!hasInitialApiHealthCheck) {
     return <LoadingScreen />;
   }
 
