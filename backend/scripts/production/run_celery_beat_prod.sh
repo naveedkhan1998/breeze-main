@@ -18,5 +18,6 @@ rm -f /var/run/celery/beat.pid
 # Start Celery Beat scheduler detached
 celery -A main beat \
     --pidfile=/var/run/celery/beat.pid \
-    --loglevel=ERROR \
-    --max-interval=60
+    --loglevel=INFO \
+    --max-interval=60 \
+    --scheduler django_celery_beat.schedulers:DatabaseScheduler
