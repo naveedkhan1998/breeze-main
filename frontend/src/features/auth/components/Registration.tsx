@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
@@ -17,6 +16,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppDispatch } from 'src/app/hooks';
 import { setCredentials } from '../authSlice';
 import { setToken } from '@/api/auth';
+import { AuthResponse } from '@/types/common-types';
+import { handleFormError, handleAuthError } from '@/utils/errorHandler';
 
 export default function Registration() {
   const dispatch = useAppDispatch();
@@ -62,7 +63,7 @@ export default function Registration() {
       handleAuthSuccess(userData);
       setSuccessMessage('Registration successful!');
     } catch (error: unknown) {
-      handleAuthError(error, setRegisterError);
+      setRegisterError(handleFormError(error));
     }
   };
 
@@ -78,16 +79,23 @@ export default function Registration() {
         handleAuthSuccess(userData);
         setSuccessMessage('Google registration successful!');
       } catch (error: unknown) {
-        handleAuthError(error, setRegisterError);
+        setRegisterError(handleAuthError(error));
       }
     } else {
       setRegisterError('No credential received from Google.');
     }
   };
 
+  const handleGoogleFailure = () => {
+    console.error('Google registration failed');
+    setRegisterError(
+      'Google registration failed. Please try again or use email/password registration.'
+    );
+  };
+
   const { refetch: getLoggedUser } = useGetLoggedUserQuery();
 
-  const handleAuthSuccess = async (userData: any) => {
+  const handleAuthSuccess = async (userData: AuthResponse) => {
     setToken(userData.token.access);
 
     // Fetch logged in user data
@@ -102,22 +110,6 @@ export default function Registration() {
     );
 
     navigate('/');
-  };
-
-  const handleAuthError = (error: any, setError: (message: string) => void) => {
-    console.error('Authentication error:', error);
-    if (error.data && error.data.errors) {
-      setError(
-        error.data.errors.non_field_errors?.[0] ||
-          'An error occurred during authentication.'
-      );
-    } else {
-      setError('An error occurred during authentication.');
-    }
-  };
-
-  const handleGoogleFailure = () => {
-    setRegisterError('Google registration failed.');
   };
 
   return (

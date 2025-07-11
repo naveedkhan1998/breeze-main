@@ -26,6 +26,9 @@ export interface ApiResponse<T> {
 export interface ApiError {
   detail?: string;
   message?: string;
+  // Django REST framework non-field errors
+  non_field_errors?: string[];
+  // Allow any field errors - will be handled dynamically
   [key: string]: unknown;
 }
 
