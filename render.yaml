@@ -124,12 +124,7 @@ services:
     region: oregon
     dockerCommand: ./scripts/production/run_celery_worker_prod.sh
     autoDeployTrigger: commit
-    buildFilter:
-      paths:
-        - ./backend
-      ignoredPaths:
-        - ./backend
-    rootDir: ./backend
+
   - type: web
     name: breeze-main-celery-worker-7
     runtime: image
