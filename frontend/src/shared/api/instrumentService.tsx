@@ -1,8 +1,20 @@
 import { baseApi } from './baseApi';
+import {
+  Candle,
+  GetCandles,
+  GetInstruments,
+  GetPaginatedCandles,
+  Instrument,
+  PaginatedCandles,
+  SubscribedInstrument,
+} from '../types/common-types';
 
 export const instrumentApi = baseApi.injectEndpoints({
   endpoints: builder => ({
-    getSubscribedInstruments: builder.query({
+    getSubscribedInstruments: builder.query<
+      { data: SubscribedInstrument[]; msg: string },
+      void
+    >({
       query: () => {
         return {
           url: 'core/subscribed_instruments/',
@@ -12,8 +24,9 @@ export const instrumentApi = baseApi.injectEndpoints({
           },
         };
       },
+      providesTags: ['Instrument'],
     }),
-    getCandles: builder.query({
+    getCandles: builder.query<Candle[], GetCandles>({
       query: ({ id, tf }) => {
         return {
           url: `core/candles/get_candles/?id=${id}&tf=${tf}`,
@@ -23,11 +36,12 @@ export const instrumentApi = baseApi.injectEndpoints({
           },
         };
       },
+      providesTags: ['Instrument'],
     }),
-    getPaginatedCandles: builder.query({
+    getPaginatedCandles: builder.query<PaginatedCandles, GetPaginatedCandles>({
       query: ({ id, tf, limit, offset }) => {
         const params = new URLSearchParams();
-        params.append('tf', tf);
+        params.append('tf', String(tf));
         if (limit !== undefined && limit !== null)
           params.append('limit', String(limit));
         if (offset !== undefined && offset !== null)
@@ -41,8 +55,12 @@ export const instrumentApi = baseApi.injectEndpoints({
           },
         };
       },
+      providesTags: ['Instrument'],
     }),
-    subscribeInstrument: builder.mutation({
+    subscribeInstrument: builder.mutation<
+      SubscribedInstrument,
+      { id: number; duration: number }
+    >({
       query: ({ id, duration }) => ({
         url: `core/subscribed_instruments/${id}/subscribe/`,
         method: 'POST',
@@ -53,8 +71,9 @@ export const instrumentApi = baseApi.injectEndpoints({
           'Content-type': 'application/json',
         },
       }),
+      invalidatesTags: ['Instrument'],
     }),
-    loadInstrumentCandles: builder.mutation({
+    loadInstrumentCandles: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
         url: `core/candles/${id}`,
         method: 'POST',
@@ -62,8 +81,9 @@ export const instrumentApi = baseApi.injectEndpoints({
           'Content-type': 'application/json',
         },
       }),
+      invalidatesTags: ['Instrument'],
     }),
-    deleteInstrument: builder.mutation({
+    deleteInstrument: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
         url: `core/subscribed_instruments/${id}/`,
         method: 'DELETE',
@@ -71,8 +91,12 @@ export const instrumentApi = baseApi.injectEndpoints({
           'Content-type': 'application/json',
         },
       }),
+      invalidatesTags: ['Instrument'],
     }),
-    getInstruments: builder.query({
+    getInstruments: builder.query<
+      { data: Instrument[]; msg: string },
+      GetInstruments
+    >({
       query: ({
         exchange,
         search,
@@ -85,7 +109,7 @@ export const instrumentApi = baseApi.injectEndpoints({
         if (exchange) params.append('exchange', exchange);
         if (search) params.append('search', search);
         if (optionType) params.append('option_type', optionType);
-        if (strikePrice) params.append('strike_price', strikePrice);
+        if (strikePrice) params.append('strike_price', String(strikePrice));
         if (expiryAfter) params.append('expiry_after', expiryAfter);
         if (expiryBefore) params.append('expiry_before', expiryBefore);
 
@@ -97,6 +121,7 @@ export const instrumentApi = baseApi.injectEndpoints({
           },
         };
       },
+      providesTags: ['Instrument'],
     }),
   }),
 });

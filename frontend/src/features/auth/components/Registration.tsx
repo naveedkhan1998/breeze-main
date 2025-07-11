@@ -85,7 +85,7 @@ export default function Registration() {
     }
   };
 
-  const { refetch: getLoggedUser } = useGetLoggedUserQuery({});
+  const { refetch: getLoggedUser } = useGetLoggedUserQuery();
 
   const handleAuthSuccess = async (userData: any) => {
     setToken(userData.token.access);

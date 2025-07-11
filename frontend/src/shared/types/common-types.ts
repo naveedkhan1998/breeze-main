@@ -3,6 +3,13 @@ export type Credentials = {
   password: string;
 };
 
+export type AuthResponse = {
+  token: {
+    access: string;
+    refresh: string;
+  };
+};
+
 export interface RefreshTokenResult {
   data?: {
     access?: string;
@@ -30,6 +37,8 @@ export interface Instrument {
   exchange: number;
 }
 
+export type SubscribedInstrument = Instrument;
+
 export type Candle = {
   open: number;
   high: number;
@@ -37,7 +46,7 @@ export type Candle = {
   close: number;
   date: string;
   volume?: number;
-  time?: string;
+  time?: string | number;
 };
 
 export interface BreezeAccount {
@@ -50,6 +59,11 @@ export interface BreezeAccount {
   is_active: boolean;
   user: number;
 }
+// create breeze is breeze account omitting the user field
+export type CreateBreeze = Omit<
+  BreezeAccount,
+  'user' | 'id' | 'last_updated' | 'is_active' | 'session_token'
+>;
 
 export interface Indicator {
   name: string;
@@ -63,6 +77,42 @@ export interface User {
   email: string;
   name: string;
   avatar: string;
+  tc: boolean;
   is_admin: boolean;
   auth_provider: string;
+}
+
+export interface UserRegistration
+  extends Omit<User, 'id' | 'is_admin' | 'avatar' | 'auth_provider'> {
+  password: string;
+  password2: string;
+}
+
+export interface GetCandles {
+  id: number;
+  tf: string;
+}
+
+export interface GetInstruments {
+  exchange?: string;
+  search?: string;
+  optionType?: string;
+  strikePrice?: number | null;
+  expiryAfter?: string;
+  expiryBefore?: string;
+  instrumentType?: 'OPTION' | 'FUTURE' | undefined;
+}
+
+export interface GetPaginatedCandles {
+  id: number;
+  tf: number;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PaginatedCandles {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Candle[];
 }

@@ -50,10 +50,9 @@ export default function App() {
   const dispatch = useAppDispatch();
   const accessToken = useAppSelector(getCurrentToken);
   const loggedInUser = useAppSelector(getLoggedInUser);
-  const { refetch: getLoggedUser } = useGetLoggedUserQuery(
-    {},
-    { skip: !accessToken }
-  );
+  const { refetch: getLoggedUser } = useGetLoggedUserQuery(undefined, {
+    skip: !accessToken,
+  });
 
   // Initialize Breeze account when user is logged in
   const { isBreezeAccountLoading } = useBreezeAccount();
@@ -63,7 +62,7 @@ export default function App() {
     isLoading: isHealthCheckLoading,
     error: healthCheckError,
     isSuccess: isHealthCheckSuccess,
-  } = useHealthCheckQuery('', {
+  } = useHealthCheckQuery(undefined, {
     // Start polling only after initial health check succeeds
     pollingInterval: hasInitialApiHealthCheck ? HEALTH_CHECK_INTERVAL : 0,
     skip: false,

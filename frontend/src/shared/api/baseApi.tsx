@@ -19,8 +19,9 @@ const baseQuery = fetchBaseQuery({
 export const baseApi = createApi({
   reducerPath: 'baseApi',
   baseQuery,
+  tagTypes: ['Breeze', 'Instrument', 'User'],
   endpoints: builder => ({
-    healthCheck: builder.query({
+    healthCheck: builder.query<void, void>({
       query: () => ({
         url: '/core/',
         method: 'GET',
