@@ -68,7 +68,7 @@ class User(AbstractBaseUser):
         verbose_name="avatar",
         upload_to="user/avatar/",
         null=True,
-        default="/profile_icon.png",
+        default="profile_icon.png",
         blank=True,
     )
     name = models.CharField(max_length=200, db_index=True)

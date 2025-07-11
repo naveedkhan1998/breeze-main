@@ -190,7 +190,10 @@ const Navbar: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <Avatar className="w-8 h-8 transition-all duration-200 hover:scale-105">
                           <AvatarImage
-                            src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+                            src={
+                              user?.avatar ||
+                              `https://ui-avatars.com/api/?name=${user?.name}&background=random`
+                            }
                             alt="Profile"
                           />
                           <AvatarFallback className="font-semibold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
@@ -217,7 +220,10 @@ const Navbar: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <Avatar className="w-12 h-12">
                           <AvatarImage
-                            src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+                            src={
+                              user?.avatar ||
+                              `https://ui-avatars.com/api/?name=${user?.name}&background=random`
+                            }
                             alt="Profile"
                           />
                           <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10">
@@ -306,7 +312,10 @@ const Navbar: React.FC = () => {
                           <div className="relative">
                             <Avatar className="w-16 h-16 ring-2 ring-primary/20">
                               <AvatarImage
-                                src={`https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+                                src={
+                                  user?.avatar ||
+                                  `https://ui-avatars.com/api/?name=${user?.name}&background=random`
+                                }
                                 alt="Profile"
                               />
                               <AvatarFallback className="text-lg font-bold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">

@@ -40,3 +40,12 @@ SIMPLE_JWT.update(
         "SIGNING_KEY": SECRET_KEY,
     }
 )
+
+# Local development: Use the filesystem for static and media files
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "static/"
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "media/"
+OUTPUT_ROOT = BASE_DIR / "OUTPUTS"
+OUTPUT_URL = "outputs/"
