@@ -149,7 +149,7 @@
 
   /* Trading-specific enhancements */
   .chart-container {
-    @apply relative overflow-hidden shadow-lg rounded-lg ring-1 ring-border/50 dark:ring-border;
+    @apply relative overflow-hidden rounded-lg shadow-lg ring-1 ring-border/50 dark:ring-border;
     background: linear-gradient(
       135deg,
       hsl(var(--card)) 0%,
@@ -227,7 +227,7 @@
   }
 
   .data-table th {
-    @apply bg-muted/50 font-semibold text-muted-foreground border-b border-border;
+    @apply font-semibold border-b bg-muted/50 text-muted-foreground border-border;
   }
 
   .data-table td {
@@ -240,14 +240,14 @@
 
   /* Price change indicators */
   .price-up {
-    @apply text-success bg-success/10 px-2 py-1 rounded-sm font-medium;
+    @apply px-2 py-1 font-medium rounded-sm text-success bg-success/10;
   }
 
   .price-down {
-    @apply text-destructive bg-destructive/10 px-2 py-1 rounded-sm font-medium;
+    @apply px-2 py-1 font-medium rounded-sm text-destructive bg-destructive/10;
   }
 
   .price-unchanged {
-    @apply text-muted-foreground bg-muted/50 px-2 py-1 rounded-sm font-medium;
+    @apply px-2 py-1 font-medium rounded-sm text-muted-foreground bg-muted/50;
   }
 }

@@ -4,24 +4,24 @@
 # For more help, visit the .dockerignore file reference guide at
 # https://docs.docker.com/go/build-context-dockerignore/
 
-**/.classpath
-**/.dockerignore
-**/.env
-**/.git
-**/.gitignore
-**/.project
-**/.settings
-**/.toolstarget
-**/.vs
-**/.vscode
-**/.next
-**/.cache
-**/*.*proj.user
-**/*.dbmdl
-**/*.jfm
-**/charts
-**/docker-compose*
-**/compose.y*ml
+node_modules
+npm-debug.log*
+.npm
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+coverage
+.dist
+dist
+build
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
 **/Dockerfile*
 **/node_modules
 **/npm-debug.log
