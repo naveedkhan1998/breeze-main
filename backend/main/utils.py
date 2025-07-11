@@ -23,15 +23,9 @@ def get_redis_client(alias: str = "default") -> redis.Redis:
         ValueError: If the specified cache alias doesn't exist
     """
     try:
-        cache_instance = cache if alias == "default" else cache[alias]
-
-        # Ensure we're using Redis cache backend
-        if not isinstance(cache_instance, RedisCache):
-            raise AttributeError(f"Cache backend '{alias}' is not Redis")
-
-        return cache_instance.client.get_client()
-    except KeyError:
-        raise ValueError(f"Cache alias '{alias}' not found in settings")
+        return cache.client.get_client(alias)
+    except Exception as e:
+        raise ValueError(f"Failed to get Redis client for alias '{alias}': {e}")
 
 
 def get_cache_client(alias: str = "default") -> Optional[redis.Redis]:
