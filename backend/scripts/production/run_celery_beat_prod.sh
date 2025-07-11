@@ -10,14 +10,14 @@ python3 http_server.py & # Run HTTP server in background
 echo "STARTING CELERY BEAT SCHEDULER WITH MEMORY LIMIT..."
 
 # Create necessary directories
-mkdir -p /var/run/celery
+mkdir -p /tmp/run/celery
 
 # Remove existing beat PID file
-rm -f /var/run/celery/beat.pid
+rm -f /tmp/run/celery/beat.pid
 
 # Start Celery Beat scheduler detached
 celery -A main beat \
-    --pidfile=/var/run/celery/beat.pid \
+    --pidfile=/tmp/run/celery/beat.pid \
     --loglevel=INFO \
     --max-interval=60 \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler

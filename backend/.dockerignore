@@ -1,3 +1,12 @@
+.git
+tests
+docs
+scripts/dev
+*.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+node_modules
+.vscode
 .venv
-venv
-.ruff_cache
+ruff_cache

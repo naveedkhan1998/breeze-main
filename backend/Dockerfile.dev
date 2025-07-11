@@ -1,48 +1,44 @@
-FROM python:3.13-bookworm
+########## Base (unchanged) ##########
+ARG PY_TAG=3.13
+FROM python:${PY_TAG}-slim-bookworm AS base
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    VENV_PATH=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
 
-# Set environment variable to ensure Python output is unbuffered
-ENV PYTHONUNBUFFERED=1
+RUN python -m venv $VENV_PATH && \
+    mkdir -p /src
 
-# Install system dependencies
+########## Builder ###############
+FROM base AS builder
+
+# 1. OS deps (note: libpq-dev added earlier)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    netcat-openbsd \
-    chromium-driver \
-    wget \
-    curl \
-    ca-certificates \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+      build-essential libpq-dev curl wget git chromium-driver \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-# Download the latest installer
-ADD https://astral.sh/uv/install.sh /uv-installer.sh
+# 2. Install uv **inside** the venv
+RUN $VENV_PATH/bin/pip install --no-cache-dir --upgrade pip uv
 
-# Run the installer then remove it
-RUN sh /uv-installer.sh && rm /uv-installer.sh
+WORKDIR /src
+COPY pyproject.toml poetry.lock* /src/
 
-# Ensure the installed binary is on the `PATH`
-ENV PATH="/root/.local/bin/:$PATH"
+# 3. Install project deps *into the venv* (drop --system)
+RUN uv pip install --no-cache -r pyproject.toml
 
-# Set the working directory
+########## Runtime ###############
+FROM base AS runtime
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      netcat-openbsd libpq5 \
+  && rm -rf /var/lib/apt/lists/*
+
+# Copy the populated venv
+COPY --from=builder $VENV_PATH $VENV_PATH
+
 WORKDIR /app
-
-# Copy only the dependency file first for better layer caching
-COPY pyproject.toml /app/pyproject.toml
-
-# Install Python package requirements using uv
-# This layer will only be rebuilt if pyproject.toml changes
-RUN uv pip install --system --no-cache -r pyproject.toml
-
-# Copy the rest of the application code
 COPY . /app
 
-# Make the scripts directory executable
-RUN chmod +x /app/scripts/*.sh
-# Make sure that scripts/production/*.sh are executable
-RUN chmod +x /app/scripts/production/*.sh
-
-# Expose the port
+RUN chmod +x /app/scripts/*.sh /app/scripts/production/*.sh
 EXPOSE 8000
-
-# Use the run_backend.sh script as entrypoint
 ENTRYPOINT ["./scripts/run_backend.sh"]

@@ -23,10 +23,6 @@ class UserManager(BaseUserManager):
             email=email,
             name=name,
             tc=tc,
-            is_email_verify=True,
-            auth_provider=extra_fields.get(
-                "auth_provider", const.AUTH_PROVIDERS.get("email")
-            ),
             **extra_fields,
         )
 
@@ -47,7 +43,6 @@ class UserManager(BaseUserManager):
         """
         extra_fields.setdefault("is_admin", True)
         extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_email_verify", True)
         extra_fields.setdefault("auth_provider", const.AUTH_PROVIDERS.get("email"))
 
@@ -107,4 +102,5 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         "Is the user a member of staff?"
+        return self.is_admin or self.is_superuser
         return self.is_admin or self.is_superuser

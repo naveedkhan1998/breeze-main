@@ -45,7 +45,7 @@ services:
       context: backend/
       dockerfile: Dockerfile.dev
     container_name: breeze-backend
-    image: breeze-backend
+    image: naveedkhan1998/breeze-backend
     env_file:
       - ./.envs/.env.local
     volumes:
@@ -70,7 +70,7 @@ services:
       - ./frontend/package-lock.json:/usr/app/package-lock.json
 
   celery-beat:
-    image: "breeze-backend"
+    image: naveedkhan1998/breeze-backend
     container_name: breeze-celery-beat
     env_file:
       - ./.envs/.env.local
@@ -87,7 +87,7 @@ services:
     restart: always
 
   celery-worker:
-    image: "breeze-backend"
+    image: naveedkhan1998/breeze-backend
     container_name: breeze-celery-worker
     env_file:
       - ./.envs/.env.local
@@ -104,7 +104,7 @@ services:
     restart: always
 
   flower:
-    image: "breeze-backend"
+    image: naveedkhan1998/breeze-backend
     container_name: breeze-flower
     volumes:
       - ./backend/:/app/

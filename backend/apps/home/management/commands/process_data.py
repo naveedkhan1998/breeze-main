@@ -304,7 +304,7 @@ class Command(BaseCommand):
                 ins_list = []
                 line_count = 0
 
-                with Path(file_path).Path.open(encoding="utf-8") as f:
+                with Path(file_path).open(encoding="utf-8") as f:
                     reader = csv.reader(f)
                     next(reader, None)  # Skip header
 
@@ -406,7 +406,7 @@ class Command(BaseCommand):
                                     exchange=ins,
                                     stock_token=f"{ins.code}.1!{token}",
                                     token=token,
-                                    instrument=short_name,  # Use short_name as instrument for equity
+                                    instrument=short_name,
                                     short_name=short_name,
                                     series=series,
                                     company_name=company_name,
