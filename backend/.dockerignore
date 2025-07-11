@@ -1,7 +1,6 @@
 .git
 tests
 docs
-scripts/dev
 *.pytest_cache
 __pycache__
 *.pyc
