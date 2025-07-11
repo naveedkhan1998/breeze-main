@@ -19,13 +19,6 @@ import {
 } from 'lucide-react';
 import { useCheckBreezeStatusQuery } from '@/api/breezeServices';
 
-type BreezeStatusData = {
-  data: {
-    session_status: boolean;
-    websocket_status: boolean;
-  };
-};
-
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -60,20 +53,14 @@ const BreezeStatusCard: React.FC = () => {
     refetch,
   } = useCheckBreezeStatusQuery(undefined, {
     pollingInterval: 60000,
-  }) as {
-    data: BreezeStatusData;
-    error: { data?: { data: string } };
-    isLoading: boolean;
-    isFetching: boolean;
-    refetch: () => void;
-  };
+  });
 
   // Derived state for error message
   const errorMessage = React.useMemo(() => {
     if (!error) return null;
-    return 'data' in error
-      ? error.data?.data
-      : 'Unable to fetch status. Please try again later.';
+    if ('status' in error && error.status === 404) {
+      return 'Breeze service not found. Please check your configuration.';
+    }
   }, [error]);
 
   const getOverallStatus = () => {

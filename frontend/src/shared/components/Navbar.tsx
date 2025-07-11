@@ -39,6 +39,7 @@ import {
 } from 'src/features/auth/authSlice';
 import { ModeToggle } from './ModeToggle';
 import HealthStatus from './HealthStatus';
+import { removeToken } from '@/api/auth';
 
 const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -56,7 +57,9 @@ const Navbar: React.FC = () => {
   }, []);
 
   const signOut = () => {
+    removeToken();
     dispatch(logOut());
+    window.location.reload();
     toast.success('Logged Out Successfully');
   };
 

@@ -52,7 +52,7 @@ const Instrument: React.FC<Props> = ({
   const [subscribingIds, setSubscribingIds] = useState<number[]>([]);
 
   const [subscribeInstrument] = useSubscribeInstrumentMutation();
-  const { refetch } = useGetSubscribedInstrumentsQuery('');
+  const { refetch } = useGetSubscribedInstrumentsQuery();
 
   const queryParams = useMemo(
     () => ({

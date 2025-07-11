@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
@@ -15,8 +14,9 @@ import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppDispatch } from 'src/app/hooks';
 import { setCredentials } from '../authSlice';
-import { storeToken } from '@/api/localStorageService';
 import { setToken } from '@/api/auth';
+import { AuthResponse } from '@/types/common-types';
+import { handleAuthError } from '@/utils/errorHandler';
 
 interface FormData {
   email: string;
@@ -57,8 +57,8 @@ const Login: React.FC = () => {
       const userData = await loginUser(formData).unwrap();
       handleAuthSuccess(userData);
       setSuccessMessage('Login successful!');
-    } catch (error: any) {
-      handleAuthError(error, setError);
+    } catch (error) {
+      setError(handleAuthError(error));
     }
   };
 
@@ -73,19 +73,24 @@ const Login: React.FC = () => {
         }).unwrap();
         handleAuthSuccess(userData);
         setSuccessMessage('Google login successful!');
-      } catch (error: any) {
-        handleAuthError(error, setError);
+      } catch (error) {
+        setError(handleAuthError(error));
       }
     } else {
       setError('No credential received from Google.');
     }
   };
 
-  const { refetch: getLoggedUser } = useGetLoggedUserQuery({});
+  const handleGoogleFailure = () => {
+    console.error('Google login failed');
+    setError(
+      'Google login failed. Please try again or use email/password login.'
+    );
+  };
 
-  const handleAuthSuccess = async (userData: any) => {
-    // Use your existing token storage system
-    storeToken(userData.token);
+  const { refetch: getLoggedUser } = useGetLoggedUserQuery();
+
+  const handleAuthSuccess = async (userData: AuthResponse) => {
     setToken(userData.token.access);
 
     // Fetch logged in user data
@@ -100,22 +105,6 @@ const Login: React.FC = () => {
     );
 
     navigate('/');
-  };
-
-  const handleAuthError = (error: any, setError: (message: string) => void) => {
-    console.error('Authentication error:', error);
-    if (error.data && error.data.errors) {
-      setError(
-        error.data.errors.non_field_errors?.[0] ||
-          'An error occurred during authentication.'
-      );
-    } else {
-      setError('An error occurred during authentication.');
-    }
-  };
-
-  const handleGoogleFailure = () => {
-    setError('Google login failed.');
   };
 
   return (

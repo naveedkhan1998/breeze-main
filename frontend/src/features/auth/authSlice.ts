@@ -1,34 +1,23 @@
-import {
-  getToken,
-  getUser,
-  removeUser,
-  storeUser,
-  getBreezeAccountExists,
-  storeBreezeAccountExists,
-  removeBreezeAccountExists,
-} from '@/api/localStorageService';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { RootState } from 'src/app/store';
 import { User, BreezeAccount } from '@/types/common-types';
+import { getToken } from '@/api/auth';
 
-const { access_token } = getToken();
-const storedUser = getUser();
-const storedBreezeAccountExists = getBreezeAccountExists();
+const access_token = getToken();
 
-// Define a type for the slice state
 interface AuthState {
   access?: string | null;
   user?: User | null;
-  breezeAccount?: BreezeAccount | null; // Keep in memory only, not persisted
-  hasBreezeAccount?: boolean; // Only this boolean is persisted
+  breezeAccount?: BreezeAccount | null;
+  hasBreezeAccount?: boolean;
   isBreezeAccountLoading?: boolean;
 }
 
 const initialState: AuthState = {
   access: access_token || null,
-  user: storedUser || null,
-  breezeAccount: null, // Always start as null, will be fetched if user is authenticated
-  hasBreezeAccount: storedBreezeAccountExists,
+  user: null,
+  breezeAccount: null,
+  hasBreezeAccount: false,
   isBreezeAccountLoading: false,
 };
 
@@ -43,16 +32,12 @@ export const authSlice = createSlice({
       const { access, user } = action.payload;
       state.access = access;
       state.user = user;
-      if (user) {
-        storeUser(user);
-      }
     },
     setBreezeAccount: (state, action: PayloadAction<BreezeAccount | null>) => {
       state.breezeAccount = action.payload;
       // Update the boolean flag based on whether account exists
       const hasAccount = !!action.payload;
       state.hasBreezeAccount = hasAccount;
-      storeBreezeAccountExists(hasAccount);
     },
     setBreezeAccountLoading: (state, action: PayloadAction<boolean>) => {
       state.isBreezeAccountLoading = action.payload;
@@ -63,8 +48,6 @@ export const authSlice = createSlice({
       state.breezeAccount = null;
       state.hasBreezeAccount = false;
       state.isBreezeAccountLoading = false;
-      removeUser();
-      removeBreezeAccountExists();
     },
   },
 });

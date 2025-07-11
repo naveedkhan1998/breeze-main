@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { useAppDispatch, useAppSelector } from './app/hooks';
-import { getCurrentToken } from './features/auth/authSlice';
+import {
+  getCurrentToken,
+  getLoggedInUser,
+  setCredentials,
+} from './features/auth/authSlice';
 import { useBreezeAccount } from './features/auth/hooks/useBreezeAccount';
 import {
   checkHealth as checkWorkersHealth,
@@ -27,6 +31,7 @@ import { checkEnvironment, GOOGLE_CLIENT_ID } from './shared/lib/environment';
 import { ThemeProvider } from './shared/components/ThemeProvider';
 import { Toaster } from 'sonner';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useGetLoggedUserQuery } from '@/api/userAuthService';
 
 const HEALTH_CHECK_INTERVAL = 120000; // 2 minutes
 const clientId = GOOGLE_CLIENT_ID || '';
@@ -44,6 +49,10 @@ export default function App() {
     useState(false);
   const dispatch = useAppDispatch();
   const accessToken = useAppSelector(getCurrentToken);
+  const loggedInUser = useAppSelector(getLoggedInUser);
+  const { refetch: getLoggedUser } = useGetLoggedUserQuery(undefined, {
+    skip: !accessToken,
+  });
 
   // Initialize Breeze account when user is logged in
   const { isBreezeAccountLoading } = useBreezeAccount();
@@ -53,11 +62,24 @@ export default function App() {
     isLoading: isHealthCheckLoading,
     error: healthCheckError,
     isSuccess: isHealthCheckSuccess,
-  } = useHealthCheckQuery('', {
+  } = useHealthCheckQuery(undefined, {
     // Start polling only after initial health check succeeds
     pollingInterval: hasInitialApiHealthCheck ? HEALTH_CHECK_INTERVAL : 0,
     skip: false,
   });
+
+  // on mount check if we have user in redux store else fetch it
+  useEffect(() => {
+    if (!loggedInUser && accessToken) {
+      const fetchUser = async () => {
+        const result = await getLoggedUser();
+        if (result.data) {
+          dispatch(setCredentials({ user: result.data, access: accessToken }));
+        }
+      };
+      fetchUser();
+    }
+  }, [accessToken, getLoggedUser, loggedInUser, dispatch]);
 
   useEffect(() => {
     checkEnvironment();

@@ -275,9 +275,9 @@ const GraphsPage: React.FC = () => {
   const rsiData = useMemo(() => {
     if (!data || !activeIndicators.includes('RSI')) return [];
     return calculateRSI(
-      data.results.map((d: { date: string }) => ({
+      data.results.map(d => ({
         ...d,
-        time: formatDate(d.date) as Time,
+        time: formatDate(d.date),
       }))
     )
       .filter(item => item.time !== undefined)
@@ -288,9 +288,9 @@ const GraphsPage: React.FC = () => {
   const atrData = useMemo(() => {
     if (!data || !activeIndicators.includes('ATR')) return [];
     return calculateATR(
-      data.results.map((d: { date: string }) => ({
+      data.results.map(d => ({
         ...d,
-        time: formatDate(d.date) as Time,
+        time: formatDate(d.date),
       }))
     )
       .map(item => ({ ...item, time: item.time as Time }))
@@ -301,7 +301,7 @@ const GraphsPage: React.FC = () => {
     if (!data || !activeIndicators.includes('EMA')) return [];
     // Assuming EMA is calculated on close prices
     return calculateMA(
-      data.results.map((d: { date: string }) => ({
+      data.results.map(d => ({
         ...d,
         time: formatDate(d.date) as Time,
       })),
@@ -313,9 +313,9 @@ const GraphsPage: React.FC = () => {
     if (!data || !activeIndicators.includes('BollingerBands')) return [];
     const bands = calculateBollingerBands(
       data.results
-        .map((d: { date: string }) => ({
+        .map(d => ({
           ...d,
-          time: formatDate(d.date) as Time,
+          time: formatDate(d.date),
         }))
         .reverse()
     );

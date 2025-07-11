@@ -17,7 +17,7 @@ export const useBreezeAccount = () => {
   const hasBreezeAccount = useAppSelector(getHasBreezeAccount);
   const isBreezeAccountLoading = useAppSelector(getIsBreezeAccountLoading);
 
-  const { data, isLoading, isSuccess, error } = useGetBreezeQuery('', {
+  const { data, isLoading, isSuccess, error } = useGetBreezeQuery(undefined, {
     skip: !accessToken, // Only fetch if user is authenticated
     refetchOnMountOrArgChange: true,
   });

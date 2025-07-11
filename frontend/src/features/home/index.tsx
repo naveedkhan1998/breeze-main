@@ -55,7 +55,7 @@ const itemVariants = {
 };
 
 const HomePage: React.FC = () => {
-  const { data, refetch } = useGetSubscribedInstrumentsQuery('');
+  const { data, refetch } = useGetSubscribedInstrumentsQuery();
   const [deleteInstrument] = useDeleteInstrumentMutation();
   const [startWebsocket] = useStartWebsocketMutation();
 
@@ -139,7 +139,7 @@ const HomePage: React.FC = () => {
             Refresh
           </Button>
           <Button
-            onClick={() => startWebsocket({})}
+            onClick={() => startWebsocket()}
             variant="default"
             size="sm"
             className="shadow-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80"

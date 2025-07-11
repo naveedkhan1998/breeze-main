@@ -1,16 +1,25 @@
 import { baseApi } from './baseApi';
+import {
+  AuthResponse,
+  User,
+  Credentials,
+  UserRegistration,
+  GoogleLoginParams,
+  EmailVerificationResponse,
+} from '../types/common-types';
 
 export const userAuthApi = baseApi.injectEndpoints({
   endpoints: builder => ({
-    loginUser: builder.mutation({
+    loginUser: builder.mutation<AuthResponse, Credentials>({
       query: credentials => ({
         url: '/account/login/',
         method: 'POST',
         body: { ...credentials },
         credentials: 'omit',
       }),
+      invalidatesTags: ['User'],
     }),
-    registerUser: builder.mutation({
+    registerUser: builder.mutation<AuthResponse, UserRegistration>({
       query: user => {
         return {
           url: '/account/register/',
@@ -22,16 +31,18 @@ export const userAuthApi = baseApi.injectEndpoints({
           credentials: 'omit',
         };
       },
+      invalidatesTags: ['User'],
     }),
-    getLoggedUser: builder.query({
+    getLoggedUser: builder.query<User, void>({
       query: () => {
         return {
           url: '/account/profile',
           method: 'GET',
         };
       },
+      providesTags: ['User'],
     }),
-    googleLogin: builder.mutation({
+    googleLogin: builder.mutation<AuthResponse, GoogleLoginParams>({
       query: token => {
         return {
           url: '/account/social/google/',
@@ -39,14 +50,16 @@ export const userAuthApi = baseApi.injectEndpoints({
           body: token,
         };
       },
+      invalidatesTags: ['User'],
     }),
-    sendEmail: builder.query({
+    sendEmail: builder.query<EmailVerificationResponse, void>({
       query: () => {
         return {
           url: '/account/invoke_verify_email',
           method: 'GET',
         };
       },
+      providesTags: ['User'],
     }),
   }),
 });

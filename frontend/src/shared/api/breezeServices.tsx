@@ -1,8 +1,15 @@
+import {
+  BreezeAccount,
+  CreateBreezeAccount,
+  ApiResponse,
+  BreezeStatusResponse,
+  UpdateBreezeParams,
+} from '@/types/common-types';
 import { baseApi } from './baseApi';
 
 export const breezeApi = baseApi.injectEndpoints({
   endpoints: builder => ({
-    getBreeze: builder.query({
+    getBreeze: builder.query<ApiResponse<BreezeAccount[]>, void>({
       query: () => {
         return {
           url: 'core/breeze/',
@@ -12,8 +19,9 @@ export const breezeApi = baseApi.injectEndpoints({
           },
         };
       },
+      providesTags: ['Breeze'],
     }),
-    checkBreezeStatus: builder.query({
+    checkBreezeStatus: builder.query<BreezeStatusResponse, void>({
       query: () => {
         return {
           url: 'core/breeze/breeze_status',
@@ -23,8 +31,9 @@ export const breezeApi = baseApi.injectEndpoints({
           },
         };
       },
+      providesTags: ['Breeze'],
     }),
-    createBreeze: builder.mutation({
+    createBreeze: builder.mutation<BreezeAccount, CreateBreezeAccount>({
       query: data => ({
         url: 'core/breeze/',
         method: 'POST',
@@ -33,8 +42,9 @@ export const breezeApi = baseApi.injectEndpoints({
           'Content-type': 'application/json',
         },
       }),
+      invalidatesTags: ['Breeze'],
     }),
-    updateBreeze: builder.mutation({
+    updateBreeze: builder.mutation<BreezeAccount, UpdateBreezeParams>({
       query: ({ data }) => ({
         url: `core/breeze/${data.id}/`,
         method: 'PUT',
@@ -43,8 +53,9 @@ export const breezeApi = baseApi.injectEndpoints({
           'Content-type': 'application/json',
         },
       }),
+      invalidatesTags: ['Breeze'],
     }),
-    startWebsocket: builder.mutation({
+    startWebsocket: builder.mutation<void, void>({
       query: () => ({
         url: `core/breeze/websocket_start/`,
         method: 'POST',
@@ -52,6 +63,7 @@ export const breezeApi = baseApi.injectEndpoints({
           'Content-type': 'application/json',
         },
       }),
+      invalidatesTags: ['Breeze'],
     }),
   }),
 });
