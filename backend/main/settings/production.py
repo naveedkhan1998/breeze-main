@@ -65,10 +65,24 @@ SIMPLE_JWT.update(
 
 # Common Settings
 GS_BUCKET_NAME = "realtime-app-bucket"
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, "gcpCredentials.json")
-)
 
+# Handle GCP credentials more gracefully
+GS_CREDENTIALS = None
+# Local development path
+local_gcp_path = os.path.join(BASE_DIR, "gcpCredentials.json")
+# Render secret file path
+render_gcp_path = "/etc/secrets/gcpCredentials.json"
+
+if os.path.exists(render_gcp_path):
+    # Use Render secret file (production)
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        render_gcp_path
+    )
+elif os.path.exists(local_gcp_path):
+    # Use local file (local development)
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        local_gcp_path
+    )
 
 STATIC_ROOT = "/app/staticfiles/"
 STATIC_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/static/"
