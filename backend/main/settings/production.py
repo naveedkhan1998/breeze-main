@@ -5,7 +5,8 @@ Production settings for main project.
 import os
 
 from .base import *  # noqa: F403, F401
-from .base import SIMPLE_JWT  # noqa: F401
+from .base import SIMPLE_JWT, BASE_DIR  # noqa: F401
+from google.oauth2 import service_account
 
 # Security settings
 SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -59,3 +60,36 @@ SIMPLE_JWT.update(
 )
 # CELERY_REDIS_MAX_CONNECTIONS = 40
 # CELERY_RESULT_BACKEND_THREAD_SAFE = True
+
+# Production: Use GCS for static and media files
+
+# Common Settings
+GS_BUCKET_NAME = "realtime-app-bucket"
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.path.join(BASE_DIR, "gcpCredentials.json")
+)
+
+
+STATIC_ROOT = "/app/staticfiles/"
+STATIC_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/static/"
+MEDIA_ROOT = "/app/media/"
+MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/media/"
+OUTPUT_ROOT = BASE_DIR / "OUTPUTS"
+OUTPUT_URL = "outputs/"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "bucket_name": GS_BUCKET_NAME,
+            "location": "media",  # Specify media files subdirectory
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "bucket_name": GS_BUCKET_NAME,
+            "location": "static",  # Specify static files subdirectory
+        },
+    },
+}

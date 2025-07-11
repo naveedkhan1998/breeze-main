@@ -123,7 +123,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_avatar(obj):
         try:
-            return MAIN_URL_2 + obj.avatar.url
+            return obj.avatar.url
         except (AttributeError, ValueError):
             return None
 

@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_cleanup.apps.CleanupConfig",
     "rest_framework",
     "django_filters",
     "rest_framework.authtoken",
@@ -117,12 +118,7 @@ USE_TZ = True
 
 # Static files and media
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-STATIC_ROOT = BASE_DIR / "static"
-STATIC_URL = "static/"
-MEDIA_ROOT = BASE_DIR / "media"
-MEDIA_URL = "media/"
-OUTPUT_ROOT = BASE_DIR / "OUTPUTS"
-OUTPUT_URL = "outputs/"
+
 
 # Custom settings
 async_load = True
@@ -171,3 +167,8 @@ PASSWORD_RESET_TIMEOUT = 900
 GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
 GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 GOOGLE_OAUTH_CALLBACK_URL = os.getenv("GOOGLE_OAUTH_CALLBACK_URL")
+
+
+# GCS-specific settings
+GS_DEFAULT_ACL = None
+GS_FILE_OVERWRITE = False

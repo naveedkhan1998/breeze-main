@@ -11,3 +11,4 @@ static
 !.env.vault
 .ruff_cache
 logs
+gcpCredentials.json
