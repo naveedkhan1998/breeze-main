@@ -17,10 +17,33 @@ export interface RefreshTokenResult {
   };
 }
 
+// Standardized API response wrappers
+export interface ApiResponse<T> {
+  data: T;
+  msg: string;
+}
+
+export interface ApiError {
+  detail?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+// Breeze related types
+export interface BreezeStatus {
+  session_status: boolean;
+  websocket_status: boolean;
+}
+
+export interface BreezeStatusResponse {
+  data: BreezeStatus;
+}
+
 export interface PercentageInstrument {
   percentage: number;
   is_loading: boolean;
 }
+
 export interface Instrument {
   id: number;
   percentage: PercentageInstrument;
@@ -59,8 +82,8 @@ export interface BreezeAccount {
   is_active: boolean;
   user: number;
 }
-// create breeze is breeze account omitting the user field
-export type CreateBreeze = Omit<
+
+export type CreateBreezeAccount = Omit<
   BreezeAccount,
   'user' | 'id' | 'last_updated' | 'is_active' | 'session_token'
 >;
@@ -88,12 +111,13 @@ export interface UserRegistration
   password2: string;
 }
 
-export interface GetCandles {
+// Query parameter types
+export interface GetCandlesParams {
   id: number;
   tf: string;
 }
 
-export interface GetInstruments {
+export interface GetInstrumentsParams {
   exchange?: string;
   search?: string;
   optionType?: string;
@@ -103,16 +127,43 @@ export interface GetInstruments {
   instrumentType?: 'OPTION' | 'FUTURE' | undefined;
 }
 
-export interface GetPaginatedCandles {
+export interface GetPaginatedCandlesParams {
   id: number;
   tf: number;
   limit?: number;
   offset?: number;
 }
 
+// Mutation parameter types
+export interface SubscribeInstrumentParams {
+  id: number;
+  duration: number;
+}
+
+export interface LoadInstrumentCandlesParams {
+  id: number;
+}
+
+export interface DeleteInstrumentParams {
+  id: number;
+}
+
+export interface UpdateBreezeParams {
+  data: BreezeAccount;
+}
+
+export interface GoogleLoginParams {
+  token: string;
+}
+
+// Response types
 export interface PaginatedCandles {
   count: number;
   next: string | null;
   previous: string | null;
   results: Candle[];
+}
+
+export interface EmailVerificationResponse {
+  message: string;
 }

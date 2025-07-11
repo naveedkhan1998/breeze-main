@@ -1,9 +1,15 @@
-import { BreezeAccount, CreateBreeze } from '@/types/common-types';
+import {
+  BreezeAccount,
+  CreateBreezeAccount,
+  ApiResponse,
+  BreezeStatusResponse,
+  UpdateBreezeParams,
+} from '@/types/common-types';
 import { baseApi } from './baseApi';
 
 export const breezeApi = baseApi.injectEndpoints({
   endpoints: builder => ({
-    getBreeze: builder.query<{ data: BreezeAccount[]; msg: string }, void>({
+    getBreeze: builder.query<ApiResponse<BreezeAccount[]>, void>({
       query: () => {
         return {
           url: 'core/breeze/',
@@ -15,10 +21,7 @@ export const breezeApi = baseApi.injectEndpoints({
       },
       providesTags: ['Breeze'],
     }),
-    checkBreezeStatus: builder.query<
-      { data: { session_status: boolean; websocket_status: boolean } },
-      void
-    >({
+    checkBreezeStatus: builder.query<BreezeStatusResponse, void>({
       query: () => {
         return {
           url: 'core/breeze/breeze_status',
@@ -30,7 +33,7 @@ export const breezeApi = baseApi.injectEndpoints({
       },
       providesTags: ['Breeze'],
     }),
-    createBreeze: builder.mutation<BreezeAccount, CreateBreeze>({
+    createBreeze: builder.mutation<BreezeAccount, CreateBreezeAccount>({
       query: data => ({
         url: 'core/breeze/',
         method: 'POST',
@@ -41,7 +44,7 @@ export const breezeApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Breeze'],
     }),
-    updateBreeze: builder.mutation<BreezeAccount, { data: BreezeAccount }>({
+    updateBreeze: builder.mutation<BreezeAccount, UpdateBreezeParams>({
       query: ({ data }) => ({
         url: `core/breeze/${data.id}/`,
         method: 'PUT',

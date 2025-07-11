@@ -4,6 +4,8 @@ import {
   User,
   Credentials,
   UserRegistration,
+  GoogleLoginParams,
+  EmailVerificationResponse,
 } from '../types/common-types';
 
 export const userAuthApi = baseApi.injectEndpoints({
@@ -40,7 +42,7 @@ export const userAuthApi = baseApi.injectEndpoints({
       },
       providesTags: ['User'],
     }),
-    googleLogin: builder.mutation<AuthResponse, { token: string }>({
+    googleLogin: builder.mutation<AuthResponse, GoogleLoginParams>({
       query: token => {
         return {
           url: '/account/social/google/',
@@ -50,7 +52,7 @@ export const userAuthApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['User'],
     }),
-    sendEmail: builder.query<{ message: string }, void>({
+    sendEmail: builder.query<EmailVerificationResponse, void>({
       query: () => {
         return {
           url: '/account/invoke_verify_email',

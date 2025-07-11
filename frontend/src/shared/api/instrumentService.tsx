@@ -1,18 +1,22 @@
 import { baseApi } from './baseApi';
 import {
   Candle,
-  GetCandles,
-  GetInstruments,
-  GetPaginatedCandles,
+  GetCandlesParams,
+  GetInstrumentsParams,
+  GetPaginatedCandlesParams,
   Instrument,
   PaginatedCandles,
   SubscribedInstrument,
+  ApiResponse,
+  SubscribeInstrumentParams,
+  LoadInstrumentCandlesParams,
+  DeleteInstrumentParams,
 } from '../types/common-types';
 
 export const instrumentApi = baseApi.injectEndpoints({
   endpoints: builder => ({
     getSubscribedInstruments: builder.query<
-      { data: SubscribedInstrument[]; msg: string },
+      ApiResponse<SubscribedInstrument[]>,
       void
     >({
       query: () => {
@@ -26,7 +30,7 @@ export const instrumentApi = baseApi.injectEndpoints({
       },
       providesTags: ['Instrument'],
     }),
-    getCandles: builder.query<Candle[], GetCandles>({
+    getCandles: builder.query<Candle[], GetCandlesParams>({
       query: ({ id, tf }) => {
         return {
           url: `core/candles/get_candles/?id=${id}&tf=${tf}`,
@@ -38,7 +42,10 @@ export const instrumentApi = baseApi.injectEndpoints({
       },
       providesTags: ['Instrument'],
     }),
-    getPaginatedCandles: builder.query<PaginatedCandles, GetPaginatedCandles>({
+    getPaginatedCandles: builder.query<
+      PaginatedCandles,
+      GetPaginatedCandlesParams
+    >({
       query: ({ id, tf, limit, offset }) => {
         const params = new URLSearchParams();
         params.append('tf', String(tf));
@@ -59,7 +66,7 @@ export const instrumentApi = baseApi.injectEndpoints({
     }),
     subscribeInstrument: builder.mutation<
       SubscribedInstrument,
-      { id: number; duration: number }
+      SubscribeInstrumentParams
     >({
       query: ({ id, duration }) => ({
         url: `core/subscribed_instruments/${id}/subscribe/`,
@@ -73,7 +80,7 @@ export const instrumentApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Instrument'],
     }),
-    loadInstrumentCandles: builder.mutation<void, { id: number }>({
+    loadInstrumentCandles: builder.mutation<void, LoadInstrumentCandlesParams>({
       query: ({ id }) => ({
         url: `core/candles/${id}`,
         method: 'POST',
@@ -83,7 +90,7 @@ export const instrumentApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Instrument'],
     }),
-    deleteInstrument: builder.mutation<void, { id: number }>({
+    deleteInstrument: builder.mutation<void, DeleteInstrumentParams>({
       query: ({ id }) => ({
         url: `core/subscribed_instruments/${id}/`,
         method: 'DELETE',
@@ -94,8 +101,8 @@ export const instrumentApi = baseApi.injectEndpoints({
       invalidatesTags: ['Instrument'],
     }),
     getInstruments: builder.query<
-      { data: Instrument[]; msg: string },
-      GetInstruments
+      ApiResponse<Instrument[]>,
+      GetInstrumentsParams
     >({
       query: ({
         exchange,
