@@ -16,7 +16,6 @@ import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppDispatch } from 'src/app/hooks';
 import { setCredentials } from '../authSlice';
-import { storeToken } from '@/api/localStorageService';
 import { setToken } from '@/api/auth';
 
 export default function Registration() {
@@ -89,8 +88,6 @@ export default function Registration() {
   const { refetch: getLoggedUser } = useGetLoggedUserQuery({});
 
   const handleAuthSuccess = async (userData: any) => {
-    // Use your existing token storage system
-    storeToken(userData.token);
     setToken(userData.token.access);
 
     // Fetch logged in user data
