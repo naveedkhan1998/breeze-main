@@ -2,7 +2,6 @@
 Cache utilities for accessing Redis client and other cache operations.
 """
 
-
 from django.core.cache import cache
 import redis
 

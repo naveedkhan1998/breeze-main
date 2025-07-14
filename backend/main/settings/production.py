@@ -1,6 +1,7 @@
 """
 Production settings for main project.
 """
+
 import os
 from pathlib import Path
 
