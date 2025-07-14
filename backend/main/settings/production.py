@@ -3,10 +3,12 @@ Production settings for main project.
 """
 
 import os
+from pathlib import Path
+
+from google.oauth2 import service_account
 
 from .base import *  # noqa: F403, F401
-from .base import SIMPLE_JWT, BASE_DIR  # noqa: F401
-from google.oauth2 import service_account
+from .base import BASE_DIR, SIMPLE_JWT  # noqa: F401
 
 # Security settings
 SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -69,16 +71,16 @@ GS_BUCKET_NAME = "realtime-app-bucket"
 # Handle GCP credentials more gracefully
 GS_CREDENTIALS = None
 # Local development path
-local_gcp_path = os.path.join(BASE_DIR, "gcpCredentials.json")
+local_gcp_path = BASE_DIR / "gcpCredentials.json"
 # Render secret file path
-render_gcp_path = "/etc/secrets/gcpCredentials.json"
+render_gcp_path = Path("/etc/secrets/gcpCredentials.json")
 
-if os.path.exists(render_gcp_path):
+if render_gcp_path.exists():
     # Use Render secret file (production)
     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
         render_gcp_path
     )
-elif os.path.exists(local_gcp_path):
+elif local_gcp_path.exists():
     # Use local file (local development)
     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
         local_gcp_path

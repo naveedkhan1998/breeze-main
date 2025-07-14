@@ -166,7 +166,7 @@ describe('HomePage Component', () => {
     render(<HomePage />);
 
     // Should show 0 instruments
-    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('No instruments found')).toBeInTheDocument();
   });
 
   it('displays loading state', () => {

@@ -27,7 +27,10 @@ export const handleApiError = (
     // Handle different backend error structures
     if (apiError.data) {
       // Check for Django REST framework style errors
-      if ('non_field_errors' in apiError.data && Array.isArray(apiError.data.non_field_errors)) {
+      if (
+        'non_field_errors' in apiError.data &&
+        Array.isArray(apiError.data.non_field_errors)
+      ) {
         const nonFieldErrors = apiError.data.non_field_errors as string[];
         return nonFieldErrors[0] || 'Operation failed.';
       }
@@ -50,17 +53,21 @@ export const handleApiError = (
         }
 
         // Check if this looks like a field error (array of strings)
-        if (Array.isArray(fieldValue) && fieldValue.length > 0 && typeof fieldValue[0] === 'string') {
-          const prefix = showFieldPrefix 
-            ? `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace('_', ' ')}: ` 
+        if (
+          Array.isArray(fieldValue) &&
+          fieldValue.length > 0 &&
+          typeof fieldValue[0] === 'string'
+        ) {
+          const prefix = showFieldPrefix
+            ? `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace('_', ' ')}: `
             : '';
           return `${prefix}${fieldValue[0]}`;
         }
 
         // Handle single string field errors
         if (typeof fieldValue === 'string') {
-          const prefix = showFieldPrefix 
-            ? `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace('_', ' ')}: ` 
+          const prefix = showFieldPrefix
+            ? `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace('_', ' ')}: `
             : '';
           return `${prefix}${fieldValue}`;
         }
@@ -99,7 +106,10 @@ export const handleApiError = (
   // Handle network errors
   if (error && typeof error === 'object' && 'message' in error) {
     const networkError = error as { message: string };
-    if (networkError.message.includes('fetch') || networkError.message.includes('network')) {
+    if (
+      networkError.message.includes('fetch') ||
+      networkError.message.includes('network')
+    ) {
       return 'Network error. Please check your connection and try again.';
     }
   }

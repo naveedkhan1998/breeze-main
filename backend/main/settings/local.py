@@ -3,7 +3,10 @@ Local development settings for main project.
 """
 
 from .base import *  # noqa: F403, F401
-from .base import SIMPLE_JWT  # noqa: F401
+from .base import (
+    BASE_DIR,
+    SIMPLE_JWT,  # noqa: F401
+)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-3)jkjc-9$076kt^q9_b)bl2^$p36%%#zc4%^0c@sg_d17ch_6_"

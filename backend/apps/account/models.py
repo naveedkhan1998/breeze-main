@@ -72,14 +72,13 @@ class User(AbstractBaseUser):
     is_email_verify = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_in_session = models.BooleanField(default=False)
     is_online = models.BooleanField(default=False)
     auth_provider = models.CharField(
         max_length=50,
-        choices=[(key, key.capitalize()) for key in const.AUTH_PROVIDERS.keys()],
+        choices=[(key, key.capitalize()) for key in const.AUTH_PROVIDERS],
         default=const.AUTH_PROVIDERS.get("email"),
     )
 
@@ -102,5 +101,4 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         "Is the user a member of staff?"
-        return self.is_admin or self.is_superuser
         return self.is_admin or self.is_superuser

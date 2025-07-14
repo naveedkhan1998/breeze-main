@@ -1,5 +1,19 @@
 services:
   - type: web
+    name: breeze-main-backend-data-loader
+    runtime: image
+    image:
+      url: docker.io/naveedkhan1998/breeze-backend:latest
+    plan: free
+    envVars:
+      - key: gcpCredentials.json
+        sync: false
+      - fromGroup: breeze-main-backend
+    region: oregon
+    dockerCommand: ./scripts/production/run_process_data.sh
+    autoDeployTrigger: commit
+
+  - type: web
     name: breeze-main-backend-migrations-worker
     runtime: image
     image:
