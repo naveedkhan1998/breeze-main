@@ -90,7 +90,7 @@ class BreezeAccountViewSet(viewsets.ModelViewSet):
                     f"Cleared cached session for user {request.user.id} due to credential update."
                 )
                 # Start a new WebSocket session if credentials were updated
-                manual_start_websocket.delay(request.user.id)
+                manual_start_websocket.apply_async(args=[request.user.id])
 
             return Response(
                 {"msg": "Account updated successfully", "data": serializer.data},

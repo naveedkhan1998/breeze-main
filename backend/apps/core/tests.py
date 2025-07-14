@@ -265,9 +265,11 @@ class TestBreezeAccountViewSet:
     @patch("apps.core.views.get_object_or_404")
     @patch("apps.core.views.BreezeAccountViewSet.get_serializer")
     @patch("apps.core.views.breeze_session_manager")
+    @patch("apps.core.views.manual_start_websocket")
     @patch("apps.core.views.BreezeAccountViewSet.permission_classes", new=[])
     def test_update_breeze_account_success(
         self,
+        MockManualStartWebsocket,
         MockBreezeSessionManager,
         MockGetSerializer,
         MockGetObjectOr404,
@@ -306,6 +308,7 @@ class TestBreezeAccountViewSet:
         mock_serializer_instance.is_valid.assert_called_once_with()
         mock_serializer_instance.save.assert_called_once_with()
         MockBreezeSessionManager.clear_session.assert_called_once_with(request.user.id)
+        MockManualStartWebsocket.apply_async.assert_called_once_with(args=[request.user.id])
 
     @patch(
         "apps.core.views.BreezeAccount.objects"
@@ -408,7 +411,7 @@ class TestBreezeAccountViewSet:
         assert response.status_code == status.HTTP_201_CREATED
         assert response_data["msg"] == "WebSocket Started successfully"
         assert response_data["data"] == "WebSocket Started"
-        MockWebsocketStart.delay.assert_called_once_with(request.user.id)
+        MockWebsocketStart.apply_async.assert_called_once_with(args=[request.user.id])
 
     @patch(
         "apps.core.views.BreezeAccount.objects"
