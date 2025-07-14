@@ -173,6 +173,7 @@ ignore = [
     "C901",   # too complex
     "W191",   # indentation contains tabs
     "SIM113",
+    "SIM115",
 ]
 unfixable = [
     "F841", # remove unused variables

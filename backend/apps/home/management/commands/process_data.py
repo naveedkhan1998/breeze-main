@@ -2,6 +2,7 @@
 
 import csv
 from datetime import datetime, timedelta
+import io
 import logging
 from pathlib import Path
 import shutil
@@ -281,15 +282,40 @@ class Command(BaseCommand):
                     )
                 )
 
-                file_path = ins.file.path
-
-                if not Path(file_path).exists():
-                    self.stdout.write(
-                        self.style.ERROR(
-                            f"File does not exist: {file_path}. Skipping this exchange."
+                # Handle both local and cloud storage
+                try:
+                    # Try to get local path first (for local development)
+                    file_path = ins.file.path
+                    if not Path(file_path).exists():
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f"File does not exist: {file_path}. Skipping this exchange."
+                            )
                         )
-                    )
-                    continue
+                        continue
+                    # Use local file path
+                    file_handle = Path(file_path).open(encoding="utf-8")
+                except NotImplementedError:
+                    # Cloud storage doesn't support absolute paths
+                    # Open the file directly from storage
+                    try:
+                        # For cloud storage, we need to read as binary then decode
+                        binary_file = ins.file.open("rb")
+                        file_content = binary_file.read().decode("utf-8")
+                        binary_file.close()
+                        file_handle = io.StringIO(file_content)
+                        self.stdout.write(
+                            self.style.NOTICE(
+                                f"Opened file from cloud storage for exchange: {ins.title}"
+                            )
+                        )
+                    except Exception as e:
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f"Could not open file from storage for exchange {ins.title}: {e}. Skipping."
+                            )
+                        )
+                        continue
 
                 # Get column mapping for this exchange
                 column_mapping = EXCHANGE_COLUMN_MAPPINGS.get(ins.title)
@@ -304,7 +330,7 @@ class Command(BaseCommand):
                 ins_list = []
                 line_count = 0
 
-                with Path(file_path).open(encoding="utf-8") as f:
+                with file_handle as f:
                     reader = csv.reader(f)
                     next(reader, None)  # Skip header
 
@@ -456,3 +482,11 @@ class Command(BaseCommand):
                         f"An unexpected error occurred while loading instruments for Exchange '{ins.title}': {e}"
                     )
                 )
+                # Ensure file handle is closed in case of error
+                try:
+                    if "file_handle" in locals():
+                        file_handle.close()
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to close file handle for exchange {ins.title} after error: {e}"
+                    )
