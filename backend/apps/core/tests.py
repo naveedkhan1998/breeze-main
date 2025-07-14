@@ -308,7 +308,9 @@ class TestBreezeAccountViewSet:
         mock_serializer_instance.is_valid.assert_called_once_with()
         mock_serializer_instance.save.assert_called_once_with()
         MockBreezeSessionManager.clear_session.assert_called_once_with(request.user.id)
-        MockManualStartWebsocket.apply_async.assert_called_once_with(args=[request.user.id])
+        MockManualStartWebsocket.apply_async.assert_called_once_with(
+            args=[request.user.id]
+        )
 
     @patch(
         "apps.core.views.BreezeAccount.objects"
