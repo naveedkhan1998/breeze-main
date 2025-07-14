@@ -43,7 +43,7 @@ jobs:
 
       # ───────── Build & push ─────────
       - name: 🏗️  Build and push backend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend # directory to send as build context
           file: ./backend/Dockerfile.dev # adjust if you rename
