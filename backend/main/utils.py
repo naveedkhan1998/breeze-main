@@ -2,10 +2,9 @@
 Cache utilities for accessing Redis client and other cache operations.
 """
 
-from typing import Optional
-import redis
+
 from django.core.cache import cache
-from django.core.cache.backends.redis import RedisCache
+import redis
 
 
 def get_redis_client(alias: str = "default") -> redis.Redis:
@@ -25,10 +24,10 @@ def get_redis_client(alias: str = "default") -> redis.Redis:
     try:
         return cache.client.get_client(alias)
     except Exception as e:
-        raise ValueError(f"Failed to get Redis client for alias '{alias}': {e}")
+        raise ValueError(f"Failed to get Redis client for alias '{alias}': {e}") from e
 
 
-def get_cache_client(alias: str = "default") -> Optional[redis.Redis]:
+def get_cache_client(alias: str = "default") -> redis.Redis | None:
     """
     Safely get the Redis client with error handling.
 

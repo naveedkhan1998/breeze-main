@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from apps.account.utils import Util
 from main import const
-from main.settings.local import BASE_DIR, MAIN_URL_2
+from main.settings.local import BASE_DIR
 
 from .models import User
 
@@ -32,7 +32,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         email = attrs.get("email")
-        name = attrs.get("name")
         password = attrs.get("password")
         password2 = attrs.get("password2")
         tc = attrs.get("tc")
@@ -247,8 +246,8 @@ class UserPasswordResetSerializer(serializers.Serializer):
         try:
             user_id = smart_str(urlsafe_base64_decode(uid))
             user = User.objects.get(pk=user_id)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            raise serializers.ValidationError(_("Invalid user."))
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+            raise serializers.ValidationError(_("Invalid user.")) from e
 
         if user.auth_provider != const.AUTH_PROVIDERS.get("email"):
             raise serializers.ValidationError(
