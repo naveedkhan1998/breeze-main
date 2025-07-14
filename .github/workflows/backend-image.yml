@@ -2,12 +2,10 @@ name: Build & Push Backend Image
 
 on:
   # Fires whenever code lands on main (merges or direct pushes)
-  push:
+  pull_request:
     branches: [main]
-    # Only trigger if something in backend/ changed.
     paths:
       - "backend/**"
-      # keep the workflow self‑updating
       - ".github/workflows/backend-image.yml"
 
 jobs:
