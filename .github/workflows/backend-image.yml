@@ -20,7 +20,7 @@ jobs:
     steps:
       # ───────── Git checkout ─────────
       - name: 🛎️  Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # full history not needed for docker build
           fetch-depth: 1
